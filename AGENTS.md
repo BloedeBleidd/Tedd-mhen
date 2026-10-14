@@ -9,6 +9,7 @@ Treat Tedd’mhen as a production application. The repository is public; deploye
 - Keep credentials, real records, exports, database state, and private screenshots out of commits and public CI artifacts. Use synthetic test records.
 - Maintain the README, data dictionary, deployment guide, and model methodology as the implementation changes. Version incompatible schema/model changes and use append-only deployed migrations.
 - Describe priors, uncertainty, missingness, and model limitations. Do not present exploratory associations as causal, clinical, or validated forecasting results.
+- Cover every statistical, parsing, transformation, and authorization algorithm with meaningful reference and edge-case tests. Keep production documentation factual and topic-specific; avoid progress reports, TODOs, and development-stage commentary in source documentation.
 - Run appropriate validation before delivery: formatting, TypeScript, unit/API tests, production build, and browser tests for affected flows. Investigate failures rather than suppressing them.
 - Preserve a working migration and backup/restore path. Do not assume storage or runtime limits are unlimited.
 

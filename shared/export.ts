@@ -6,6 +6,7 @@ export const exportGroups = [
   'symptoms',
   'workouts',
   'notes',
+  'context',
 ] as const;
 export type ExportGroup = (typeof exportGroups)[number];
 export type ExportFormat = 'json' | 'csv' | 'md' | 'ndjson';
@@ -34,6 +35,7 @@ export const exportFieldOptions: Record<ExportGroup, { path: string; label: stri
     { path: 'trainingStatus', label: 'Training / rest status' },
     { path: 'workouts', label: 'Structured training sessions' },
   ],
+  context: [{ path: 'labels', label: 'Recorded context labels' }],
   notes: [
     { path: 'notes', label: 'Daily notes' },
     { path: 'sleepNotes', label: 'Sleep notes' },
@@ -61,6 +63,8 @@ export const exportDictionary = {
     'severity 1–10, mild to severe. An empty symptoms list alone does not establish absence of illness.',
   workouts:
     'durationMinutes; distanceKm; effort 1–10 (very easy to maximal, project-defined); pain 0–10 (none to extreme); weights in kg. Load = sum(duration × effort); missing if effort or training status missing. Explicit rest = zero.',
+  labels:
+    'Structured context labels: null/absent = not recorded; [] = explicitly no labels; otherwise presence indicators. User-defined, not validated exposures.',
   notes: 'Optional self-reported narrative; not used by the statistical model.',
 };
 export function selectFields(
@@ -80,6 +84,7 @@ export function selectFields(
     if (group === 'ratings')
       for (const key of Object.keys(scaleDefinitions) as (keyof typeof scaleDefinitions)[])
         row[key] = entry[key];
+    else if (group === 'context') row.labels = entry.labels ?? null;
     else if (group === 'notes') {
       row.notes = entry.notes;
       row.sleepNotes = entry.sleepNotes;

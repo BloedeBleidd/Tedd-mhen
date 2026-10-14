@@ -9,6 +9,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { dayNumber } from '../../shared/schema';
 import type { Prediction } from '../../shared/bayes';
 import { prettyDate } from './ui';
 export function TrendChart({
@@ -29,11 +30,19 @@ export function TrendChart({
       aria-label={`Time series in ${unit}. ${simple ? 'Recorded values.' : 'Observed values, posterior mean, 95% credible interval, and 95% predictive interval.'}`}
     >
       <ResponsiveContainer width="100%" height="100%">
-        <ComposedChart data={data} margin={{ top: 20, right: 18, left: -15, bottom: 5 }}>
+        <ComposedChart
+          data={data.map((p) => ({ ...p, calendarDay: dayNumber(p.date) }))}
+          margin={{ top: 20, right: 18, left: -15, bottom: 5 }}
+        >
           <CartesianGrid strokeDasharray="3 5" vertical={false} stroke="var(--line)" />
           <XAxis
-            dataKey="date"
-            tickFormatter={(value) => prettyDate(value)}
+            dataKey="calendarDay"
+            type="number"
+            scale="linear"
+            domain={['dataMin', 'dataMax']}
+            tickFormatter={(value) =>
+              prettyDate(new Date(Number(value) * 86400000).toISOString().slice(0, 10))
+            }
             tickLine={false}
             axisLine={false}
             minTickGap={45}
@@ -49,7 +58,11 @@ export function TrendChart({
           />
           <Tooltip
             labelFormatter={(value) =>
-              prettyDate(String(value), { day: 'numeric', month: 'long', year: 'numeric' })
+              prettyDate(new Date(Number(value) * 86400000).toISOString().slice(0, 10), {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+              })
             }
             formatter={(value, name) => [
               Array.isArray(value)
@@ -110,7 +123,7 @@ export function TrendChart({
           />
           {forecastStart && (
             <ReferenceLine
-              x={forecastStart}
+              x={dayNumber(forecastStart)}
               stroke="var(--chart-forecast)"
               strokeDasharray="4 4"
               label={{

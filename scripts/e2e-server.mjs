@@ -10,6 +10,24 @@ const migration = spawnSync(
   { stdio: 'inherit' },
 );
 if (migration.status !== 0) process.exit(migration.status ?? 1);
+if (!strict) {
+  const administrator = spawnSync(
+    'npx',
+    [
+      'wrangler',
+      'd1',
+      'execute',
+      'DB',
+      '--local',
+      '--persist-to',
+      directory,
+      '--command',
+      "INSERT INTO users(id,email) VALUES ('local-developer','local@teddmhen.test'); INSERT INTO administrators(user_id) VALUES ('local-developer');",
+    ],
+    { stdio: 'inherit' },
+  );
+  if (administrator.status !== 0) process.exit(administrator.status ?? 1);
+}
 const server = spawn(
   'npx',
   [

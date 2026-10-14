@@ -1,11 +1,11 @@
 # Contributing
 
-Tedd’mhen is maintained as a production-oriented application, with English source, UI copy, and documentation.
+Tedd’mhen is maintained as a production application, with English source, UI copy, and documentation.
 
 1. Install the Node.js version in `.nvmrc`, run `npm ci`, then `npm run setup`.
 2. Keep a change focused and describe the user-visible behavior it affects.
 3. Run `npm run format`, `npm run typecheck`, `npm test`, `npm run build`, and `npm run test:e2e`.
-4. Add meaningful tests for changes to validation, statistics, ownership, concurrency, or exports. Use synthetic records only.
+4. Every algorithm must have meaningful tests: reference calculations, boundary conditions, missingness and invalid-input behavior. Statistical validation must also test time alignment and prevention of future-data leakage. Use synthetic records only.
 5. Update the data dictionary and methodology whenever a field, unit, anchor, or model changes. Version the schema or model when its interpretation changes.
 6. Database migrations are append-only once deployed. Do not edit a migration already applied to a production database.
 

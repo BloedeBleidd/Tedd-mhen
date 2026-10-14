@@ -31,7 +31,7 @@ These rating anchors are **project-defined**, not standardized clinical instrume
 | `score`               | integer 0–100; wearable/source-specific |
 | `quality`             | integer 1–10; very poor → excellent     |
 
-Bedtime is generally the preceding evening; daytime sleep is permitted. These clock fields do not record separate dates, UTC offsets or multiple sleep episodes. Duration is explicitly entered, never derived from them. Use notes for exceptional context. The physiology source field also describes the device sleep score source in this initial schema; split sources across sleep and physiology require a future schema extension.
+Bedtime is generally the preceding evening; daytime sleep is permitted. These clock fields do not record separate dates, UTC offsets or multiple sleep episodes. Duration is explicitly entered, never derived from them. Use notes for exceptional context. The physiology source field also describes the device sleep score source. Separate sleep and physiology device sources are not stored.
 
 ## Physiology
 
@@ -66,6 +66,16 @@ HRV methods, recording duration, posture and devices affect comparability. Recor
 
 Derived training time sums duration only for explicitly recorded training/rest days. Derived daily load is `Σ(durationMinutes × effort)` in arbitrary units. Missing effort in any session makes the daily load unknown. Rest is zero. This is a descriptive project heuristic, not a validated readiness score or cross-sport equivalence.
 
+## Context labels and analytical features
+
+`labels` is null when context was not recorded, an empty array when explicitly no labels apply, or up to 12 distinct normalized lowercase strings of 1–40 characters. Labels such as `travel` or `late meal` are user-defined observations, not inferred from notes. Older version-1 records without this additive field are treated as null.
+
+The analytical catalog contains numeric fields plus binary indicators for trained/rest status, activity types, symptoms, device source, HRV method, weekdays and observed custom labels. Monday, manual source and unknown HRV method are reference categories. Unknown training and label context remain null. A symptom absent from an otherwise recorded symptom/illness observation is zero; an unrecorded illness observation is unknown.
+
+Additional numeric summaries are workout count, duration-weighted session effort, symptom count and summed symptom severity. The symptom sum is descriptive and is not a clinical severity instrument. Bedtime and wake time use paired sine/cosine coordinates, `sin(2π minutes/1440)` and `cos(2π minutes/1440)`, so times near midnight remain close. They cannot establish elapsed sleep duration or encode daylight-saving offsets. Exercise names and arbitrary narrative text are not model predictors.
+
+See [Methodology](METHODOLOGY.md) for alignment, rolling windows and statistical treatment. The in-app Definitions & methods page lists each supported feature and its units, missingness rules and references.
+
 ## Narrative and provenance
 
 `notes`, `sleepNotes`, and `illnessNotes` each allow up to 50,000 characters. The complete daily JSON write body must fit within 256 KiB. Narratives can contain arbitrary Unicode, are preserved as written, and are not modeled statistically.
@@ -77,6 +87,8 @@ Export field selection never removes required provenance. Including HRV without 
 ## Account and local preference data
 
 Account data is separate from the journal export schema. `auth_accounts` contains the internal user ID, normalized unverified email identifier, salted versioned password hash, recovery-code digest, credential version and creation timestamp. `auth_sessions` contains the session-token digest, user ID, credential version and expiry timestamp. Raw passwords, session tokens and recovery codes are not stored in D1. Legacy migration reservations associate existing emails with their prior owner IDs; they are removed when claimed.
+
+`administrators` stores an explicit internal user ID and grant timestamp; account deletion cascades to this role. Administration exposes aggregate counts and JSON byte volume, not user identities or journal bodies.
 
 The AuthService Durable Object stores hashed IP/email limiter keys, attempt counts and expiry instants for ten-minute windows. Expired keys are removed on later authentication requests. These are operational abuse controls and are never part of journal exports.
 

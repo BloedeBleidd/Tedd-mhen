@@ -140,6 +140,62 @@ export function Help() {
             never saves them to your database.
           </p>
         </Panel>
+        <Panel title="07 · Explore relationships">
+          <p>
+            Choose an outcome and compare other measurements on the same date or 1–28 calendar days
+            earlier. Sleep belongs to the waking date: use a one-day lag to compare yesterday’s
+            training with tonight’s recorded sleep. Daily values, day-to-day changes, detrended
+            values and complete 7/28-day averages answer different questions.
+          </p>
+          <p>
+            Pearson measures linear association; Spearman measures ranked association. Rankings
+            require at least 14 paired observations. Calendar-block bootstrap intervals need more
+            data and describe sampling uncertainty, not causality. Searching many comparisons can
+            produce large correlations by chance. Check paired counts and compare different windows.
+          </p>
+          <Link className="text-link" to="/analysis/relationships">
+            Explore relationships
+          </Link>
+        </Panel>
+        <Panel title="08 · Predict with multiple inputs">
+          <p>
+            Choose an outcome, a same-day or 1/3/7-day horizon, and numeric or categorical inputs.
+            Use all recorded dates or a filtered period. Context labels, activities and device
+            categories become explicit binary predictors; written notes are not analyzed.
+          </p>
+          <p>
+            The model shows conditional associations, uncertainty and a chronological holdout
+            compared with simple baselines. Sparse or constant inputs are listed with exclusion
+            reasons. All selected inputs must be observed on eligible rows; unknown values are not
+            filled in. A 7-day prediction uses inputs available on its origin date, without
+            inventing future training or sleep.
+          </p>
+          <p>
+            Record labels consistently: unchecked context means unknown, while recording no labels
+            means none applied. Read each feature’s definition and the model diagnostics before
+            interpreting a coefficient as useful predictive evidence.
+          </p>
+          <Link className="text-link" to="/analysis/metrics">
+            Definitions &amp; methods
+          </Link>
+        </Panel>
+        <Panel title="09 · Import an existing journal">
+          <p>
+            Select a JSON, NDJSON or compatible CSV file, review its dates and supplied fields, then
+            confirm the destination. Skip existing days preserves saved observations. Merge changes
+            only supplied fields, including explicit nulls; omitted notes remain intact. JSON is the
+            preferred archival format. Markdown and model reports cannot be imported as journal
+            observations.
+          </p>
+          <p>
+            Each day has its own revision check and result. A conflict or interruption can leave a
+            partially completed import. Stop import prevents further rows; a save already sent can
+            finish. Check results before retrying. Files accept up to 500 days / 20 MiB.
+          </p>
+          <Link className="text-link" to="/import">
+            Import observations
+          </Link>
+        </Panel>
       </div>
       <Panel title="Private deployment & data ownership" action={<LockKeyhole size={19} />}>
         <p>
@@ -169,7 +225,13 @@ export function Help() {
             the deployment and backup guide <ExternalLink size={13} />
           </a>
           . Narrative fields support up to 50,000 characters each, with a 256 KiB daily request
-          limit. D1 storage is finite; large archive storage in R2 is a future extension.
+          limit. D1 storage is finite; attachments are not supported.
+        </p>
+        <p>
+          Authorized administrators can view aggregate account counts, journal volume and recent
+          activity in Administration. This panel contains no individual journal entries or email
+          lists. Read <Link to="/about">about Piotr Żmuda, the author</Link> and the interests
+          behind the project.
         </p>
       </Panel>
       <Panel title="Methodology & primary references">

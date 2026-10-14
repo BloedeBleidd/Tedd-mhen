@@ -46,6 +46,7 @@ export function makeDemo(): StoredEntry[] {
           notes: '',
         },
       ];
+    entry.labels = i % 5 === 0 ? ['late meal'] : i % 7 === 0 ? ['travel'] : [];
     entry.notes = 'Synthetic demonstration record. Not a real health observation.';
     // Deliberate missing observations demonstrate missingness handling.
     if (i % 17 === 0) entry.physiology.hrv = null;

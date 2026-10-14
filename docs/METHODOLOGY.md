@@ -1,69 +1,111 @@
 # Statistical methodology
 
-Model identifier: `normal-inverse-gamma-linear-v1`.
+Tedd’mhen analyzes observations from one account. It distinguishes descriptive association, a conditional model estimate, and a prediction evaluated on later data. None establishes causation, diagnosis, treatment benefit, longevity, or injury risk.
 
-## Purpose
+## Data alignment and missingness
 
-The analysis estimates a within-person linear trajectory for one numerical metric over a selected calendar window. It reports the posterior slope, its uncertainty, the probability of a positive slope, and a short extrapolation. It does not estimate the causal effect of training, diagnose disease, or assign a validated readiness score. The current model uses time as its only predictor.
+A journal date identifies a local day; sleep belongs to its waking date. A predictor at date `d` and outcome at `d + L` are paired by actual calendar dates, never by row position. Training Monday and sleep Tuesday describe the night after Monday’s training. Same-date sleep normally precedes that day’s training; intra-day ordering and separate sleep episodes are not measured.
 
-## Observations and preprocessing
+Date, illness, source, HRV-method, training-status and context filters restrict both predictor and outcome days. Missing and excluded dates remain missing. Numeric trailing means require all 7 or 28 calendar days ending at the predictor date; no interpolation or zero filling occurs. Binary labels use the predictor date, not a rolling average. A selected period supplies its own history, so early windows without enough preceding selected dates are unavailable.
 
-One measurement per local journal date is used. Missing values are omitted without interpolation or imputation. Duplicate dates are rejected. Date gaps remain gaps on the chart; elapsed calendar time determines the design matrix. All filters are applied before fitting. Fourteen non-missing measurements are required to display a fit; this is a product threshold, not a statistical guarantee.
+Context labels use `1` for listed, `0` for explicitly recorded context without that label, and missing for unrecorded context. Activity indicators likewise require known training/rest status. A symptom not listed is not proof of clinical absence. See [field definitions](DATA_DICTIONARY.md).
 
-For a metric with fixed center `c` and scale `s`, define `z_i = (y_i − c) / s`. These values are declared in `shared/metrics.ts`, not estimated from the same data. They are computational prior scales, not population norms, target values, or healthy ranges. Time is `x_i = (day_i − midpoint) / 7`, where midpoint is halfway between the earliest and latest selected observation. The regression row is `[1, x_i]`.
+## Correlations
 
-## Likelihood and prior
+Model identifier: `calendar-paired-correlations-v1`.
+
+For paired vectors, Pearson correlation is:
+
+```text
+r = Σ(xᵢ − x̄)(yᵢ − ȳ) / √[Σ(xᵢ − x̄)² Σ(yᵢ − ȳ)²]
+```
+
+Spearman correlation is Pearson correlation of average ranks; ties receive their average rank. Both lie in `[-1,1]` and are undefined for a constant variable. Pearson with one binary variable is the point-biserial correlation. A minimum of 14 valid pairs is a display threshold, not an adequacy guarantee.
+
+Available perspectives:
+
+- **Levels:** pair recorded values.
+- **Changes:** pair `x(d) − x(d−1)` with the corresponding outcome change; both consecutive dates must exist.
+- **Detrended:** regress each aligned vector on an intercept and elapsed calendar days, then correlate residuals. This removes linear co-trending only.
+- **7/28-day means:** pair complete trailing numeric means; overlapping windows share observations.
+
+Rankings sort absolute coefficients for one outcome, lag and selection. Counts can differ between candidates; ranks are not directly comparable evidence of causal importance. Lag scans and repeated filtering create a multiple-comparison problem. The interface supplies no unadjusted significance stars or “causal winner.”
+
+### Approximate block-bootstrap intervals
+
+Selected-pair intervals use 200 circular calendar-block replicates. Construct a calendar grid from the first to last valid pair, retaining empty slots. Sample block start positions uniformly, concatenate blocks to the original grid length, retain present pairs, then recompute the selected coefficient. The seed is `20261014`; blocks are 7, 14 or 28 days and at least as long as the selected rolling window. The 2.5th and 97.5th percentiles form the displayed interval. Detrending is performed before resampling; these intervals condition on that transformation.
+
+Intervals require 28 pairs, a calendar span of four blocks, and at least 90% valid replicates. This is a reproducible exploratory approximation under local stationarity, sensitive to block length, missingness, trends and the small number of blocks. It is not an exact confidence statement, a Bayesian credible interval, or an adjustment for searching many relationships. See [Pearson](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.pearsonr.html), [Spearman](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.spearmanr.html), and the [time-series bootstrap reference](https://stat.ethz.ch/R-manual/R-devel/library/boot/html/tsboot.html).
+
+## Shared Bayesian regression mathematics
+
+Both regression models use a Normal–Inverse-Gamma prior. For normalized outcome `z = (y − c)/s`:
 
 ```text
 z | β, σ² ~ Normal(Xβ, σ² I)
 σ² ~ InverseGamma(a₀ = 2, b₀ = 1)
-β | σ² ~ Normal(m₀ = [0, 0], σ² V₀)
-V₀ = diag(10, v)
+β | σ² ~ Normal(0, σ² V₀)
+V₀ = diag(10, v, …, v)
+v = 10 (weak), 1 (regular), or 0.1 (strong shrinkage)
 ```
 
-InverseGamma uses density proportional to `(σ²)^(-a-1) exp(-b/σ²)`. The prior mean of `σ²` is `b₀/(a₀−1)=1`; its variance is not finite at `a₀=2`. Weekly slope variance multiplier `v` is 10 (weak shrinkage), 1 (regular, default), or 0.1 (strong). Conditional on noise, the prior favors a zero slope. The intercept favors the metric’s fixed center, with larger variance.
-
-These are transparent starting priors, not clinically elicited priors. Compare settings before relying on a direction. The conjugate construction couples coefficient and residual uncertainty through `σ²`.
-
-## Exact posterior
+The inverse-gamma density is proportional to `(σ²)^(-a−1) exp(−b/σ²)`. Prior residual variance has mean 1 and nonfinite variance. Fixed outcome centers/scales in `shared/metrics.ts` are computational prior units, not population norms or healthy targets.
 
 ```text
 Vₙ = (V₀⁻¹ + XᵀX)⁻¹
-mₙ = Vₙ(V₀⁻¹m₀ + Xᵀz)
-aₙ = a₀ + n/2
-bₙ = b₀ + ½(zᵀz + m₀ᵀV₀⁻¹m₀ − mₙᵀVₙ⁻¹mₙ)
+mₙ = Vₙ Xᵀz
+aₙ = 2 + n/2
+bₙ = 1 + ½[(z − Xmₙ)ᵀ(z − Xmₙ) + mₙᵀV₀⁻¹mₙ]
 ```
 
-The implementation evaluates `bₙ` as a residual sum of squares plus prior penalty to reduce numerical cancellation. The 2×2 precision matrix is inverted analytically. There is no MCMC, random seed, or sampling error; no convergence diagnostic is implied.
+The residual-plus-prior form reduces cancellation. The single trend uses an analytic 2×2 inverse; the multivariable model uses a Cholesky factorization of positive-definite regularized precision. There is no MCMC or sampling convergence claim.
 
-For a new row `x*`, the average normalized response has a Student-t distribution with `2aₙ` degrees of freedom, location `x*mₙ`, and scale squared `(bₙ/aₙ) x*Vₙx*ᵀ`. A new individual observation instead has scale squared `(bₙ/aₙ)(1 + x*Vₙx*ᵀ)`.
+For a new design row `x*`, the normalized mean response has a Student-t distribution with `2aₙ` degrees of freedom, location `x*mₙ`, and squared scale `(bₙ/aₙ)x*Vₙx*ᵀ`. For an individual observation, squared scale is `(bₙ/aₙ)(1 + x*Vₙx*ᵀ)`. Equal-tailed 95% intervals use the Student-t 0.975 quantile and return to outcome units. Coefficient marginals yield `P(βⱼ > 0)`, conditional on the selected data, features and prior.
 
-Displayed intervals are equal-tailed 95% intervals using Student-t quantiles, transformed back to original units. The slope is reported in original metric units per week. `P(slope > 0)` is calculated from its marginal Student-t posterior. It does not mean “probability the person is healthier.”
+These distributions assume linearity, constant residual variance and independent Gaussian residuals. Uncertainty does not account for input measurement error, omitted variables, model selection or autocorrelated errors. Bounds are not clipped: ratings and physiological quantities can receive intervals outside their input scale, with an explicit warning. [Murphy’s conjugate-Gaussian derivation](https://www.cs.ubc.ca/~murphyk/Papers/bayesGauss.pdf) explains the distribution family; the implementation parameters are specified here.
 
-## Charts and extrapolation
+## Single-metric trend
 
-- Points are recorded observations.
-- The line is the posterior expected trajectory.
-- The darker band is the 95% credible interval for the mean.
-- The lighter band is the 95% predictive interval for a single observation.
-- The forecast boundary is the last observed date. Horizon is 0, 3, or 7 days after that date, even when the most recent observation is old.
+Model identifier: `normal-inverse-gamma-linear-v1`.
 
-The Gaussian model has unbounded support. Ratings, physiological values, and training load do not. Intervals are intentionally shown without clipping or relabeling them as bounded probabilities. A warning appears if the predictive interval exceeds the declared physical/input scale. A future ordinal or positive-valued likelihood would be more appropriate for some metrics.
+The design is `[1, (day − midpoint)/7]`, with the midpoint between the first and last observed selected dates. Fourteen observations are required. The slope and its credible interval describe outcome units per week. Extrapolation extends 0–7 calendar days after the last observation, including when that observation is old. The chart separates observations, posterior mean, mean uncertainty, and individual-observation uncertainty.
 
-## Assumptions and failure modes
+## Multiple-input direct prediction
 
-The fit assumes a stable linear trajectory, independent approximately Gaussian residuals, and constant residual variance. Daily health data can have nonlinear changes, outliers, seasonality, serial dependence, measurement error, and missingness related to illness or fatigue. A wider or narrower window can change a slope. Testing many metrics/windows invites selective interpretation.
+Model identifier: `normal-inverse-gamma-multivariable-direct-v1`.
 
-The lag-one residual correlation uses only pairs on consecutive calendar days and requires seven such pairs. Its magnitude above 0.3 produces a warning. This is a descriptive diagnostic with a heuristic threshold; it neither tests independence conclusively nor adjusts interval widths.
+One selected numerical outcome is predicted from multiple numerical series, category indicators and context labels. It is a multivariable regression, not a joint multi-output causal system. For horizon `h ∈ {0,1,3,7}`, each row uses inputs available through origin day `d` to predict outcome on `d+h`. Numeric inputs can be that day’s value or a complete trailing 7/28-day mean. Clock-time sine/cosine pairs represent periodicity; weekday indicators use Monday as reference. Other category reference levels and missing semantics are in the dictionary.
 
-Do not pool rMSSD and SDNN as if they were the same measurement. Device scores are vendor-dependent. Use the source and HRV-method filters. Excluding illness conditions on a user-selected subset and can introduce selection bias; unknown illness is not equivalent to zero severity.
+The target metric is excluded from ordinary predictors. Optional outcome history uses `y(d)` for a future horizon and `y(d−1)` for same-day estimation. Optional linear calendar time adjusts for co-trending. A same-day fit requires that day’s other observations; it is not an advance forecast. No unknown future predictor is filled in or silently forecast.
 
-## Validation and reproducibility
+### Screening and scaling
 
-Unit tests compare the conjugate posterior to independently hand-derived sufficient statistics and a known Student-t quantile. Other tests cover constant series, genuine elapsed time with gaps, prior shrinkage, predictive versus credible widths, physical-bound warnings, duplicate dates, and minimum sample handling. Schema/API tests cover missingness and zero semantics.
+Candidate screening uses the pre-holdout training period when it has at least 20 observed rows; otherwise it uses all observed rows and does not produce a valid holdout score. A feature is excluded and reported when it has fewer than 14 known values, less than 80% coverage, no variation, or (for binary inputs) fewer than five present/five absent observations. These are explicit product heuristics, not statistical guarantees. They can exclude rare but meaningful contexts; narrow the selection to comparable recorded periods when appropriate.
 
-The model download contains the model version, settings, observations, prior, posterior parameters, diagnostics, and curve values. This supports independent reproduction. These computational tests do not establish out-of-sample forecasting calibration or clinical validity. Prospective calibration, temporal holdout evaluation, ordinal likelihoods, and autocorrelated-error models are future work.
+Remaining incomplete rows are excluded. At most 80 active inputs and at least `max(30, 2p)` complete observations are required, where `p` includes intercept and optional calendar trend. A feature becoming constant after complete-case selection blocks fitting rather than dividing by zero. Numeric and binary predictors are centered and scaled by observed standard deviation. Screening, scale estimation and time centering for validation use training information only. The final descriptive/forecast model is refitted on all complete selected observations with its own scales.
 
-## Primary reference
+### Coefficients and prediction
 
-Kevin P. Murphy, [Conjugate Bayesian analysis of the Gaussian distribution](https://www.cs.ubc.ca/~murphyk/Papers/bayesGauss.pdf), 2007, explains the Gaussian conjugate families, parameterizations, and Student-t predictive distributions. The regression specialization and every parameter used by this application are explicitly specified above and in `shared/bayes.ts`.
+The coefficient table displays outcome change per original input unit (or label `0→1`), its 95% marginal credible interval, and posterior sign probability. Ranking uses absolute change per one observed predictor standard deviation. It describes a conditional model association while other selected inputs are fixed. Correlated inputs can share or reverse coefficients; combinations implied by “holding others fixed” may not occur in the data. Proper shrinkage makes a fit numerically defined, not causally identified.
+
+Only the latest recorded predictor date is used for the displayed conditional prediction. If required inputs are missing there, no prediction is substituted from an older date. The interface shows the input values, origin, target date, already-observed status and input-range violations. Historical fit and future prediction are distinguished.
+
+### Chronological evaluation
+
+The last 20% of observed outcome dates define a holdout. Training outcomes must be strictly earlier than the first holdout **origin**, preventing an overlapping horizon from leaking future outcomes. Training and holdout use the same screened input specification; no random split is used. Evaluation requires the fitting minimum in training and at least seven complete holdout rows.
+
+Reported diagnostics:
+
+```text
+MAE = mean(|observed − predicted|)
+RMSE = sqrt(mean((observed − predicted)²))
+95% coverage = fraction of observations inside their predictive interval
+```
+
+Baselines predict either the training mean or the outcome known at the forecast origin (preceding day for same-day estimation). Persistence can have fewer eligible rows; both its count and model MAE on those same rows are shown. A small holdout’s coverage is descriptive, not validated calibration. Changing settings after seeing holdout results tunes to that holdout; confirm the chosen model on newly collected observations. See [regression forecasting](https://otexts.com/fpp3/regression.html) and [temporal evaluation](https://otexts.com/fpp3/toolbox.html).
+
+## Diagnostics, evidence and reproduction
+
+Both models report consecutive-calendar-day residual correlation when at least seven residual pairs exist. Multivariable models flag predictor pairs with `|r| > 0.95`. These diagnostics do not correct intervals. HRV methods and vendor scores must remain comparable; category indicators are not device calibration.
+
+Analysis downloads include versions, selections, exact paired/design observations, priors, scaling, posterior parameters, intervals, screening exclusions, bootstrap seed and held-out results as applicable. They contain personal data and are not journal-import files. All algorithms have reference and edge-case tests described in [Testing](TESTING.md). Computational correctness and synthetic forecast skill do not establish medical validity or accuracy for an individual’s real observations.

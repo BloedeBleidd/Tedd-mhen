@@ -14,6 +14,10 @@ The repository and sign-up pages are public; each account's journal is private.
 
 Credential mutations require exact same-origin requests and a custom header. Data mutations also require the custom header and reject foreign origins. The API enables no CORS. Parameterized SQL, strict input/body limits, no-store responses, content security headers, CSV formula mitigation, and optimistic revisions add safeguards. Credential bodies are capped at 8 KiB; daily entries at 256 KiB.
 
+Import files are parsed and validated locally, then saved through the same owner-scoped, revision-checked API. Unknown fields and ownership keys are rejected; source revisions are never trusted. An expected-account header rejects an import after the signed-in identity changes. Imports are not atomic across days.
+
+Administrator access requires an explicit immutable user-ID grant. Unverified registration emails cannot confer privileges. The role is checked server-side on every administrator request; hiding navigation is not authorization. Aggregate administration excludes journal bodies and user email lists. Provision grants only after independently verifying the account owner; see [Administration](docs/ADMINISTRATION.md).
+
 ## Storage and privacy
 
 Static assets contain no private records or credentials and can be cached. Authenticated API responses must not be cached or overridden by Cache Rules. Passwords, recovery codes, session cookies, request bodies and private exports must never enter logs, source, public issues, screenshots or CI artifacts.

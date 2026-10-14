@@ -34,6 +34,10 @@ const groupInfo: Record<ExportGroup, { title: string; description: string }> = {
     description:
       'Activity, duration, distance, effort, pain, heart rate, strength sets, rest status',
   },
+  context: {
+    title: 'Context labels',
+    description: 'Structured labels, including explicitly no labels or unrecorded context',
+  },
   notes: {
     title: 'Written context',
     description: 'Daily, sleep, illness, and workout notes · may contain personal details',

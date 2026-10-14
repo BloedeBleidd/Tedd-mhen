@@ -4,6 +4,7 @@ import {
   BookOpen,
   ChartNoAxesCombined,
   Download,
+  Upload,
   FlaskConical,
   LayoutDashboard,
   Menu,
@@ -20,18 +21,23 @@ import { AppearanceControl } from './components/AppearanceControl';
 import { PrivacyNotice } from './components/PrivacyNotice';
 import { AuthPage } from './pages/Auth';
 import { Privacy } from './pages/Privacy';
+import { About } from './pages/About';
 const Dashboard = lazy(() => import('./pages/Dashboard').then((m) => ({ default: m.Dashboard })));
 const CheckIn = lazy(() => import('./pages/CheckIn').then((m) => ({ default: m.CheckIn })));
 const Journal = lazy(() => import('./pages/Journal').then((m) => ({ default: m.Journal })));
-const Analysis = lazy(() => import('./pages/Analysis').then((m) => ({ default: m.Analysis })));
+const Analysis = lazy(() =>
+  import('./pages/AnalysisHub').then((m) => ({ default: m.AnalysisHub })),
+);
 const Export = lazy(() => import('./pages/Export').then((m) => ({ default: m.Export })));
 const Help = lazy(() => import('./pages/Help').then((m) => ({ default: m.Help })));
 const Account = lazy(() => import('./pages/Account').then((m) => ({ default: m.Account })));
+const Import = lazy(() => import('./pages/Import').then((m) => ({ default: m.Import })));
+const Admin = lazy(() => import('./pages/Admin').then((m) => ({ default: m.Admin })));
 export function App() {
   const { demo, toggleDemo } = useApi(),
     location = useLocation(),
     [menuOpen, setMenuOpen] = useState(false);
-  const session = useLoad<{ email: string; local: boolean }>('/api/session', true);
+  const session = useLoad<{ email: string; local: boolean; admin: boolean }>('/api/session', true);
   useEffect(() => {
     const close = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setMenuOpen(false);
@@ -45,6 +51,10 @@ export function App() {
     { to: '/journal', icon: BookOpen, label: 'Journal' },
     { to: '/analysis', icon: ChartNoAxesCombined, label: 'Trends & predictions' },
     { to: '/export', icon: Download, label: 'Export data' },
+    { to: '/import', icon: Upload, label: 'Import data' },
+    ...(session.data?.admin && !demo
+      ? [{ to: '/admin', icon: ShieldCheck, label: 'Administration' }]
+      : []),
   ];
   const authRoute = ['/sign-in', '/register', '/recover', '/api/auth/claim'].includes(
     location.pathname,
@@ -60,7 +70,9 @@ export function App() {
         </header>
         <PrivacyNotice />
         <main id="main">
-          {location.pathname === '/privacy' ? (
+          {location.pathname === '/about' ? (
+            <About />
+          ) : location.pathname === '/privacy' ? (
             <Privacy />
           ) : !authRoute && session.loading ? (
             <Loading />
@@ -70,6 +82,7 @@ export function App() {
         </main>
         <footer className="public-footer">
           <NavLink to="/privacy">Privacy & data</NavLink>
+          <NavLink to="/about">About the author</NavLink>
           <span>A personal training & recovery journal.</span>
         </footer>
       </div>
@@ -157,12 +170,18 @@ export function App() {
             <span>Workspace</span>
             <span className="slash">/</span>
             <strong>
-              {nav.find((n) => n.to === location.pathname)?.label ||
-                (location.pathname === '/privacy'
-                  ? 'Privacy & data'
-                  : location.pathname === '/account'
-                    ? 'Account'
-                    : 'Guide & methodology')}
+              {nav.find(
+                (n) =>
+                  n.to === location.pathname ||
+                  (n.to === '/analysis' && location.pathname.startsWith('/analysis/')),
+              )?.label ||
+                (location.pathname === '/about'
+                  ? 'About the author'
+                  : location.pathname === '/privacy'
+                    ? 'Privacy & data'
+                    : location.pathname === '/account'
+                      ? 'Account'
+                      : 'Guide & methodology')}
             </strong>
           </div>
           <div className="topbar-tools">
@@ -196,8 +215,11 @@ export function App() {
               <Route path="/" element={<Dashboard />} />
               <Route path="/check-in" element={<CheckIn />} />
               <Route path="/journal" element={<Journal />} />
-              <Route path="/analysis" element={<Analysis />} />
+              <Route path="/analysis/*" element={<Analysis />} />
               <Route path="/export" element={<Export />} />
+              <Route path="/import" element={<Import />} />
+              <Route path="/admin" element={<Admin />} />
+              <Route path="/about" element={<About />} />
               <Route path="/help" element={<Help />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/account" element={<Account />} />
@@ -219,6 +241,7 @@ export function App() {
             </span>
             <span>Your observations. A little more perspective.</span>
             <NavLink to="/privacy">Privacy & data</NavLink>
+            <NavLink to="/about">About the author</NavLink>
           </footer>
         </main>
       </div>

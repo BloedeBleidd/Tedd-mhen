@@ -37,6 +37,8 @@ beforeEach(() => {
   sqlite = new DatabaseSync(':memory:');
   sqlite.exec('PRAGMA foreign_keys=ON');
   sqlite.exec(readFileSync('migrations/0001_initial.sql', 'utf8'));
+  sqlite.exec(readFileSync('migrations/0002_accounts.sql', 'utf8'));
+  sqlite.exec(readFileSync('migrations/0003_administrators.sql', 'utf8'));
   env = { DB: adapter(sqlite) } as Env;
   actor = 'owner-a';
 });
@@ -71,6 +73,58 @@ describe('API ownership, concurrency, filtering, and streaming exports', () => {
       413,
     );
     expect(forwarded).toHaveLength(2);
+  });
+  it('restricts administration to explicit IDs and returns aggregates without private rows', async () => {
+    expect((await call('/api/admin/overview')).status).toBe(403);
+    await call('/api/entries/2026-01-01', 'PUT', {
+      entry: { ...emptyEntry('2026-01-01'), notes: 'private α' },
+      revision: 0,
+    });
+    sqlite
+      .prepare(
+        'INSERT INTO auth_accounts(user_id,email,password_hash,recovery_hash) VALUES (?,?,?,?)',
+      )
+      .run(actor, 'admin@example.test', 'test-hash', 'test-code');
+    sqlite.prepare('INSERT INTO administrators(user_id) VALUES (?)').run(actor);
+    expect(await (await call('/api/session')).json()).toMatchObject({ id: actor, admin: true });
+    const response = await call('/api/admin/overview');
+    expect(response.status).toBe(200);
+    const report = (await response.json()) as {
+      accounts: { accounts: number };
+      journal: { entries: number; payloadBytes: number };
+    };
+    expect(report.accounts.accounts).toBe(1);
+    expect(report.journal.entries).toBe(1);
+    expect(report.journal.payloadBytes).toBeGreaterThan(0);
+    expect(JSON.stringify(report)).not.toContain('private α');
+    expect(JSON.stringify(report)).not.toContain('admin@example.test');
+    actor = 'owner-b';
+    expect(
+      (
+        await call('/api/admin/overview', 'GET', undefined, {
+          'X-Admin': 'true',
+          'Cf-Access-Authenticated-User-Email': 'admin@example.test',
+        })
+      ).status,
+    ).toBe(403);
+  });
+  it('supports all-history analysis without mixing owners and protects imports against account changes', async () => {
+    await call('/api/entries/2001-01-01', 'PUT', { entry: emptyEntry('2001-01-01'), revision: 0 });
+    expect(await (await call('/api/series?all=true')).json()).toMatchObject({
+      entries: [{ date: '2001-01-01' }],
+    });
+    expect(
+      (
+        await call(
+          '/api/entries/2001-01-02',
+          'PUT',
+          { entry: emptyEntry('2001-01-02'), revision: 0 },
+          { 'X-Teddmhen-Expected-User': 'someone-else' },
+        )
+      ).status,
+    ).toBe(403);
+    actor = 'owner-b';
+    expect(await (await call('/api/series?all=true')).json()).toMatchObject({ entries: [] });
   });
   it('saves, reads, summarizes, searches, and deletes a real SQLite-backed entry', async () => {
     const entry = {

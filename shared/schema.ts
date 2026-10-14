@@ -82,6 +82,12 @@ export const entrySchema = z
     stress: burden,
     soreness: burden,
     illnessSeverity: burden,
+    labels: z
+      .array(z.string().trim().toLowerCase().min(1).max(40))
+      .max(12)
+      .refine((items) => new Set(items).size === items.length, 'Duplicate context label.')
+      .nullable()
+      .default(null),
     symptoms: z
       .array(
         z
@@ -197,6 +203,7 @@ export function emptyEntry(date = localDate()): Entry {
     stress: null,
     soreness: null,
     illnessSeverity: null,
+    labels: null,
     symptoms: [],
     sleep: {
       durationMinutes: null,

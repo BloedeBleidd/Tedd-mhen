@@ -53,7 +53,10 @@ export function ApiProvider({ children }: { children: ReactNode }) {
       }
       const url = new URL(path, window.location.origin),
         date = url.pathname.match(/\/entries\/(.+)$/)?.[1];
-      if (url.pathname === '/api/session') return { email: 'Demo workspace', local: false } as T;
+      if (url.pathname === '/api/session')
+        return { id: 'demo', email: 'Demo workspace', local: false, admin: false } as T;
+      if (url.pathname.startsWith('/api/admin/'))
+        throw new ApiError('Administration is unavailable in the synthetic demo.', 403);
       if (date) {
         const existing = demoEntries.find((e) => e.date === date);
         if (options.method === 'PUT') {

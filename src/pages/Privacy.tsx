@@ -17,14 +17,32 @@ export function Privacy() {
         </p>
         <p>
           Saving a check-in sends your selected ratings, training, sleep, physiology, symptoms,
-          optional notes, date, time zone, and revision metadata to Cloudflare D1. Account records
-          contain your email identifier, a salted password hash, a hash of your recovery code, and
-          session records. Passwords and recovery codes are not stored as readable text.
+          context labels, optional notes, date, time zone, and revision metadata to Cloudflare D1.
+          Account records contain your email identifier, a salted password hash, a hash of your
+          recovery code, and session records. Passwords and recovery codes are not stored as
+          readable text.
         </p>
         <p>
           Email addresses are not verified in this pilot. No verification or reset emails are sent.
           Use a unique password and save your recovery code; possession of the code and email
           enables a password reset.
+        </p>
+      </Panel>
+      <Panel title="Analysis, imports and administration" className="prose-panel">
+        <p>
+          Relationship calculations and Bayesian models run in your browser using your selected
+          observations. Written notes are not used as model inputs. Downloaded model reports can
+          contain selected measurements and labels, so treat them as personal data.
+        </p>
+        <p>
+          Import files are read and validated in your browser. Confirmation saves the reviewed
+          observations to your signed-in account. Imported data follows the same storage and
+          deletion rules as manual check-ins. Source account IDs and revisions are not imported.
+        </p>
+        <p>
+          The application’s administrator panel exposes aggregate account counts, journal JSON
+          volume and recent activity. It does not display individual email addresses or journal
+          contents. Infrastructure administrators still have database access as described above.
         </p>
       </Panel>
       <Panel title="Cookies and browser storage" className="prose-panel">

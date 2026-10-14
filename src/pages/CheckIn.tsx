@@ -1,3 +1,4 @@
+import { LabelsEditor } from '../components/LabelsEditor';
 import { useEffect, useRef, useState } from 'react';
 import { useBlocker, useSearchParams } from 'react-router-dom';
 import { Check, ChevronDown, Dumbbell, Heart, Moon, Plus, Save, Trash2, Waves } from 'lucide-react';
@@ -217,6 +218,10 @@ export function CheckIn() {
                         />
                       ))}
                   </div>
+                  <LabelsEditor
+                    value={entry.labels ?? null}
+                    onChange={(value) => update('labels', value)}
+                  />
                   <details className="notes-details">
                     <summary>
                       Additional context <span>Optional</span>

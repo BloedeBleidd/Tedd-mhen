@@ -1,3 +1,4 @@
+import { adminOverview, isAdministrator } from './admin';
 import { z } from 'zod';
 import { authenticate, authenticateLegacy, isLocal, type Env } from './auth';
 import {
@@ -129,7 +130,7 @@ async function exportResponse(env: Env, url: URL, owner: string): Promise<Respon
   const groups = z
     .array(z.enum(exportGroups))
     .min(1)
-    .max(6)
+    .max(7)
     .parse((url.searchParams.get('groups') || exportGroups.join(',')).split(',')) as ExportGroup[];
   const fields = url.searchParams.has('fields')
     ? url.searchParams.get('fields')!.split(',')
@@ -254,6 +255,15 @@ export async function handleApi(request: Request, env: Env): Promise<Response> {
   if (url.pathname === '/api/health' && request.method === 'GET')
     return json({ ok: true, service: 'teddmhen' });
   const user = await authenticate(request, env);
+  if (url.pathname.startsWith('/api/admin/')) {
+    if (!(await isAdministrator(env.DB, user.id))) error('Administrator access is required.', 403);
+    if (url.pathname === '/api/admin/overview' && request.method === 'GET')
+      return json(await adminOverview(env.DB));
+    return json({ error: 'Endpoint not found.' }, 404);
+  }
+  const expectedUser = request.headers.get('X-Teddmhen-Expected-User');
+  if (expectedUser && expectedUser !== user.id)
+    error('Your signed-in account changed. Reload before continuing.', 403);
   if (!['GET', 'HEAD'].includes(request.method)) {
     if (request.headers.get('X-Teddmhen-Request') !== '1')
       error('Missing request verification header.', 403);
@@ -266,18 +276,36 @@ export async function handleApi(request: Request, env: Env): Promise<Response> {
       error('Cross-origin writes are not allowed.', 403);
   }
   if (url.pathname === '/api/session' && request.method === 'GET')
-    return json({ email: user.email, local: isLocal(request, env) });
+    return json({
+      id: user.id,
+      email: user.email,
+      local: isLocal(request, env),
+      admin: await isAdministrator(env.DB, user.id),
+    });
   if (url.pathname === '/api/export' && request.method === 'GET')
     return exportResponse(env, url, user.id);
   if (url.pathname === '/api/series' && request.method === 'GET') {
-    if (!url.searchParams.has('from')) url.searchParams.set('from', shiftDate(localDate(), -89));
-    if (!url.searchParams.has('to')) url.searchParams.set('to', localDate());
+    const all = url.searchParams.get('all') === 'true';
+    if (all) {
+      url.searchParams.set('from', '1900-01-01');
+      url.searchParams.set('to', '2200-12-31');
+    } else {
+      if (!url.searchParams.has('from')) url.searchParams.set('from', shiftDate(localDate(), -89));
+      if (!url.searchParams.has('to')) url.searchParams.set('to', localDate());
+    }
     const f = filters(url, user.id);
-    if (dayNumber(f.to) - dayNumber(f.from) > 1830)
-      error('Select at most five years for analysis.');
-    const result = await env.DB.prepare(`${summarySelect} WHERE ${f.where} ORDER BY date ASC`)
+    if (!all && dayNumber(f.to) - dayNumber(f.from) > 1830)
+      error('Select at most five years, or use All recorded dates.');
+    const result = await env.DB.prepare(
+      `${summarySelect} WHERE ${f.where} ORDER BY date ASC LIMIT 10001`,
+    )
       .bind(...f.params)
       .all<SummaryRow>();
+    if (result.results.length > 10000)
+      error(
+        'This selection exceeds 10,000 recorded days. Choose a date range; no observations were silently truncated.',
+        413,
+      );
     return json({ entries: result.results.map(summary) });
   }
   if (url.pathname === '/api/entries' && request.method === 'GET') {

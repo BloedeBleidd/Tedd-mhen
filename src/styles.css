@@ -2848,3 +2848,153 @@ input[type='radio'] {
     padding: 20px;
   }
 }
+
+.analysis-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 28px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 14px;
+}
+.analysis-tabs a {
+  padding: 10px 14px;
+  border-radius: 7px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.analysis-tabs a.active {
+  color: var(--text);
+  background: var(--surface-subtle);
+  font-weight: 600;
+}
+.feature-picker summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.picker-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 20px 0;
+}
+.picker-actions input {
+  max-width: 280px;
+}
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 12px;
+  max-height: 350px;
+  overflow: auto;
+  padding: 4px;
+}
+.feature-choice {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12px;
+}
+.feature-choice input {
+  width: 16px;
+  height: 16px;
+}
+.feature-choice small,
+.association-row small {
+  display: block;
+  color: var(--muted);
+  margin-top: 4px;
+  font-size: 10px;
+}
+.compact-stat {
+  font-size: 23px !important;
+}
+.association-list {
+  max-height: 500px;
+  overflow: auto;
+}
+.association-row {
+  display: grid;
+  grid-template-columns: minmax(100px, 1fr) 90px 40px;
+  width: 100%;
+  gap: 10px;
+  align-items: center;
+  text-align: left;
+  padding: 12px 8px;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  color: var(--text);
+  font-size: 12px;
+}
+.association-row.selected {
+  background: var(--surface-subtle);
+}
+.association-bar {
+  height: 8px;
+  border-radius: 5px;
+  background: var(--surface-subtle);
+}
+.association-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 5px;
+  background: var(--chart-mean);
+}
+.chart-tooltip {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--line);
+  padding: 12px;
+  font-size: 12px;
+  border-radius: 8px;
+}
+.definition-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+  margin-top: 25px;
+}
+.definition-grid article {
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+}
+.definition-grid h3 {
+  margin: 8px 0;
+}
+.definition-grid small {
+  color: var(--muted);
+  font-weight: 400;
+}
+.method-glossary dt {
+  font-weight: 600;
+  margin-top: 18px;
+}
+.method-glossary dd {
+  margin: 6px 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.labels-editor {
+  border-top: 1px solid var(--line);
+  padding-top: 20px;
+  margin-top: 20px;
+}
+.label-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+.label-add {
+  display: flex;
+  gap: 10px;
+}
+.label-add input {
+  min-width: 0;
+}
+.import-preview {
+  max-height: 360px;
+  overflow: auto;
+  margin: 20px 0;
+}

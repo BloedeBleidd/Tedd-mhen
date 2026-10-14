@@ -1,5 +1,126 @@
 import type { EntrySummary } from './schema';
+const clockPart = (value: string | null, cosine = false) => {
+  if (!value) return null;
+  const [h, m] = value.split(':').map(Number);
+  const angle = (2 * Math.PI * (h * 60 + m)) / 1440;
+  return cosine ? Math.cos(angle) : Math.sin(angle);
+};
 export const metrics = {
+  sleepLatency: {
+    label: 'Sleep latency',
+    unit: 'min',
+    center: 15,
+    scale: 15,
+    min: 0,
+    max: 720,
+    get: (e: EntrySummary) => e.sleep.latencyMinutes,
+  },
+  awakenings: {
+    label: 'Awakenings',
+    unit: 'count',
+    center: 1,
+    scale: 2,
+    min: 0,
+    max: 100,
+    get: (e: EntrySummary) => e.sleep.awakenings,
+  },
+  temperature: {
+    label: 'Body temperature',
+    unit: '°C',
+    center: 37,
+    scale: 0.5,
+    min: 30,
+    max: 45,
+    get: (e: EntrySummary) => e.physiology.temperatureC,
+  },
+  bodyWeight: {
+    label: 'Body weight',
+    unit: 'kg',
+    center: 75,
+    scale: 15,
+    min: 20,
+    max: 400,
+    get: (e: EntrySummary) => e.physiology.weightKg,
+  },
+  workoutCount: {
+    label: 'Training sessions',
+    unit: 'count',
+    center: 1,
+    scale: 1,
+    min: 0,
+    max: 20,
+    get: (e: EntrySummary) => (e.trainingStatus === 'unrecorded' ? null : e.workoutCount),
+  },
+  trainingEffort: {
+    label: 'Duration-weighted effort',
+    unit: '/ 10',
+    center: 5,
+    scale: 2,
+    min: 1,
+    max: 10,
+    get: (e: EntrySummary) =>
+      e.trainingLoad !== null && e.trainingMinutes !== null && e.trainingMinutes > 0
+        ? e.trainingLoad / e.trainingMinutes
+        : null,
+  },
+  symptomCount: {
+    label: 'Recorded symptom count',
+    unit: 'count',
+    center: 1,
+    scale: 2,
+    min: 0,
+    max: 8,
+    get: (e: EntrySummary) =>
+      e.symptoms.length || e.illnessSeverity !== null ? e.symptoms.length : null,
+  },
+  symptomBurden: {
+    label: 'Sum of symptom severities',
+    unit: 'points',
+    center: 3,
+    scale: 5,
+    min: 0,
+    max: 80,
+    get: (e: EntrySummary) =>
+      e.symptoms.length || e.illnessSeverity !== null
+        ? e.symptoms.reduce((sum, s) => sum + s.severity, 0)
+        : null,
+  },
+  bedtimeSin: {
+    label: 'Bedtime · sine',
+    unit: 'cyclic',
+    center: 0,
+    scale: 1,
+    min: -1,
+    max: 1,
+    get: (e: EntrySummary) => clockPart(e.sleep.bedtime),
+  },
+  bedtimeCos: {
+    label: 'Bedtime · cosine',
+    unit: 'cyclic',
+    center: 0,
+    scale: 1,
+    min: -1,
+    max: 1,
+    get: (e: EntrySummary) => clockPart(e.sleep.bedtime, true),
+  },
+  wakeTimeSin: {
+    label: 'Wake time · sine',
+    unit: 'cyclic',
+    center: 0,
+    scale: 1,
+    min: -1,
+    max: 1,
+    get: (e: EntrySummary) => clockPart(e.sleep.wakeTime),
+  },
+  wakeTimeCos: {
+    label: 'Wake time · cosine',
+    unit: 'cyclic',
+    center: 0,
+    scale: 1,
+    min: -1,
+    max: 1,
+    get: (e: EntrySummary) => clockPart(e.sleep.wakeTime, true),
+  },
   motivation: {
     label: 'Motivation',
     unit: '/ 10',
