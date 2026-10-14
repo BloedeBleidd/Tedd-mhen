@@ -1,0 +1,180 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { DatabaseSync } from 'node:sqlite';
+import { readFileSync } from 'node:fs';
+import worker from '../worker/index';
+import type { Env } from '../worker/auth';
+import { emptyEntry } from '../shared/schema';
+let actor = 'owner-a';
+vi.mock('../worker/auth', () => ({
+  authenticate: async () => ({ id: actor, email: `${actor}@example.test` }),
+  isLocal: () => false,
+}));
+let env: Env, sqlite: DatabaseSync;
+function adapter(db: DatabaseSync): D1Database {
+  function prepare(sql: string, values: unknown[] = []) {
+    const result = () => {
+      if (/^\s*SELECT/i.test(sql))
+        return { results: db.prepare(sql).all(...(values as [])), meta: { changes: 0 } };
+      const response = db.prepare(sql).run(...(values as []));
+      return { results: [], meta: { changes: Number(response.changes) } };
+    };
+    return {
+      bind: (...params: unknown[]) => prepare(sql, params),
+      all: async () => result(),
+      run: async () => result(),
+      first: async (column?: string) => {
+        const row = db.prepare(sql).get(...(values as []));
+        return row ? (column ? row[column] : row) : null;
+      },
+    };
+  }
+  return {
+    prepare,
+    batch: async (statements: { all: () => Promise<unknown> }[]) => {
+      db.exec('BEGIN');
+      try {
+        const results = [];
+        for (const statement of statements) results.push(await statement.all());
+        db.exec('COMMIT');
+        return results;
+      } catch (e) {
+        db.exec('ROLLBACK');
+        throw e;
+      }
+    },
+  } as unknown as D1Database;
+}
+async function call(
+  path: string,
+  method = 'GET',
+  body?: unknown,
+  headers?: Record<string, string>,
+) {
+  return worker.fetch(
+    new Request(`https://journal.example${path}`, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Teddmhen-Request': '1',
+        Origin: 'https://journal.example',
+        ...headers,
+      },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    }),
+    env,
+  );
+}
+beforeEach(() => {
+  sqlite?.close();
+  sqlite = new DatabaseSync(':memory:');
+  sqlite.exec('PRAGMA foreign_keys=ON');
+  sqlite.exec(readFileSync('migrations/0001_initial.sql', 'utf8'));
+  env = { DB: adapter(sqlite) } as Env;
+  actor = 'owner-a';
+});
+describe('API ownership, concurrency, filtering, and streaming exports', () => {
+  it('saves, reads, summarizes, searches, and deletes a real SQLite-backed entry', async () => {
+    const entry = {
+      ...emptyEntry('2026-10-14'),
+      wellbeing: 8,
+      notes: 'Long trail run context',
+      trainingStatus: 'rest',
+    };
+    expect((await call('/api/entries/2026-10-14', 'PUT', { entry, revision: 0 })).status).toBe(201);
+    const saved = (await (await call('/api/entries/2026-10-14')).json()) as Record<string, unknown>;
+    expect(saved.notes).toBe(entry.notes);
+    const listing = (await (await call('/api/entries?q=trail')).json()) as {
+      entries: Record<string, unknown>[];
+      total: number;
+    };
+    expect(listing.total).toBe(1);
+    expect(listing.entries[0]).not.toHaveProperty('notes');
+    expect(listing.entries[0].trainingLoad).toBe(0);
+    expect((await call('/api/entries/2026-10-14?revision=1', 'DELETE')).status).toBe(204);
+    expect((await call('/api/entries/2026-10-14')).status).toBe(404);
+  });
+  it('never reads or overwrites another owner’s records', async () => {
+    const entry = { ...emptyEntry('2026-10-14'), notes: 'owner A private data' };
+    await call('/api/entries/2026-10-14', 'PUT', { entry, revision: 0 });
+    actor = 'owner-b';
+    expect((await call('/api/entries/2026-10-14')).status).toBe(404);
+    expect(await (await call('/api/entries')).json()).toMatchObject({ total: 0 });
+    expect((await call('/api/entries/2026-10-14?revision=1', 'DELETE')).status).toBe(409);
+    const exported = await (
+      await call('/api/export?from=2026-10-01&to=2026-10-31&groups=notes')
+    ).text();
+    expect(exported).not.toContain('owner A private data');
+    expect(
+      (
+        await call('/api/entries/2026-10-14', 'PUT', {
+          entry: { ...entry, notes: 'B' },
+          revision: 0,
+        })
+      ).status,
+    ).toBe(201);
+    actor = 'owner-a';
+    expect(await (await call('/api/entries/2026-10-14')).json()).toMatchObject({
+      notes: entry.notes,
+    });
+  });
+  it('rejects stale revisions for updates, inserts, and deletes', async () => {
+    const entry = emptyEntry('2026-10-14');
+    await call('/api/entries/2026-10-14', 'PUT', { entry, revision: 0 });
+    expect((await call('/api/entries/2026-10-14', 'PUT', { entry, revision: 0 })).status).toBe(409);
+    expect((await call('/api/entries/2026-10-14', 'PUT', { entry, revision: 1 })).status).toBe(200);
+    expect((await call('/api/entries/2026-10-14', 'PUT', { entry, revision: 1 })).status).toBe(409);
+    expect((await call('/api/entries/2026-10-14?revision=1', 'DELETE')).status).toBe(409);
+  });
+  it('validates origin, payload bounds, and inconsistent dates', async () => {
+    const body = { entry: emptyEntry('2026-10-14'), revision: 0 };
+    expect(
+      (await call('/api/entries/2026-10-14', 'PUT', body, { Origin: 'https://evil.test' })).status,
+    ).toBe(403);
+    expect(
+      (await call('/api/entries/2026-10-14', 'PUT', body, { 'X-Teddmhen-Request': '' })).status,
+    ).toBe(403);
+    expect((await call('/api/entries/2026-10-13', 'PUT', body)).status).toBe(400);
+    expect(
+      (await call('/api/entries/2026-10-14', 'PUT', { padding: 'a'.repeat(300_000) })).status,
+    ).toBe(413);
+    expect((await call('/api/export?from=1900-01-01&to=2026-10-14')).status).toBe(400);
+  });
+  it('paginates without duplicates and streams valid field-selected export formats', async () => {
+    for (const date of ['2026-10-12', '2026-10-13', '2026-10-14'])
+      await call(`/api/entries/${date}`, 'PUT', {
+        entry: { ...emptyEntry(date), wellbeing: 7, notes: 'secret' },
+        revision: 0,
+      });
+    const first = (await (await call('/api/entries?limit=2')).json()) as {
+      entries: { date: string }[];
+      nextCursor: string;
+    };
+    expect(first.entries.map((e) => e.date)).toEqual(['2026-10-14', '2026-10-13']);
+    const next = (await (await call(`/api/entries?limit=2&cursor=${first.nextCursor}`)).json()) as {
+      entries: { date: string }[];
+    };
+    expect(next.entries.map((e) => e.date)).toEqual(['2026-10-12']);
+    const path = '/api/export?from=2026-10-01&to=2026-10-31&groups=ratings&fields=wellbeing';
+    for (const format of ['json', 'ndjson', 'csv', 'md']) {
+      const response = await call(`${path}&format=${format}`);
+      expect(response.status).toBe(200);
+      const text = await response.text();
+      expect(text).not.toContain('secret');
+      if (format === 'json') {
+        const result = JSON.parse(text);
+        expect(result.entries).toHaveLength(3);
+        expect(result.entries[0]).not.toHaveProperty('fatigue');
+      }
+      if (format === 'ndjson')
+        expect(
+          text
+            .trim()
+            .split('\n')
+            .map((line) => JSON.parse(line)),
+        ).toHaveLength(4);
+      if (format === 'csv') expect(text).toContain('"wellbeing"');
+      if (format === 'md') expect(text).toContain('## 2026-10-12');
+      expect(response.headers.get('cache-control')).toContain('no-store');
+    }
+  });
+});
