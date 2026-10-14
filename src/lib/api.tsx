@@ -115,7 +115,7 @@ export function ApiProvider({ children }: { children: ReactNode }) {
   );
 }
 export const useApi = () => useContext(Context);
-export function useLoad<T>(path: string | null) {
+export function useLoad<T>(path: string | null, keepDuringRefresh = false) {
   const { request, version } = useApi();
   const [state, setState] = useState<{ data: T | null; loading: boolean; error: string | null }>({
     data: null,
@@ -128,7 +128,11 @@ export function useLoad<T>(path: string | null) {
       setState({ data: null, loading: false, error: null });
       return;
     }
-    setState({ data: null, loading: true, error: null });
+    setState((previous) => ({
+      data: keepDuringRefresh ? previous.data : null,
+      loading: true,
+      error: null,
+    }));
     request<T>(path)
       .then((data) => {
         if (active) setState({ data, loading: false, error: null });
@@ -139,7 +143,7 @@ export function useLoad<T>(path: string | null) {
     return () => {
       active = false;
     };
-  }, [path, request, version]);
+  }, [path, request, version, keepDuringRefresh]);
   return state;
 }
 export function download(content: BlobPart, filename: string, type: string) {

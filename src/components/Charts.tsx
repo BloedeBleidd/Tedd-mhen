@@ -30,20 +30,20 @@ export function TrendChart({
     >
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart data={data} margin={{ top: 20, right: 18, left: -15, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 5" vertical={false} stroke="#e5e9e2" />
+          <CartesianGrid strokeDasharray="3 5" vertical={false} stroke="var(--line)" />
           <XAxis
             dataKey="date"
             tickFormatter={(value) => prettyDate(value)}
             tickLine={false}
             axisLine={false}
             minTickGap={45}
-            tick={{ fontSize: 11, fill: '#778078' }}
+            tick={{ fontSize: 11, fill: 'var(--muted)' }}
             dy={10}
           />
           <YAxis
             tickLine={false}
             axisLine={false}
-            tick={{ fontSize: 11, fill: '#778078' }}
+            tick={{ fontSize: 11, fill: 'var(--muted)' }}
             domain={['auto', 'auto']}
             tickFormatter={(v) => Number(v.toFixed(1)).toString()}
           />
@@ -57,7 +57,14 @@ export function TrendChart({
                 : `${Number(value).toFixed(2)} ${unit}`,
               name,
             ]}
-            contentStyle={{ borderRadius: 10, border: '1px solid #e1e6dc', fontSize: 12 }}
+            contentStyle={{
+              borderRadius: 10,
+              border: '1px solid var(--line)',
+              background: 'var(--surface)',
+              color: 'var(--text)',
+              fontSize: 12,
+            }}
+            labelStyle={{ color: 'var(--text)' }}
           />
           {!simple && (
             <>
@@ -65,14 +72,14 @@ export function TrendChart({
                 dataKey="predictive"
                 name="95% predictive interval"
                 stroke="none"
-                fill="#e9eddf"
+                fill="var(--chart-predictive)"
                 isAnimationActive={false}
               />
               <Area
                 dataKey="credible"
                 name="95% credible interval"
                 stroke="none"
-                fill="#bed1a6"
+                fill="var(--chart-credible)"
                 fillOpacity={0.65}
                 isAnimationActive={false}
               />
@@ -80,7 +87,7 @@ export function TrendChart({
                 type="linear"
                 dataKey="mean"
                 name="Posterior mean"
-                stroke="#325d47"
+                stroke="var(--chart-mean)"
                 dot={false}
                 strokeWidth={2}
                 isAnimationActive={false}
@@ -91,22 +98,26 @@ export function TrendChart({
             type="linear"
             dataKey="observed"
             name="Observed"
-            stroke={simple ? '#476b4b' : 'transparent'}
+            stroke={simple ? 'var(--chart-mean)' : 'transparent'}
             strokeWidth={2.5}
-            dot={simple ? false : { r: 3, fill: '#315946', stroke: '#fcfcf9', strokeWidth: 1 }}
+            dot={
+              simple
+                ? false
+                : { r: 3, fill: 'var(--chart-mean)', stroke: 'var(--surface)', strokeWidth: 1 }
+            }
             connectNulls={false}
             isAnimationActive={false}
           />
           {forecastStart && (
             <ReferenceLine
               x={forecastStart}
-              stroke="#ac784e"
+              stroke="var(--chart-forecast)"
               strokeDasharray="4 4"
               label={{
                 value: 'Forecast →',
                 position: 'insideTopRight',
                 fontSize: 10,
-                fill: '#906740',
+                fill: 'var(--chart-forecast)',
               }}
             />
           )}

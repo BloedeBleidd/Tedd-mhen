@@ -2,48 +2,16 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DatabaseSync } from 'node:sqlite';
 import { readFileSync } from 'node:fs';
 import worker from '../worker/index';
+import { adapter } from './database';
 import type { Env } from '../worker/auth';
 import { emptyEntry } from '../shared/schema';
 let actor = 'owner-a';
 vi.mock('../worker/auth', () => ({
   authenticate: async () => ({ id: actor, email: `${actor}@example.test` }),
   isLocal: () => false,
+  authenticateLegacy: async () => ({ id: 'legacy-owner', email: 'legacy@example.test' }),
 }));
 let env: Env, sqlite: DatabaseSync;
-function adapter(db: DatabaseSync): D1Database {
-  function prepare(sql: string, values: unknown[] = []) {
-    const result = () => {
-      if (/^\s*SELECT/i.test(sql))
-        return { results: db.prepare(sql).all(...(values as [])), meta: { changes: 0 } };
-      const response = db.prepare(sql).run(...(values as []));
-      return { results: [], meta: { changes: Number(response.changes) } };
-    };
-    return {
-      bind: (...params: unknown[]) => prepare(sql, params),
-      all: async () => result(),
-      run: async () => result(),
-      first: async (column?: string) => {
-        const row = db.prepare(sql).get(...(values as []));
-        return row ? (column ? row[column] : row) : null;
-      },
-    };
-  }
-  return {
-    prepare,
-    batch: async (statements: { all: () => Promise<unknown> }[]) => {
-      db.exec('BEGIN');
-      try {
-        const results = [];
-        for (const statement of statements) results.push(await statement.all());
-        db.exec('COMMIT');
-        return results;
-      } catch (e) {
-        db.exec('ROLLBACK');
-        throw e;
-      }
-    },
-  } as unknown as D1Database;
-}
 async function call(
   path: string,
   method = 'GET',
@@ -73,6 +41,37 @@ beforeEach(() => {
   actor = 'owner-a';
 });
 describe('API ownership, concurrency, filtering, and streaming exports', () => {
+  it('replaces untrusted migration headers with the independently verified legacy identity', async () => {
+    const forwarded: Request[] = [];
+    env.APP_ORIGIN = 'https://journal.example';
+    env.AUTH = {
+      idFromName: () => 'test',
+      get: () => ({
+        fetch: async (request: Request) => {
+          forwarded.push(request);
+          return Response.json({ ok: true });
+        },
+      }),
+    } as unknown as DurableObjectNamespace;
+    expect(
+      (
+        await call(
+          '/api/auth/claim',
+          'POST',
+          { password: 'synthetic password' },
+          { 'X-Legacy-Id': 'forged', 'X-Legacy-Email': 'forged@example.test' },
+        )
+      ).status,
+    ).toBe(200);
+    expect(forwarded[0].headers.get('X-Legacy-Id')).toBe('legacy-owner');
+    expect(forwarded[0].headers.get('X-Legacy-Email')).toBe('legacy@example.test');
+    await call('/api/auth/register', 'POST', {}, { 'X-Legacy-Id': 'forged' });
+    expect(forwarded[1].headers.has('X-Legacy-Id')).toBe(false);
+    expect((await call('/api/auth/register', 'POST', { padding: 'x'.repeat(9000) })).status).toBe(
+      413,
+    );
+    expect(forwarded).toHaveLength(2);
+  });
   it('saves, reads, summarizes, searches, and deletes a real SQLite-backed entry', async () => {
     const entry = {
       ...emptyEntry('2026-10-14'),

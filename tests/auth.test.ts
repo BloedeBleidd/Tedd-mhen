@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { authenticate, isLocal, verifyAccessToken, type Env } from '../worker/auth';
+import {
+  authenticate,
+  authenticateLegacy,
+  isLocal,
+  verifyAccessToken,
+  type Env,
+} from '../worker/auth';
 import { createLocalJWKSet, exportJWK, generateKeyPair, SignJWT } from 'jose';
 const env = { ACCESS_AUD: '', ACCESS_TEAM_DOMAIN: '' } as Env;
 describe('Fail-closed authentication', () => {
@@ -51,12 +57,12 @@ describe('Fail-closed authentication', () => {
   });
   it('does not grant unauthenticated production access when configuration is missing', async () => {
     await expect(
-      authenticate(new Request('https://journal.example/api/session'), env),
+      authenticateLegacy(new Request('https://journal.example/api/auth/claim'), env),
     ).rejects.toMatchObject({ status: 503 });
   });
   it('requires a token when production Access is configured', async () => {
     await expect(
-      authenticate(new Request('https://journal.example/api/session'), {
+      authenticateLegacy(new Request('https://journal.example/api/auth/claim'), {
         ...env,
         ACCESS_TEAM_DOMAIN: 'test.cloudflareaccess.com',
         ACCESS_AUD: 'audience',

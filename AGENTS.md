@@ -4,7 +4,7 @@ Treat Tedd’mhen as a production application. The repository is public; deploye
 
 - Keep subjective experiences numerically analyzable with explicit scales and anchors. Narrative fields are optional context, not a substitute for structured measurements.
 - Preserve `null` for missing observations. Do not silently impute, coerce missing values to zero, or interpret an unrecorded training day as rest.
-- Target the owner's Cloudflare account: Workers Static Assets, D1, and verified Cloudflare Access identity. Do not deploy to an unrelated hosting account.
+- Target the owner's Cloudflare account: Workers Static Assets, D1, and the AuthService SQLite Durable Object. Use application email/password sessions; Cloudflare Access is only for verified legacy-owner migration. Do not deploy to an unrelated hosting account.
 - Scope every data operation to the verified owner. Never trust a client-supplied owner identifier. Keep production authentication fail-closed.
 - Keep credentials, real records, exports, database state, and private screenshots out of commits and public CI artifacts. Use synthetic test records.
 - Maintain the README, data dictionary, deployment guide, and model methodology as the implementation changes. Version incompatible schema/model changes and use append-only deployed migrations.

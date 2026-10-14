@@ -1,10 +1,13 @@
 import { createRemoteJWKSet, jwtVerify, type JWTVerifyGetKey } from 'jose';
+import { readSession, sessionToken } from './sessions';
 export type Env = {
   DB: D1Database;
   ASSETS: Fetcher;
   ACCESS_TEAM_DOMAIN: string;
   ACCESS_AUD: string;
   LOCAL_DEV?: string;
+  AUTH: DurableObjectNamespace;
+  APP_ORIGIN: string;
 };
 export const isLocal = (request: Request, env: Env) =>
   env.LOCAL_DEV === 'true' &&
@@ -26,11 +29,10 @@ export async function verifyAccessToken(
     throw new Error('Identity missing');
   return { id: payload.sub, email: payload.email };
 }
-export async function authenticate(
+export async function authenticateLegacy(
   request: Request,
   env: Env,
 ): Promise<{ id: string; email: string }> {
-  if (isLocal(request, env)) return { id: 'local-developer', email: 'local@teddmhen.test' };
   if (!env.ACCESS_TEAM_DOMAIN || !env.ACCESS_AUD)
     throw new Response(
       JSON.stringify({
@@ -57,4 +59,15 @@ export async function authenticate(
       { status: 401 },
     );
   }
+}
+
+export async function authenticate(
+  request: Request,
+  env: Env,
+): Promise<{ id: string; email: string }> {
+  if (sessionToken(request)) {
+    const user = await readSession(request, env.DB);
+    if (user) return user;
+  } else if (isLocal(request, env)) return { id: 'local-developer', email: 'local@teddmhen.test' };
+  throw new Response(JSON.stringify({ error: 'Sign in to access your journal.' }), { status: 401 });
 }

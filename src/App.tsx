@@ -10,22 +10,28 @@ import {
   Plus,
   ShieldCheck,
   X,
+  UserRound,
 } from 'lucide-react';
 import { NavLink, Route, Routes, useLocation } from 'react-router-dom';
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { useApi, useLoad } from './lib/api';
 import { EmptyState, Loading } from './components/ui';
+import { AppearanceControl } from './components/AppearanceControl';
+import { PrivacyNotice } from './components/PrivacyNotice';
+import { AuthPage } from './pages/Auth';
+import { Privacy } from './pages/Privacy';
 const Dashboard = lazy(() => import('./pages/Dashboard').then((m) => ({ default: m.Dashboard })));
 const CheckIn = lazy(() => import('./pages/CheckIn').then((m) => ({ default: m.CheckIn })));
 const Journal = lazy(() => import('./pages/Journal').then((m) => ({ default: m.Journal })));
 const Analysis = lazy(() => import('./pages/Analysis').then((m) => ({ default: m.Analysis })));
 const Export = lazy(() => import('./pages/Export').then((m) => ({ default: m.Export })));
 const Help = lazy(() => import('./pages/Help').then((m) => ({ default: m.Help })));
+const Account = lazy(() => import('./pages/Account').then((m) => ({ default: m.Account })));
 export function App() {
   const { demo, toggleDemo } = useApi(),
     location = useLocation(),
     [menuOpen, setMenuOpen] = useState(false);
-  const session = useLoad<{ email: string; local: boolean }>('/api/session');
+  const session = useLoad<{ email: string; local: boolean }>('/api/session', true);
   useEffect(() => {
     const close = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setMenuOpen(false);
@@ -40,6 +46,35 @@ export function App() {
     { to: '/analysis', icon: ChartNoAxesCombined, label: 'Trends & predictions' },
     { to: '/export', icon: Download, label: 'Export data' },
   ];
+  const authRoute = ['/sign-in', '/register', '/recover', '/api/auth/claim'].includes(
+    location.pathname,
+  );
+  if (authRoute || (!session.data && !demo)) {
+    return (
+      <div className="public-shell">
+        <header className="public-header">
+          <NavLink to="/" className="public-brand">
+            Tedd’mhen
+          </NavLink>
+          <AppearanceControl />
+        </header>
+        <PrivacyNotice />
+        <main id="main">
+          {location.pathname === '/privacy' ? (
+            <Privacy />
+          ) : !authRoute && session.loading ? (
+            <Loading />
+          ) : (
+            <AuthPage key={location.pathname} />
+          )}
+        </main>
+        <footer className="public-footer">
+          <NavLink to="/privacy">Privacy & data</NavLink>
+          <span>A personal training & recovery journal.</span>
+        </footer>
+      </div>
+    );
+  }
   return (
     <div className="app-shell">
       <a className="skip-link" href="#main">
@@ -73,6 +108,12 @@ export function App() {
           <span>One day at a time.</span>
         </div>
         <div className="sidebar-bottom">
+          <NavLink to="/account" onClick={() => setMenuOpen(false)}>
+            <UserRound size={17} /> Account
+          </NavLink>
+          <NavLink to="/privacy" onClick={() => setMenuOpen(false)}>
+            <ShieldCheck size={17} /> Privacy & data
+          </NavLink>
           <NavLink to="/help" onClick={() => setMenuOpen(false)}>
             <BookOpen size={17} /> Guide & methodology <ArrowUpRight size={14} />
           </NavLink>
@@ -116,14 +157,23 @@ export function App() {
             <span>Workspace</span>
             <span className="slash">/</span>
             <strong>
-              {nav.find((n) => n.to === location.pathname)?.label || 'Guide & methodology'}
+              {nav.find((n) => n.to === location.pathname)?.label ||
+                (location.pathname === '/privacy'
+                  ? 'Privacy & data'
+                  : location.pathname === '/account'
+                    ? 'Account'
+                    : 'Guide & methodology')}
             </strong>
           </div>
-          <span className={`privacy-pill ${demo ? 'demo' : ''}`}>
-            <span />
-            {demo ? 'DEMO DATA' : session.data?.local ? 'LOCAL WORKSPACE' : 'PRIVATE BY DESIGN'}
-          </span>
+          <div className="topbar-tools">
+            <AppearanceControl />
+            <span className={`privacy-pill ${demo ? 'demo' : ''}`}>
+              <span />
+              {demo ? 'DEMO DATA' : session.data?.local ? 'LOCAL WORKSPACE' : 'PRIVATE BY DESIGN'}
+            </span>
+          </div>
         </header>
+        <PrivacyNotice />
         {demo && (
           <div className="demo-banner">
             <FlaskConical size={15} />
@@ -149,6 +199,8 @@ export function App() {
               <Route path="/analysis" element={<Analysis />} />
               <Route path="/export" element={<Export />} />
               <Route path="/help" element={<Help />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/account" element={<Account />} />
               <Route
                 path="*"
                 element={
@@ -166,7 +218,7 @@ export function App() {
               <Activity size={13} /> Tedd’mhen
             </span>
             <span>Your observations. A little more perspective.</span>
-            <span>v0.1</span>
+            <NavLink to="/privacy">Privacy & data</NavLink>
           </footer>
         </main>
       </div>

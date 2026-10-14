@@ -143,15 +143,21 @@ export function Help() {
       </div>
       <Panel title="Private deployment & data ownership" action={<LockKeyhole size={19} />}>
         <p>
-          Host the Worker and D1 database on your own Cloudflare account. Protect your custom domain
-          with Cloudflare Access, allow your own email address, and configure the application
-          audience. The API verifies the token signature, issuer, audience, and expiry, then scopes
-          every record to the authenticated identity.
+          Create an account with an email identifier and a unique password. Email addresses are not
+          verified, and this pilot sends no email. Save your one-time recovery code in a password
+          manager. Recovery and password changes replace the code and sign out older sessions.
+          Account settings also let you sign out or delete your account and journal.
         </p>
         <p>
-          Production API requests fail closed if access configuration is missing. Local development
-          bypass is limited to an explicitly enabled local mode and loopback hosts. Multi-user data
-          ownership is built in; public registration and shared journals are not.
+          Each account can access only its own records. The original owner can use the legacy
+          migration link to keep their existing journal. See Privacy &amp; data for necessary
+          cookies, Cloudflare database storage, retention, and exports.
+        </p>
+        <p>
+          Appearance offers Light, Dark, and Auto. Auto uses sunrise and sunset after you choose Use
+          device location and grant browser permission; without a location it follows your system
+          theme. Approximate coordinates stay in this browser. Update them when travelling or choose
+          Forget saved location. There is no background location tracking.
         </p>
         <p>
           See{' '}

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { authenticate, isLocal, type Env } from './auth';
+import { authenticate, authenticateLegacy, isLocal, type Env } from './auth';
 import {
   dateSchema,
   dayNumber,
@@ -90,7 +90,7 @@ function filters(url: URL, owner: string) {
   else if (illness && illness !== 'all') error('Invalid illness filter.');
   return { where: clauses.join(' AND '), params, from, to };
 }
-async function readBody(request: Request) {
+async function readBody(request: Request, maximum = MAX_BODY) {
   if (!request.headers.get('content-type')?.startsWith('application/json'))
     error('Send application/json.', 415);
   const reader = request.body?.getReader();
@@ -101,9 +101,9 @@ async function readBody(request: Request) {
     const { value, done } = await reader!.read();
     if (done) break;
     length += value.byteLength;
-    if (length > MAX_BODY) {
+    if (length > maximum) {
       await reader!.cancel();
-      error('A daily entry must be smaller than 256 KiB.', 413);
+      error(`Request must be smaller than ${maximum / 1024} KiB.`, 413);
     }
     chunks.push(value);
   }
@@ -223,6 +223,34 @@ async function exportResponse(env: Env, url: URL, owner: string): Promise<Respon
 }
 export async function handleApi(request: Request, env: Env): Promise<Response> {
   const url = new URL(request.url);
+  if (url.pathname.startsWith('/api/auth/')) {
+    const headers = new Headers(request.headers);
+    headers.delete('X-Legacy-Id');
+    headers.delete('X-Legacy-Email');
+    if (url.pathname === '/api/auth/claim') {
+      const owner = await authenticateLegacy(request, env);
+      if (request.method === 'GET') {
+        return env.ASSETS.fetch(
+          new Request(new URL('/index.html', url), { headers: request.headers }),
+        );
+      }
+      headers.set('X-Legacy-Id', owner.id);
+      headers.set('X-Legacy-Email', owner.email);
+    }
+    const loopback = ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname);
+    if (!loopback && (url.origin !== env.APP_ORIGIN || url.protocol !== 'https:'))
+      return json({ error: 'Invalid application origin.' }, 403);
+    if (request.method !== 'POST') return json({ error: 'Method not allowed.' }, 405);
+    if (request.headers.get('Origin') !== url.origin || headers.get('X-Teddmhen-Request') !== '1')
+      return json({ error: 'Cross-origin or unverified requests are not allowed.' }, 403);
+    if (!env.AUTH) return json({ error: 'Account service is unavailable.' }, 503);
+    // Finish reading the bounded body before forwarding: a rate-limit response can be immediate.
+    const body = JSON.stringify(await readBody(request, 8192));
+    headers.delete('Content-Length');
+    return env.AUTH.get(env.AUTH.idFromName('accounts')).fetch(
+      new Request(request, { headers, body }),
+    );
+  }
   if (url.pathname === '/api/health' && request.method === 'GET')
     return json({ ok: true, service: 'teddmhen' });
   const user = await authenticate(request, env);

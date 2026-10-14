@@ -1,20 +1,10 @@
 # Deploying Tedd’mhen to your Cloudflare account
 
-The deployment consists of one Worker, its static assets, a D1 database, a custom domain, and a Cloudflare Access application. Source is public; records stay in your account. No Sites hosting or external application database is required.
+The deployment uses a Worker with static assets, D1, one SQLite-backed AuthService Durable Object, and a custom domain. The owner's hostname is `teddmhen.piotrzmudadev.com`. Source is public; accounts and journals live in the owner's Cloudflare account. No external auth database or mail service is used.
 
-The production hostname is `teddmhen.piotrzmudadev.com`, under the owner's `piotrzmudadev.com` zone. The Worker, custom domain, D1 database, and Access application were provisioned on the owner's account on October 14, 2026.
+## Prerequisites and configuration
 
-The production Access application covers every path and allows only the owner's email through the existing Cloudflare identity provider, with a 24-hour session. It has no Bypass or Everyone policy. Both `workers.dev` and deployment preview URLs are disabled. The team domain and application audience in `wrangler.jsonc` identify the application; they are not credentials.
-
-Deployment verification confirmed HTTPS redirects to Access for signed-out requests to `/`, `/journal`, `/api/entries`, and `/api/health`, the correct D1 binding, and the absence of `LOCAL_DEV` in the deployed Worker. Local validation passed 31 unit/API/configuration tests and three browser tests, plus formatting, TypeScript, and the production build. Completing the signed-in production smoke test below requires the owner's browser session; local browser tests do not establish that result.
-
-Development and test commands explicitly keep Wrangler's upstream hostname on loopback. Otherwise Wrangler can rewrite local request URLs to the configured production hostname, correctly causing the local authentication bypass to refuse those requests.
-
-## 1. Prerequisites
-
-- Node.js 22.12+ or a supported newer LTS, npm, and this repository.
-- A Cloudflare account with a zone for your intended custom domain.
-- Cloudflare Zero Trust / Access enabled for your account.
+Use Node.js 22.12+ or a supported newer LTS, npm, and an authenticated Cloudflare account:
 
 ```sh
 npm ci
@@ -22,91 +12,71 @@ npx wrangler login
 npx wrangler whoami
 ```
 
-Use your local authenticated session or scoped deployment credentials. Never put a token in source, chat, a shell command argument, or a public issue. For CI later, use protected secrets and the minimum Worker/D1 permissions needed. This repository intentionally does not auto-deploy from pull requests.
+The owner's D1 database is already bound in `wrangler.jsonc` and was created in the EEUR region. Do not create another when maintaining this installation. Forks must replace the account/database IDs, custom domain and `APP_ORIGIN` with their own. A fresh installation can create its database with `npx wrangler d1 create teddmhen`.
 
-Wrangler OAuth does not include Access administration permissions. If Access is not enabled, complete the [Zero Trust onboarding](https://developers.cloudflare.com/cloudflare-one/setup/) in the account dashboard first, selecting the intended plan and team name. Cloudflare may require payment details even for its Free plan.
+Keep the `AUTH` binding, SQLite class migration, `nodejs_compat`, `workers_dev: false`, `preview_urls: false`, and `/api` Worker-first asset routing. Never set `LOCAL_DEV` in production. Development scripts explicitly keep the Wrangler upstream hostname on loopback. To test real account flows locally, use `LOCAL_DEV:false`; the browser suite also runs a separate strict account server. The two `.wrangler/e2e*` directories contain only synthetic test state and are reset at test-server startup.
 
-To configure Access through the API, use a separate account-scoped API token with `Access: Apps and Policies Edit` and `Access: Organizations, Identity Providers, and Groups Edit`. Limit it to the deployment account. An ignored local `.env.cloudflare` file can hold `CLOUDFLARE_API_TOKEN=...` while provisioning; it is not loaded by the application or committed. Remove the file and revoke the temporary token after provisioning. Alternatively, configure the application in the dashboard as described below without issuing an additional API token.
+`APP_ORIGIN` must exactly match the HTTPS custom-domain origin, without a trailing slash. Normal registration, sign-in and private API requests use application sessions, not Cloudflare Access. A fresh installation without legacy owners needs no Access setup and can omit both `ACCESS_TEAM_DOMAIN` and `ACCESS_AUD`.
 
-## 2. Create and bind the database
+## Migrating the existing private installation
 
-```sh
-npx wrangler d1 create teddmhen
-```
+Keep the original full-hostname Access protection in place until the new Worker and migration are installed. Never deploy the old Access-only API after opening the hostname without first restoring full-hostname protection.
 
-For a new installation, copy the returned database UUID into `d1_databases[0].database_id` in `wrangler.jsonc`. The binding name must remain `DB`. Set `account_id` to the intended account explicitly if your credentials have access to multiple accounts. Account and database IDs are identifiers, not authentication tokens.
+1. Export a private backup before applying migration 0002. Inspect legacy identity counts and duplicate emails without exposing journal data. The migration intentionally fails on duplicate email reservations rather than merging journals.
+2. Apply all D1 migrations. Migration 0002 creates account/session tables and reserves existing legacy emails. If the allowed owner has not saved an entry yet, reserve their normalized email in `auth_legacy_reservations` with a null `user_id` before registration opens. This personal deployment setting must not be committed in SQL migrations.
+3. Deploy the new Worker, its AuthService class and assets while the old Access rule still protects the entire hostname.
+4. Narrow the existing self-hosted Access application's domain to **`teddmhen.piotrzmudadev.com/api/auth/claim`**. Retain its audience, identity provider and owner-only Allow policy. Keep its 24-hour session and no Bypass/Everyone rules. Check that its destination list does not still cover the full hostname.
+5. Confirm anonymous `/`, `/register` and `/privacy` are accessible; `/api/entries`, `/api/session` and `/api/export` return 401 without a session; `/api/auth/claim` still redirects to Access.
+6. The original owner opens `/api/auth/claim`, signs in with the old allowed identity, and chooses their application password. Save the recovery code immediately. The verified subject remains the journal owner ID, preserving all original entries. Later sign-in uses email/password at `/sign-in`.
 
-The owner's production database `teddmhen` has already been created in Cloudflare's EEUR region, migrated, and bound in this repository's configuration. Do not create another database when maintaining this deployment. A fork must use its own account, database, domain, and Access configuration.
+The Worker independently verifies the legacy Access JWT. A plain Cloudflare email header or a client-supplied legacy ID grants no access. The existing audience and team domain are public identifiers, not credentials. Once an account is claimed, repeating the claim cannot reset it.
 
-## 3. Configure private access before serving real data
+Wrangler OAuth lacks Access administration permissions. A temporary account-scoped token needs `Access: Apps and Policies Edit`; identity-provider administration additionally needs `Access: Organizations, Identity Providers, and Groups Edit`. The ignored `.env.cloudflare` can hold that token for provisioning only. Never print or commit it. Remove/revoke it after setup. The application does not read that file at runtime.
 
-For a new installation, create a self-hosted Access application in Cloudflare Zero Trust covering every path on your hostname. Add an Allow policy restricted to your email. Configure an identity provider or email one-time PIN. Avoid a Bypass policy or an Everyone allow rule. The owner's installation already uses the existing Cloudflare identity provider; it does not require a separate application password or one-time PIN provider.
-
-Copy the team domain and Application Audience (AUD) into `vars`:
-
-```json
-{
-  "ACCESS_TEAM_DOMAIN": "your-team.cloudflareaccess.com",
-  "ACCESS_AUD": "your-application-audience"
-}
-```
-
-The hostname is already declared as a Worker custom domain in `wrangler.jsonc`:
-
-```json
-"routes": [
-  { "pattern": "teddmhen.piotrzmudadev.com", "custom_domain": true }
-]
-```
-
-Keep `workers_dev: false` and `preview_urls: false` unless you separately protect and verify every alternate hostname. Do not configure `LOCAL_DEV` in Cloudflare. It belongs only in ignored `.dev.vars` for loopback development.
-
-The browser loads through Access. The Worker independently verifies the JWT using the account’s public keys, issuer, audience, expiry, and subject/email claims. A spoofed email header does not grant access. See Cloudflare’s [JWT validation documentation](https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/authorization-cookie/validating-json/).
-
-## 4. Validate, migrate, and deploy
+## Validate, migrate, deploy
 
 ```sh
 npm run format:check
 npm run typecheck
 npm test
-npm run setup
 npx playwright install chromium
 npm run test:e2e
 npm run db:migrate:remote
 npm run deploy
 ```
 
-`deploy` builds the application and checks for the configured database, custom domain, and Access parameters before calling Wrangler. A syntax/configuration check cannot verify the Access policy itself: validate the signed-out and signed-in flows in the dashboard/browser.
+Back up before the remote migration. `deploy` builds and checks D1, origin, the AuthService binding/migration, runtime compatibility, and disabled alternate hostnames. It cannot verify the external Access policy; test that separately. The GitHub workflow validates synthetic data and does not deploy pull requests.
 
-The UI and API are one deployment. Static-asset routing forces `/api` and `/api/*` through the Worker; unrecognized API URLs return JSON 404 responses rather than the SPA. See Cloudflare’s [SPA routing documentation](https://developers.cloudflare.com/workers/static-assets/routing/single-page-application/).
+Production smoke checks must cover two synthetic accounts, private CRUD and selective export, isolation, invalid credentials, recovery invalidating an old session/code, and account deletion. Remove test accounts afterward. Check cookie attributes, `Cache-Control: private, no-store`, CSP, and `Permissions-Policy: geolocation=(self)`. Test device-location permission and sunrise/sunset appearance in the browser; refusing permission must preserve manual/system themes.
 
-## 5. Verify the deployed application
+## Verified release — 14 October 2026
 
-1. A signed-out browser is challenged by Access before entering the journal.
-2. Sign in as the allowed identity. Create a clearly marked test entry, reload it, edit it, export it, and delete it.
-3. An unauthenticated direct API request must not expose entries. A token with the wrong audience must be rejected.
-4. Check the custom domain on a phone. Confirm that a hard refresh on `/journal` and `/analysis` works.
-5. Confirm `Cache-Control: private, no-store` on authenticated API responses and no cache rule overriding it.
-6. Confirm that all production hostnames are protected and the Worker has no `LOCAL_DEV` variable.
+Worker version `c3ebb621-c601-4ca0-8c44-aec92e23e7d2` was deployed with migration 0002, the AuthService binding and the claim-only Access policy. A private pre-migration SQL backup was restored into an isolated in-memory SQLite database to verify readability and counts. Validation passed formatting, TypeScript, 45 unit/API/configuration tests, 10 browser tests, the production build and a dependency audit with no reported vulnerabilities.
 
-## Backups and restore
+Production synthetic checks passed public-page access, anonymous API rejection, the legacy Access challenge, registration, secure session cookies, journal create/read/edit, selective export, two-account isolation, one-time recovery and old-session invalidation, sign-out/sign-in, and light/dark/privacy UI on desktop/mobile. Both synthetic accounts and their records were deleted and cleanup was verified in D1. Alternate endpoints are disabled and no production `LOCAL_DEV` binding exists. The original owner confirmed setting a password, saving the recovery code and reaching Overview through the migration flow.
 
-Selective app exports are useful for analysis, but a database backup also preserves owner identities, revisions, and timestamps. Use a private destination outside the repository:
+## Backups and restoration
+
+A full database export preserves identities, credential hashes, revisions and timestamps. Treat it as sensitive:
 
 ```sh
 npx wrangler d1 export teddmhen --remote --output /private/backup-location/teddmhen.sql
 ```
 
-Replace the destination with a protected directory on your machine. Encrypt and retain backups according to your needs. Do not attach them to issues or CI artifacts. To test restoration, import into a **separate empty** D1 database and verify counts, sample records, and ownership before changing any production binding. Keep a tested rollback plan for migrations.
+Use a protected private directory, restrictive file permissions and encryption where appropriate. Never attach backups to issues or CI. Keep manual migration backups for at most 30 days unless an incident requires a documented exception; remove them explicitly. No automated backup scheduler is installed. Application exports are user-controlled copies and are not deleted when an account is deleted.
 
-Cloudflare D1 also offers point-in-time recovery (Time Travel), subject to plan-specific retention. Follow the current [Time Travel documentation](https://developers.cloudflare.com/d1/reference/time-travel/) and [Wrangler D1 commands](https://developers.cloudflare.com/workers/wrangler/commands/#d1). Restoring a live database can replace recent records; choose the intended recovery point deliberately.
+Test restoration into a **separate empty database** before changing a production binding. Compare owner and entry counts. Restoring an older database can restore deleted records and old credential hashes: invalidate restored sessions, reconcile deletions, and handle recovered credentials deliberately before reopening access. Do not blindly restore a backup over a live database.
 
-## Capacity and operations
+D1 Time Travel retains recovery points according to the plan (7 days Free, 30 days Paid at this release). Consult [Time Travel](https://developers.cloudflare.com/d1/reference/time-travel/) and [Wrangler D1 commands](https://developers.cloudflare.com/workers/wrangler/commands/#d1). Backups and recovery points can outlive deletion from the active database.
 
-According to the [D1 limits](https://developers.cloudflare.com/d1/platform/limits/), database size, total storage, query quotas, and retention depend on the Cloudflare plan. At implementation time, database limits are 500 MB on Free and 10 GB on Paid, and a single row is limited to 2,000,000 bytes. Verify current limits in your account before choosing capacity or cost assumptions.
+## Free pilot and capacity
 
-The app caps daily JSON requests at 256 KiB. Summaries omit long notes. Exports stream 50 rows at a time and accept a maximum date span of 1,830 days (1,831 dates); this bounds D1 queries per request. Chromium’s file-save API can stream directly to disk; other browsers buffer at most 64 MiB and ask you to use a smaller range if exceeded. Avoid concurrent edits during an export because batches are not a transactionally frozen snapshot.
+There is no application-imposed user-count cap or subscription fee. Cloudflare infrastructure has quotas; no paid upgrade is performed by the application or local setup.
 
-For materially larger archives, plan an R2 tier and metadata/index migration; this release does not implement it. Monitor D1 database growth and read/write usage. Text search is a substring scan within an owner/date range. Add indexes or full-text search in response to measured usage.
+- [Workers Free](https://developers.cloudflare.com/workers/platform/limits/): 100,000 dynamic requests/day and 10 ms CPU per invocation. Static assets have separate accounting.
+- [D1 Free](https://developers.cloudflare.com/d1/platform/pricing/): 5 million rows read/day, 100,000 rows written/day and 5 GB total storage. The [per-database limit](https://developers.cloudflare.com/d1/platform/limits/) is 500 MB on Free.
+- [SQLite Durable Objects Free](https://developers.cloudflare.com/durable-objects/platform/pricing/): 100,000 requests/day and 13,000 GB-s/day, with storage operation quotas. Password hashing runs here because the [default CPU allowance](https://developers.cloudflare.com/durable-objects/platform/limits/) is 30 seconds, rather than the Worker's 10 ms.
 
-No backup schedule, production resources, billing changes, or custom domain are provisioned merely by cloning or running local development. The public GitHub Actions workflow only validates source with synthetic test data.
+These are provider limits at this release, not app-level promises; verify current account usage and pricing. Quota exhaustion can prevent sign-in or saving data. The pilot uses one AuthService instance and a persistent ten-minute abuse limiter (30 credential requests/IP; 10 login/recovery attempts/email). Monitor traffic, database growth, rate limits and errors before widening adoption. A public signup endpoint can consume capacity even without a user-count cap.
+
+Daily JSON is limited to 256 KiB, notes to 50,000 characters, and days to 20 training sessions. Exports stream batches of 50 and accept 1,831 dates; non-streaming browsers have a 64 MiB download buffer cap. Avoid concurrent edits during export because batches are not a snapshot. R2 archives, attachments, shared journals, email verification/delivery and MFA are not implemented.

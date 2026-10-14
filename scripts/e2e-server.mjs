@@ -1,7 +1,12 @@
 import { spawnSync, spawn } from 'node:child_process';
+import { rmSync } from 'node:fs';
+const strict = process.argv.includes('--accounts');
+const directory = strict ? '.wrangler/e2e-accounts' : '.wrangler/e2e';
+// These isolated synthetic test stores are never used by local development or production.
+rmSync(directory, { recursive: true, force: true });
 const migration = spawnSync(
   'npx',
-  ['wrangler', 'd1', 'migrations', 'apply', 'DB', '--local', '--persist-to', '.wrangler/e2e'],
+  ['wrangler', 'd1', 'migrations', 'apply', 'DB', '--local', '--persist-to', directory],
   { stdio: 'inherit' },
 );
 if (migration.status !== 0) process.exit(migration.status ?? 1);
@@ -16,11 +21,11 @@ const server = spawn(
     '--ip',
     '127.0.0.1',
     '--port',
-    '8788',
+    strict ? '8789' : '8788',
     '--persist-to',
-    '.wrangler/e2e',
+    directory,
     '--var',
-    'LOCAL_DEV:true',
+    strict ? 'LOCAL_DEV:false' : 'LOCAL_DEV:true',
   ],
   { stdio: 'inherit' },
 );

@@ -18,7 +18,14 @@ function check(contents: string) {
 const configured = {
   d1_databases: [{ binding: 'DB', database_id: '11111111-2222-3333-4444-555555555555' }],
   routes: [{ pattern: 'teddmhen.piotrzmudadev.com', custom_domain: true }],
-  vars: { ACCESS_TEAM_DOMAIN: 'example.cloudflareaccess.com', ACCESS_AUD: 'test-audience' },
+  vars: {
+    APP_ORIGIN: 'https://teddmhen.piotrzmudadev.com',
+    ACCESS_TEAM_DOMAIN: 'example.cloudflareaccess.com',
+    ACCESS_AUD: 'test-audience',
+  },
+  compatibility_flags: ['nodejs_compat'],
+  durable_objects: { bindings: [{ name: 'AUTH', class_name: 'AuthService' }] },
+  migrations: [{ tag: 'v1-auth', new_sqlite_classes: ['AuthService'] }],
   workers_dev: false,
   preview_urls: false,
 };
@@ -37,7 +44,7 @@ describe('Deployment configuration gate', () => {
     expect(result.stderr).toContain('Invalid Wrangler configuration');
   });
 
-  it('still blocks deployment until the database and Access are configured', () => {
+  it('blocks deployment until the database and application origin are configured', () => {
     const result = check(
       JSON.stringify({
         ...configured,
@@ -47,7 +54,21 @@ describe('Deployment configuration gate', () => {
     );
     expect(result.status).toBe(1);
     expect(result.stderr).toContain('Set the database_id');
-    expect(result.stderr).toContain('Configure ACCESS_TEAM_DOMAIN and ACCESS_AUD');
+    expect(result.stderr).toContain('Set APP_ORIGIN');
+  });
+  it('rejects missing account runtime configuration', () => {
+    const result = check(
+      JSON.stringify({
+        ...configured,
+        durable_objects: {},
+        migrations: [],
+        compatibility_flags: [],
+      }),
+    );
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain('Bind AUTH');
+    expect(result.stderr).toContain('SQLite AuthService');
+    expect(result.stderr).toContain('nodejs_compat');
   });
 
   it('rejects local authentication bypass and alternate production endpoints', () => {

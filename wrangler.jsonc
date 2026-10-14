@@ -2,10 +2,13 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "teddmhen",
   "account_id": "5bc39a497fcb8a2a7226ef898e94d3e3",
-  "main": "worker/index.ts",
+  "main": "worker/entry.ts",
+  "compatibility_flags": ["nodejs_compat"],
   "compatibility_date": "2026-10-01",
   "workers_dev": false,
   "preview_urls": false,
+  "durable_objects": { "bindings": [{ "name": "AUTH", "class_name": "AuthService" }] },
+  "migrations": [{ "tag": "v1-auth", "new_sqlite_classes": ["AuthService"] }],
   "routes": [{ "pattern": "teddmhen.piotrzmudadev.com", "custom_domain": true }],
   "assets": {
     "directory": "./dist",
@@ -22,6 +25,7 @@
     },
   ],
   "vars": {
+    "APP_ORIGIN": "https://teddmhen.piotrzmudadev.com",
     "ACCESS_TEAM_DOMAIN": "little-mud-42b2.cloudflareaccess.com",
     "ACCESS_AUD": "54a592b763a9a03d21dfa1d7b35c960a9a97c3da439e5fd80892f74f34dd9f42",
   },

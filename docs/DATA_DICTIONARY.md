@@ -73,3 +73,11 @@ Derived training time sums duration only for explicitly recorded training/rest d
 `schemaVersion=1` identifies field semantics. `revision` starts at 1 and increases on successful edits. `createdAt` and `updatedAt` use UTC timestamps. These fields support reproducibility and conflict detection; this version does not retain previous record revisions as an audit history.
 
 Export field selection never removes required provenance. Including HRV without method/source may make it uninterpretable; retain those context fields. Excluding the written-context group also removes nested workout notes. JSON and NDJSON preserve nulls and nested data; CSV requires separate dictionary context.
+
+## Account and local preference data
+
+Account data is separate from the journal export schema. `auth_accounts` contains the internal user ID, normalized unverified email identifier, salted versioned password hash, recovery-code digest, credential version and creation timestamp. `auth_sessions` contains the session-token digest, user ID, credential version and expiry timestamp. Raw passwords, session tokens and recovery codes are not stored in D1. Legacy migration reservations associate existing emails with their prior owner IDs; they are removed when claimed.
+
+The AuthService Durable Object stores hashed IP/email limiter keys, attempt counts and expiry instants for ten-minute windows. Expired keys are removed on later authentication requests. These are operational abuse controls and are never part of journal exports.
+
+Appearance mode and optional approximate device coordinates (two decimal places, with a capture timestamp) are browser-local preferences, not health observations. The notice acknowledgement is also browser-local. Neither enters D1, analysis, or exports. See the application's Privacy & data page for cookie lifetimes and retention.

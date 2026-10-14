@@ -7,10 +7,18 @@ export default defineConfig({
   reporter: 'list',
   use: { baseURL: 'http://127.0.0.1:8788', trace: 'retain-on-failure' },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
-  webServer: {
-    command: 'npm run build && node scripts/e2e-server.mjs',
-    url: 'http://127.0.0.1:8788/api/health',
-    timeout: 120000,
-    reuseExistingServer: false,
-  },
+  webServer: [
+    {
+      command: 'npm run build && node scripts/e2e-server.mjs',
+      url: 'http://127.0.0.1:8788/api/health',
+      timeout: 120000,
+      reuseExistingServer: false,
+    },
+    {
+      command: 'node scripts/e2e-server.mjs --accounts',
+      url: 'http://127.0.0.1:8789/api/health',
+      timeout: 120000,
+      reuseExistingServer: false,
+    },
+  ],
 });
