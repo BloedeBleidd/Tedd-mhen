@@ -20,13 +20,19 @@ npx wrangler whoami
 
 Use your local authenticated session or scoped deployment credentials. Never put a token in source, chat, a shell command argument, or a public issue. For CI later, use protected secrets and the minimum Worker/D1 permissions needed. This repository intentionally does not auto-deploy from pull requests.
 
+Wrangler OAuth does not include Access administration permissions. If Access is not enabled, complete the [Zero Trust onboarding](https://developers.cloudflare.com/cloudflare-one/setup/) in the account dashboard first, selecting the intended plan and team name. Cloudflare may require payment details even for its Free plan.
+
+To configure Access through the API, use a separate account-scoped API token with `Access: Apps and Policies Edit` and `Access: Organizations, Identity Providers, and Groups Edit`. Limit it to the deployment account. An ignored local `.env.cloudflare` file can hold `CLOUDFLARE_API_TOKEN=...` while provisioning; it is not loaded by the application or committed. Remove the file and revoke the temporary token after provisioning. Alternatively, configure the application in the dashboard as described below without issuing an additional API token.
+
 ## 2. Create and bind the database
 
 ```sh
 npx wrangler d1 create teddmhen
 ```
 
-Copy the returned database UUID into `d1_databases[0].database_id` in `wrangler.jsonc`, replacing the zero placeholder. The binding name must remain `DB`. Select the appropriate account explicitly if your credentials have access to multiple accounts. Account and database IDs are identifiers, not authentication tokens.
+For a new installation, copy the returned database UUID into `d1_databases[0].database_id` in `wrangler.jsonc`. The binding name must remain `DB`. Set `account_id` to the intended account explicitly if your credentials have access to multiple accounts. Account and database IDs are identifiers, not authentication tokens.
+
+The owner's production database `teddmhen` has already been created in Cloudflare's EEUR region and is bound in this repository's configuration. Do not create another database when continuing this deployment. A fork must use its own account, database, domain, and Access configuration.
 
 ## 3. Configure private access before serving real data
 

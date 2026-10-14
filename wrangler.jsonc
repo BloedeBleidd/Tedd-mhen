@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "teddmhen",
+  "account_id": "5bc39a497fcb8a2a7226ef898e94d3e3",
   "main": "worker/index.ts",
   "compatibility_date": "2026-10-01",
   "workers_dev": false,
@@ -16,7 +17,7 @@
     {
       "binding": "DB",
       "database_name": "teddmhen",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "cf0ed80a-c36b-42de-ab9b-b1e7dac8008b",
       "migrations_dir": "migrations",
     },
   ],
