@@ -1,6 +1,7 @@
 import { ArrowUpRight, CircleHelp, LoaderCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { ReactNode } from 'react';
+import { useReveal } from '../lib/motion';
 export const prettyDate = (date: string, options?: Intl.DateTimeFormatOptions) =>
   new Date(`${date}T12:00:00`).toLocaleDateString(
     'en-GB',
@@ -43,8 +44,9 @@ export function Panel({
   children: ReactNode;
   className?: string;
 }) {
+  const reveal = useReveal<HTMLElement>();
   return (
-    <section className={`panel ${className}`}>
+    <section ref={reveal} className={`panel ${className}`}>
       {title && (
         <div className="panel-heading">
           <div>

@@ -102,3 +102,5 @@ All credential endpoints accept same-origin JSON POSTs with `X-Teddmhen-Request:
 ## Browser appearance and privacy
 
 The `AppearanceProvider` resolves manual Light/Dark or Auto. With saved approximate coordinates, SunCalc computes sunrise/sunset locally, including polar day/night. Auto without coordinates follows `prefers-color-scheme`. Changes apply before paint, at the next transition, and on focus/visibility changes. Browser-only preferences use `teddmhen.appearance.v1`; the necessary-cookie notice acknowledgement uses `teddmhen.privacy-notice.v1`. Storage denial leaves the application usable for the current page session. Geolocation is called only from an explicit button action; no coordinates enter API requests or D1.
+
+Shared interface motion uses viewport-triggered panel and SVG reveals, respects live reduced-motion preferences, and preserves statistical coordinates. See [Interface and motion](INTERFACE.md) for timing, accessibility and lifecycle contracts.

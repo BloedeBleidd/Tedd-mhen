@@ -2405,8 +2405,8 @@ tbody tr:hover {
   *,
   *:before,
   *:after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
+    animation: none !important;
+    transition: none !important;
     scroll-behavior: auto !important;
   }
 }
@@ -2997,4 +2997,151 @@ input[type='radio'] {
   max-height: 360px;
   overflow: auto;
   margin: 20px 0;
+}
+
+/* Motion reveals final content; measurement positions and displayed numbers stay unchanged. */
+@keyframes surface-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes content-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes bar-enter {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  :root {
+    --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --motion-quick: 160ms;
+  }
+  .page-heading,
+  .auth-card,
+  .empty-state,
+  .insight-card,
+  .workout-editor {
+    animation: surface-enter 420ms var(--motion-ease) both;
+  }
+  .stat-card,
+  .analysis-stats > div {
+    animation: surface-enter 420ms var(--motion-ease) backwards;
+  }
+  .stat-card:nth-child(2),
+  .analysis-stats > div:nth-child(2) {
+    animation-delay: 45ms;
+  }
+  .stat-card:nth-child(3),
+  .analysis-stats > div:nth-child(3) {
+    animation-delay: 90ms;
+  }
+  .stat-card:nth-child(4) {
+    animation-delay: 135ms;
+  }
+  .notice,
+  .saved-state,
+  .forecast-result,
+  .label-chips button,
+  .demo-banner,
+  .privacy-notice,
+  details[open] > :not(summary) {
+    animation: content-fade 240ms ease-out;
+  }
+  .appearance-dialog[open] {
+    animation: surface-enter 280ms var(--motion-ease);
+  }
+  .appearance-dialog[open]::backdrop {
+    animation: content-fade 220ms ease-out;
+  }
+  .association-bar i {
+    transform-origin: left center;
+    animation: bar-enter 600ms var(--motion-ease);
+    transition: width 240ms var(--motion-ease);
+  }
+  .button,
+  .stat-card,
+  .calendar-day,
+  .theme-option,
+  .icon-button {
+    transition:
+      transform var(--motion-quick) var(--motion-ease),
+      background-color 180ms ease,
+      border-color 180ms ease,
+      box-shadow 180ms ease;
+  }
+  .sidebar nav a,
+  .analysis-tabs a,
+  .segmented button,
+  .association-row,
+  .recent-entry,
+  .feature-choice,
+  .scale,
+  .field input,
+  .field select,
+  .field textarea {
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease;
+  }
+  .text-link svg,
+  .sidebar nav a svg,
+  .button svg {
+    transition: transform var(--motion-quick) var(--motion-ease);
+  }
+  .button:active:not(:disabled),
+  .stat-card:active {
+    transform: translateY(1px);
+  }
+  .theme-option:active,
+  .calendar-day:active {
+    transform: scale(0.97);
+  }
+  .sidebar {
+    transition-timing-function: var(--motion-ease);
+  }
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .button:hover:not(:disabled),
+  .calendar-day:hover {
+    transform: translateY(-1px);
+  }
+  .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 16px #173d3310;
+  }
+  .theme-option:hover {
+    transform: translateY(-2px);
+  }
+  .text-link:hover svg,
+  .sidebar nav a:hover svg {
+    transform: translateX(2px);
+  }
+  .association-row:hover,
+  .recent-entry:hover {
+    background: var(--surface-subtle);
+  }
+}
+@media print {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
 }

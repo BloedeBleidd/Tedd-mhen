@@ -8,6 +8,7 @@ import {
   YAxis,
 } from 'recharts';
 import type { Pair } from '../../shared/relationships';
+import { useReveal, useReducedMotion } from '../lib/motion';
 export function RelationshipChart({
   pairs,
   xLabel,
@@ -17,8 +18,11 @@ export function RelationshipChart({
   xLabel: string;
   yLabel: string;
 }) {
+  const reveal = useReveal<HTMLDivElement>('chart', JSON.stringify([pairs, xLabel, yLabel]));
+  const reduced = useReducedMotion();
   return (
     <div
+      ref={reveal}
       className="chart"
       role="img"
       aria-label={`${xLabel} against ${yLabel}; each point is an aligned pair of days.`}
@@ -48,6 +52,9 @@ export function RelationshipChart({
             tick={{ fill: 'var(--muted)', fontSize: 11 }}
           />
           <Tooltip
+            isAnimationActive={!reduced}
+            animationDuration={120}
+            animationEasing="ease-out"
             content={({ active, payload }) => {
               const p = payload?.[0]?.payload as Pair | undefined;
               return active && p ? (
@@ -66,6 +73,7 @@ export function RelationshipChart({
             }}
           />
           <Scatter
+            className="chart-series chart-points"
             data={pairs}
             fill="var(--chart-mean)"
             fillOpacity={0.65}

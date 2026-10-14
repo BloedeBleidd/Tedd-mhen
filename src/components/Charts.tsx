@@ -12,6 +12,7 @@ import {
 import { dayNumber } from '../../shared/schema';
 import type { Prediction } from '../../shared/bayes';
 import { prettyDate } from './ui';
+import { useReveal, useReducedMotion } from '../lib/motion';
 export function TrendChart({
   data,
   forecastStart,
@@ -23,8 +24,14 @@ export function TrendChart({
   unit: string;
   simple?: boolean;
 }) {
+  const reveal = useReveal<HTMLDivElement>(
+    'chart',
+    JSON.stringify([data, unit, simple, forecastStart]),
+  );
+  const reduced = useReducedMotion();
   return (
     <div
+      ref={reveal}
       className="chart"
       role="img"
       aria-label={`Time series in ${unit}. ${simple ? 'Recorded values.' : 'Observed values, posterior mean, 95% credible interval, and 95% predictive interval.'}`}
@@ -57,6 +64,9 @@ export function TrendChart({
             tickFormatter={(v) => Number(v.toFixed(1)).toString()}
           />
           <Tooltip
+            isAnimationActive={!reduced}
+            animationDuration={120}
+            animationEasing="ease-out"
             labelFormatter={(value) =>
               prettyDate(new Date(Number(value) * 86400000).toISOString().slice(0, 10), {
                 day: 'numeric',
@@ -82,6 +92,7 @@ export function TrendChart({
           {!simple && (
             <>
               <Area
+                className="chart-series chart-band"
                 dataKey="predictive"
                 name="95% predictive interval"
                 stroke="none"
@@ -89,6 +100,7 @@ export function TrendChart({
                 isAnimationActive={false}
               />
               <Area
+                className="chart-series chart-band"
                 dataKey="credible"
                 name="95% credible interval"
                 stroke="none"
@@ -97,6 +109,7 @@ export function TrendChart({
                 isAnimationActive={false}
               />
               <Line
+                className="chart-series chart-line"
                 type="linear"
                 dataKey="mean"
                 name="Posterior mean"
@@ -108,6 +121,7 @@ export function TrendChart({
             </>
           )}
           <Line
+            className={`chart-series ${simple ? 'chart-line' : 'chart-points'}`}
             type="linear"
             dataKey="observed"
             name="Observed"

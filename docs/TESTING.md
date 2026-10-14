@@ -13,6 +13,7 @@ Every algorithmic change requires meaningful automated tests. Tests use syntheti
 | Import/export            | Full-format round trips, selective merge, notes preservation, Unicode/CSV quoting, duplicate dates, invalid schemas, unknown keys, formula mitigation |
 | API and administration   | Real SQLite queries, owner isolation, revision conflicts, body/selection bounds, account-switch guard, explicit admin grants and denied forged roles  |
 | Accounts                 | Hash verification, session expiry/versioning, concurrent one-use recovery, legacy-ID migration, throttling and account deletion                       |
+| Motion                   | Viewport-triggered reveals, delayed SVG layers, cleanup, fixed chart geometry, live reduced-motion cancellation and missing browser APIs              |
 | Appearance               | Sunrise/sunset boundaries, polar conditions, system/manual fallback, denied permission/storage                                                        |
 
 Vitest runs the mathematical and SQLite-backed API suites. Playwright runs the compiled application against local Wrangler/D1 and the actual AuthService Durable Object, including a strict authentication server. It covers registration/recovery, journal CRUD, selective export/import, labels, analysis Web Workers, model downloads, themes, mobile layout and public author information.

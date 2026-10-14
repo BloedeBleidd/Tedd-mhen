@@ -41,6 +41,7 @@ npm run test:e2e
 | Formats, round trips and conflict handling      | [Import and export](docs/IMPORT_EXPORT.md)                |
 | Account roles and aggregate statistics          | [Administration](docs/ADMINISTRATION.md)                  |
 | Components and API contracts                    | [Architecture](docs/ARCHITECTURE.md)                      |
+| Appearance, motion and accessibility            | [Interface](docs/INTERFACE.md)                            |
 | Cloudflare deployment, quotas and recovery      | [Operations](docs/DEPLOYMENT.md)                          |
 | Algorithm verification and test boundaries      | [Testing](docs/TESTING.md)                                |
 | Security and contribution rules                 | [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md) |
