@@ -22,7 +22,7 @@
     },
   ],
   "vars": {
-    "ACCESS_TEAM_DOMAIN": "",
-    "ACCESS_AUD": "",
+    "ACCESS_TEAM_DOMAIN": "little-mud-42b2.cloudflareaccess.com",
+    "ACCESS_AUD": "54a592b763a9a03d21dfa1d7b35c960a9a97c3da439e5fd80892f74f34dd9f42",
   },
 }

@@ -4,7 +4,7 @@ A personal training and recovery journal with structured health metrics, Bayesia
 
 Tedd’mhen helps you record how you train, sleep, and feel, then explore your own longitudinal data. Subjective experiences use explicitly anchored numeric scales; free-text notes provide optional context. The application does not call an LLM or transmit your records to an AI provider.
 
-**Status:** functional v0.1 application with automated validation. Deployment requires your own Cloudflare configuration. The statistical model is exploratory; computational tests do not establish clinical validity or forecasting calibration.
+**Status:** functional v0.1 application, deployed to the owner's Cloudflare account with automated validation. The statistical model is exploratory; computational tests do not establish clinical validity or forecasting calibration.
 
 ![Tedd’mhen overview with synthetic demonstration data](docs/images/overview.png)
 
@@ -50,7 +50,7 @@ npm run test:e2e
 
 Follow [the deployment guide](docs/DEPLOYMENT.md) to provision D1, protect a custom domain with Cloudflare Access, configure the Worker, apply migrations, and deploy. No Cloudflare credentials are stored in source. Production API access fails closed until Access configuration is present and a valid token is supplied.
 
-Configured deployment target: `teddmhen.piotrzmudadev.com`. Hosting and Access must be provisioned on the owner's account before that address serves the application.
+Owner deployment: [teddmhen.piotrzmudadev.com](https://teddmhen.piotrzmudadev.com), protected by Cloudflare Access. Sign in with the owner's allowed Cloudflare account. This is a private installation, not a public demo; use the local synthetic demo to explore the application. Forks require their own Cloudflare resources and Access configuration.
 
 ## Data and analysis
 

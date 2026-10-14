@@ -2,7 +2,11 @@
 
 The deployment consists of one Worker, its static assets, a D1 database, a custom domain, and a Cloudflare Access application. Source is public; records stay in your account. No Sites hosting or external application database is required.
 
-The configured production hostname is `teddmhen.piotrzmudadev.com`, under the owner's `piotrzmudadev.com` zone. The route in source is the deployment target; it does not mean DNS, Access, or the Worker has already been provisioned.
+The production hostname is `teddmhen.piotrzmudadev.com`, under the owner's `piotrzmudadev.com` zone. The Worker, custom domain, D1 database, and Access application were provisioned on the owner's account on October 14, 2026.
+
+The production Access application covers every path and allows only the owner's email through the existing Cloudflare identity provider, with a 24-hour session. It has no Bypass or Everyone policy. Both `workers.dev` and deployment preview URLs are disabled. The team domain and application audience in `wrangler.jsonc` identify the application; they are not credentials.
+
+Deployment verification confirmed HTTPS redirects to Access for signed-out requests to `/`, `/journal`, `/api/entries`, and `/api/health`, the correct D1 binding, and the absence of `LOCAL_DEV` in the deployed Worker. Local validation passed 31 unit/API/configuration tests and three browser tests, plus formatting, TypeScript, and the production build. Completing the signed-in production smoke test below requires the owner's browser session; local browser tests do not establish that result.
 
 Development and test commands explicitly keep Wrangler's upstream hostname on loopback. Otherwise Wrangler can rewrite local request URLs to the configured production hostname, correctly causing the local authentication bypass to refuse those requests.
 
@@ -32,11 +36,11 @@ npx wrangler d1 create teddmhen
 
 For a new installation, copy the returned database UUID into `d1_databases[0].database_id` in `wrangler.jsonc`. The binding name must remain `DB`. Set `account_id` to the intended account explicitly if your credentials have access to multiple accounts. Account and database IDs are identifiers, not authentication tokens.
 
-The owner's production database `teddmhen` has already been created in Cloudflare's EEUR region and is bound in this repository's configuration. Do not create another database when continuing this deployment. A fork must use its own account, database, domain, and Access configuration.
+The owner's production database `teddmhen` has already been created in Cloudflare's EEUR region, migrated, and bound in this repository's configuration. Do not create another database when maintaining this deployment. A fork must use its own account, database, domain, and Access configuration.
 
 ## 3. Configure private access before serving real data
 
-In Cloudflare Zero Trust, create a self-hosted Access application for `teddmhen.piotrzmudadev.com`, covering all paths. Add an Allow policy restricted to your email. Configure an identity provider or email one-time PIN. Avoid a Bypass policy or an Everyone allow rule.
+For a new installation, create a self-hosted Access application in Cloudflare Zero Trust covering every path on your hostname. Add an Allow policy restricted to your email. Configure an identity provider or email one-time PIN. Avoid a Bypass policy or an Everyone allow rule. The owner's installation already uses the existing Cloudflare identity provider; it does not require a separate application password or one-time PIN provider.
 
 Copy the team domain and Application Audience (AUD) into `vars`:
 
