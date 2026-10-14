@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "concurrently -k -n api,web \"npm run dev:api\" \"vite --host 127.0.0.1\"",
-    "dev:api": "wrangler dev --ip 127.0.0.1 --port 8787",
+    "dev:api": "wrangler dev --local --ip 127.0.0.1 --local-upstream 127.0.0.1 --port 8787",
     "setup": "node scripts/setup.mjs",
     "build": "tsc --noEmit && vite build",
     "typecheck": "tsc --noEmit",
@@ -17,7 +17,7 @@
     "db:migrate": "wrangler d1 migrations apply DB --local",
     "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
     "deploy": "npm run build && node scripts/check-deploy.mjs && wrangler deploy",
-    "preview": "wrangler dev --ip 127.0.0.1 --port 8787",
+    "preview": "wrangler dev --local --ip 127.0.0.1 --local-upstream 127.0.0.1 --port 8787",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

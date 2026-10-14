@@ -4,6 +4,8 @@ The deployment consists of one Worker, its static assets, a D1 database, a custo
 
 The configured production hostname is `teddmhen.piotrzmudadev.com`, under the owner's `piotrzmudadev.com` zone. The route in source is the deployment target; it does not mean DNS, Access, or the Worker has already been provisioned.
 
+Development and test commands explicitly keep Wrangler's upstream hostname on loopback. Otherwise Wrangler can rewrite local request URLs to the configured production hostname, correctly causing the local authentication bypass to refuse those requests.
+
 ## 1. Prerequisites
 
 - Node.js 22.12+ or a supported newer LTS, npm, and this repository.

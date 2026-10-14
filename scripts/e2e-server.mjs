@@ -10,6 +10,9 @@ const server = spawn(
   [
     'wrangler',
     'dev',
+    '--local',
+    '--local-upstream',
+    '127.0.0.1',
     '--ip',
     '127.0.0.1',
     '--port',
