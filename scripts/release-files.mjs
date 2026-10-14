@@ -68,6 +68,7 @@ export function releaseConfig(config) {
   );
   result.main = 'worker.js';
   result.no_bundle = true;
+  result.find_additional_modules = false;
   result.upload_source_maps = false;
   result.assets.directory = './dist';
   for (const database of result.d1_databases) database.migrations_dir = 'migrations';

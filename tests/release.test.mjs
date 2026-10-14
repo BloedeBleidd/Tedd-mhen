@@ -118,6 +118,7 @@ describe('Release provenance and file boundary', () => {
     const output = releaseConfig(config);
     expect(output.main).toBe('worker.js');
     expect(output.no_bundle).toBe(true);
+    expect(output.find_additional_modules).toBe(false);
     expect(output.upload_source_maps).toBe(false);
     for (const key of [
       'durable_objects',
