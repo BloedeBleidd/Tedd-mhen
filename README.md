@@ -50,6 +50,8 @@ npm run test:e2e
 
 Follow [the deployment guide](docs/DEPLOYMENT.md) to provision D1, protect a custom domain with Cloudflare Access, configure the Worker, apply migrations, and deploy. No Cloudflare credentials are stored in source. Production API access fails closed until Access configuration is present and a valid token is supplied.
 
+Configured deployment target: `teddmhen.piotrzmudadev.com`. Hosting and Access must be provisioned on the owner's account before that address serves the application.
+
 ## Data and analysis
 
 Read the [data dictionary](docs/DATA_DICTIONARY.md), [statistical methodology](docs/METHODOLOGY.md), and [architecture notes](docs/ARCHITECTURE.md).

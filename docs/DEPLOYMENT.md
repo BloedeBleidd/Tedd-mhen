@@ -2,6 +2,8 @@
 
 The deployment consists of one Worker, its static assets, a D1 database, a custom domain, and a Cloudflare Access application. Source is public; records stay in your account. No Sites hosting or external application database is required.
 
+The configured production hostname is `teddmhen.piotrzmudadev.com`, under the owner's `piotrzmudadev.com` zone. The route in source is the deployment target; it does not mean DNS, Access, or the Worker has already been provisioned.
+
 ## 1. Prerequisites
 
 - Node.js 22.12+ or a supported newer LTS, npm, and this repository.
@@ -26,7 +28,7 @@ Copy the returned database UUID into `d1_databases[0].database_id` in `wrangler.
 
 ## 3. Configure private access before serving real data
 
-In Cloudflare Zero Trust, create a self-hosted Access application for your complete hostname, such as `journal.example.com`, covering all paths. Add an Allow policy restricted to your email. Configure an identity provider or email one-time PIN. Avoid a Bypass policy or an Everyone allow rule.
+In Cloudflare Zero Trust, create a self-hosted Access application for `teddmhen.piotrzmudadev.com`, covering all paths. Add an Allow policy restricted to your email. Configure an identity provider or email one-time PIN. Avoid a Bypass policy or an Everyone allow rule.
 
 Copy the team domain and Application Audience (AUD) into `vars`:
 
@@ -37,11 +39,11 @@ Copy the team domain and Application Audience (AUD) into `vars`:
 }
 ```
 
-Add the hostname as a Worker custom domain:
+The hostname is already declared as a Worker custom domain in `wrangler.jsonc`:
 
 ```json
 "routes": [
-  { "pattern": "journal.example.com", "custom_domain": true }
+  { "pattern": "teddmhen.piotrzmudadev.com", "custom_domain": true }
 ]
 ```
 

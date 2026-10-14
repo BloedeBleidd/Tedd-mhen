@@ -1,5 +1,20 @@
 import { readFile } from 'node:fs/promises';
-const config = JSON.parse(await readFile('wrangler.jsonc', 'utf8'));
+import { parse, printParseErrorCode } from 'jsonc-parser';
+const parseErrors = [];
+const config = parse(await readFile(process.argv[2] || 'wrangler.jsonc', 'utf8'), parseErrors, {
+  allowTrailingComma: true,
+});
+if (parseErrors.length || !config || typeof config !== 'object' || Array.isArray(config)) {
+  console.error(
+    'Invalid Wrangler configuration: ' +
+      (parseErrors.length
+        ? parseErrors
+            .map((error) => `${printParseErrorCode(error.error)} at offset ${error.offset}`)
+            .join(', ')
+        : 'expected an object.'),
+  );
+  process.exit(1);
+}
 const issues = [];
 const databaseId = config.d1_databases?.find((binding) => binding.binding === 'DB')?.database_id;
 if (
