@@ -8,6 +8,7 @@
 - `export.test.ts`: exact field selection, narrative exclusion, nested serialization, CSV escaping and formula mitigation.
 - `auth.test.ts`: fail-closed defaults, signed JWT verification, audience/issuer/expiry enforcement, signature tampering, local-mode restrictions.
 - `deployment.test.ts`: JSONC configuration parsing and deployment guards for database, origin, AuthService, local bypass, and alternate endpoints.
+- `release.test.mjs`: package file boundary, symlink rejection, known SHA-256 digests, version/commit/tag constraints and production configuration preservation.
 - `accounts.test.ts`: SQLite-backed credential transactions, legacy identity reservation/claim, concurrent recovery and replay, credential rotation, expiry and owner-only deletion.
 - `passwords.test.ts`: salted password hashes, password verification, recovery entropy format and session cookie attributes.
 - `motion.test.ts`: viewport/DOM readiness, animation cancellation, focus/printing, one-time effects and unavailable-API fallbacks.

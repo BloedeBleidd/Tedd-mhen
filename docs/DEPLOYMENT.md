@@ -2,6 +2,8 @@
 
 The deployment uses a Worker with static assets, D1, one SQLite-backed AuthService Durable Object, and a custom domain. The owner's hostname is `teddmhen.piotrzmudadev.com`. Source is public; accounts and journals live in the owner's Cloudflare account. No external auth database or mail service is used.
 
+Deploy from this source checkout or use the compiled Cloudflare archive from [Releases](RELEASES.md). The archive includes the Worker, browser assets, migrations and its own deployment instructions. GitHub Pages serves documentation only.
+
 ## Prerequisites and configuration
 
 Use Node.js 22.12+ or a supported newer LTS, npm, and an authenticated Cloudflare account:

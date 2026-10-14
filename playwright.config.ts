@@ -9,7 +9,9 @@ export default defineConfig({
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: [
     {
-      command: 'npm run build && node scripts/e2e-server.mjs',
+      command: process.env.TEDDMHEN_RELEASE
+        ? 'node scripts/e2e-server.mjs'
+        : 'npm run build && node scripts/e2e-server.mjs',
       url: 'http://127.0.0.1:8788/api/health',
       timeout: 120000,
       reuseExistingServer: false,

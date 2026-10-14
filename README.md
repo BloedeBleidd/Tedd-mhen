@@ -2,7 +2,7 @@
 
 A personal training, sleep and wellbeing journal with structured measurements, exploratory correlations, Bayesian predictions, and portable data.
 
-**[Open Tedd’mhen](https://teddmhen.piotrzmudadev.com)** · by [Piotr Żmuda](https://piotrzmudadev.com)
+**[Open Tedd’mhen](https://teddmhen.piotrzmudadev.com)** · [Documentation](https://bloedeBleidd.github.io/Tedd-mhen/) · [Releases](https://github.com/BloedeBleidd/Tedd-mhen/releases) · by [Piotr Żmuda](https://piotrzmudadev.com)
 
 - Daily numeric scales, symptoms, physiology, training sessions, reusable context labels and optional notes.
 - Filtered journals, selective JSON/NDJSON/CSV/Markdown exports, and reviewed JSON/NDJSON/CSV imports.
@@ -43,6 +43,7 @@ npm run test:e2e
 | Components and API contracts                    | [Architecture](docs/ARCHITECTURE.md)                      |
 | Appearance, motion and accessibility            | [Interface](docs/INTERFACE.md)                            |
 | Cloudflare deployment, quotas and recovery      | [Operations](docs/DEPLOYMENT.md)                          |
+| Minimal release packages and GitHub Pages       | [Releases](docs/RELEASES.md)                              |
 | Algorithm verification and test boundaries      | [Testing](docs/TESTING.md)                                |
 | Security and contribution rules                 | [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md) |
 

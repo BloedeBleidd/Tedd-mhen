@@ -1,0 +1,12 @@
+title: Tedd’mhen
+description: Training, sleep and wellbeing — documentation
+url: https://bloedebleidd.github.io
+baseurl: /Tedd-mhen
+plugins:
+  - jekyll-optional-front-matter
+  - jekyll-relative-links
+defaults:
+  - scope:
+      path: ''
+    values:
+      layout: default

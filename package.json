@@ -17,6 +17,8 @@
     "db:migrate": "wrangler d1 migrations apply DB --local",
     "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
     "deploy": "npm run build && node scripts/check-deploy.mjs && wrangler deploy",
+    "release:build": "node scripts/build-release.mjs",
+    "release:test": "TEDDMHEN_RELEASE=1 playwright test",
     "preview": "wrangler dev --local --ip 127.0.0.1 --local-upstream 127.0.0.1 --port 8787",
     "format": "prettier --write .",
     "format:check": "prettier --check ."

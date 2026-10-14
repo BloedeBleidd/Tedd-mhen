@@ -10,7 +10,7 @@ Each saved day has an owner ID, journal date, timezone, schema version, optimist
 
 The owner’s Cloudflare account hosts the Worker, static application, D1 SQLite database and authentication Durable Object. Public source and static assets contain no journal records. Data APIs derive the owner from a verified application session, never from imported metadata or browser-supplied ownership.
 
-D1 stores journal JSON, account identifiers, salted password hashes, recovery-code hashes and session-token hashes. The authentication Durable Object stores expiring attempt counters keyed by hashed IP/email identifiers. Email is an unverified sign-in identifier. No mail service is connected. See [Security](../SECURITY.md) for authentication, session lifetime and local-only bypass rules.
+D1 stores journal JSON, account identifiers, salted password hashes, recovery-code hashes and session-token hashes. The authentication Durable Object stores expiring attempt counters keyed by hashed IP/email identifiers. Email is an unverified sign-in identifier. No mail service is connected. See [Security](https://github.com/BloedeBleidd/Tedd-mhen/blob/main/SECURITY.md) for authentication, session lifetime and local-only bypass rules.
 
 The database was provisioned in EEUR; this does not establish that all Cloudflare processing is confined to that region. Authorized infrastructure administrators can access data. Storage is not end-to-end encrypted. The application adds no analytics trackers, advertising SDKs, third-party fonts, or LLM integration.
 

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="description" content="{{ site.description | escape }}" />
+    <title>{{ page.title | default: site.description | escape }} · Tedd’mhen</title>
+    <link rel="stylesheet" href="{{ '/assets/style.css' | relative_url }}" />
+  </head>
+  <body>
+    <a class="skip" href="#content">Skip to content</a>
+    <header>
+      <a class="brand" href="{{ '/' | relative_url }}">Tedd’mhen <span>Documentation</span></a>
+      <nav aria-label="Main navigation">
+        <a href="{{ '/' | relative_url }}">Guides</a>
+        <a href="https://teddmhen.piotrzmudadev.com">Application ↗</a>
+        <a href="https://github.com/BloedeBleidd/Tedd-mhen/releases">Releases ↗</a>
+        <a href="https://github.com/BloedeBleidd/Tedd-mhen">Source ↗</a>
+      </nav>
+    </header>
+    <main id="content">{{ content }}</main>
+    <footer>
+      <a href="{{ '/' | relative_url }}">All guides</a>
+      <span
+        >By <a href="https://piotrzmudadev.com">Piotr Żmuda</a> · Documentation for the main
+        branch.</span
+      >
+    </footer>
+  </body>
+</html>
