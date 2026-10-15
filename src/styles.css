@@ -10,6 +10,7 @@
   font-synthesis: none;
   font-weight: 400;
   --green: #214d3e;
+  --on-green: #f3f7e9;
   --deep: #173d33;
   --muted: #64735a;
   --line: #e3e7de;
@@ -2543,6 +2544,7 @@ tbody tr:hover {
   --save-bg: #14201bf5;
   --line: #3a4c3f;
   --green: #bad69c;
+  --on-green: #192a1c;
   --accent-strong: #b2cf91;
   --selection: #3c5638;
   --backdrop: #00000099;
@@ -2849,24 +2851,101 @@ input[type='radio'] {
   }
 }
 
-.analysis-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+.analysis-navigation {
   margin: 0 0 28px;
-  border-bottom: 1px solid var(--line);
-  padding-bottom: 14px;
+  padding: 16px;
+  border: 1px solid var(--accent-strong);
+  border-radius: 12px;
+  background: var(--surface-subtle);
+}
+.analysis-nav-label {
+  margin-bottom: 12px;
+  color: var(--green);
+  font-size: 13px;
+  font-weight: 700;
+}
+.analysis-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
 }
 .analysis-tabs a {
-  padding: 10px 14px;
-  border-radius: 7px;
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) 16px;
+  align-content: start;
+  align-items: center;
+  gap: 8px;
+  min-height: 100px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+}
+.analysis-nav-icon {
+  color: var(--green);
+}
+.analysis-nav-title {
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.35;
+}
+.analysis-nav-indicator {
+  justify-self: end;
+  color: var(--green);
+}
+.analysis-nav-description {
+  grid-column: 2 / -1;
   font-size: 12px;
-  color: var(--muted);
+  line-height: 1.5;
+  color: var(--text-secondary);
 }
 .analysis-tabs a.active {
-  color: var(--text);
-  background: var(--surface-subtle);
-  font-weight: 600;
+  color: var(--on-green);
+  background: var(--green);
+  border-color: var(--green);
+  box-shadow: 0 2px 6px #173d3320;
+}
+.analysis-tabs
+  a.active
+  :is(.analysis-nav-icon, .analysis-nav-indicator, .analysis-nav-description) {
+  color: inherit;
+}
+.analysis-tabs a:focus-visible {
+  outline-offset: 3px;
+}
+@media (hover: hover) {
+  .analysis-tabs a:not(.active):hover {
+    border-color: var(--green);
+    background: var(--selection);
+  }
+}
+@media (max-width: 1100px) {
+  .analysis-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .analysis-navigation {
+    padding: 12px;
+    margin-bottom: 24px;
+  }
+  .analysis-tabs {
+    gap: 8px;
+  }
+  .analysis-tabs a {
+    grid-template-columns: minmax(0, 1fr) 16px;
+    min-height: 88px;
+    padding: 12px;
+  }
+  .analysis-nav-title {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    font-size: 13px;
+  }
+  .analysis-nav-description {
+    display: none;
+  }
 }
 .feature-picker summary {
   cursor: pointer;

@@ -2,6 +2,10 @@
 
 The English interface uses shared color tokens for light/dark appearance, explicit form labels, anchored numeric scales, and visible keyboard focus. Main content has a skip link. Dialogs use native modal focus management. See [Data dictionary](DATA_DICTIONARY.md) for field semantics and [Data lifecycle](DATA_STORAGE.md) for local appearance preferences.
 
+## Analysis navigation
+
+Analysis views appear before the page heading in a distinct bordered panel. Each view has an icon, a descriptive label and a large clickable card. The active card uses a contrasting fill and check mark, with `aria-current="page"`; keyboard focus remains visible. Supporting descriptions are associated with their links for assistive technology. Narrow layouts show all four choices in two columns without horizontal scrolling.
+
 ## Motion contract
 
 Motion communicates appearance, selection and feedback. It never changes a measurement, uncertainty bound, prediction, ranking value or downloaded record.
