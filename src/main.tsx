@@ -1,8 +1,11 @@
 import React from 'react';
+import './i18n';
+import { LanguageProvider } from './lib/language-context';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
 import { ApiProvider } from './lib/api';
 import { App } from './App';
+import { PageError } from './components/PageError';
 import { PublicDemo } from './pages/PublicDemo';
 import './styles.css';
 import { AppearanceProvider } from './lib/appearance-context';
@@ -13,18 +16,15 @@ import {
   readLocal,
   resolveAppearance,
 } from './lib/appearance';
-applyTheme(
-  resolveAppearance(
-    parseAppearance(readLocal(APPEARANCE_KEY)),
-    new Date(),
-    matchMedia('(prefers-color-scheme: dark)').matches,
-  ).theme,
-);
+applyTheme(resolveAppearance(parseAppearance(readLocal(APPEARANCE_KEY)), new Date()).theme);
 const router = createBrowserRouter([
   {
+    errorElement: <PageError />,
     element: (
       <AppearanceProvider>
-        <Outlet />
+        <LanguageProvider>
+          <Outlet />
+        </LanguageProvider>
       </AppearanceProvider>
     ),
     children: [

@@ -1,0 +1,19 @@
+{
+  "search": "Search activities",
+  "activity": "Activity",
+  "all": "All activities",
+  "matches": "Matching activities: {{count}}",
+  "none": "No matches. Your current selection is kept.",
+  "endurance": "Running & endurance",
+  "strength": "Strength & fitness",
+  "cycling": "Cycling",
+  "water": "Water sports",
+  "combat": "Martial arts & combat",
+  "team": "Team sports",
+  "racket": "Racket sports",
+  "outdoors": "Outdoor & adventure",
+  "winter": "Winter sports",
+  "mind_body": "Mobility & mindful movement",
+  "movement": "Dance, gymnastics & balance",
+  "other": "Other"
+}

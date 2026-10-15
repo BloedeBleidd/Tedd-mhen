@@ -41,8 +41,12 @@ async function networkResponse(path: string, options: RequestInit = {}): Promise
       .json()
       .catch(() => ({ error: 'The server returned an unexpected response.' }))) as {
       error?: string;
+      issues?: unknown[];
     };
-    throw new ApiError(body.error || 'Request failed.', response.status);
+    throw new ApiError(
+      body.issues ? JSON.stringify(body.issues) : body.error || 'Request failed.',
+      response.status,
+    );
   }
   return response;
 }

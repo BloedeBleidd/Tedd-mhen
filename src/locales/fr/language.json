@@ -1,0 +1,19 @@
+{
+  "open": "Changer de langue",
+  "title": "Langue",
+  "close": "Fermer les paramètres de langue",
+  "auto": "Auto · position de l’appareil",
+  "automaticStatus": "Langue automatique : {{language}}.",
+  "manualStatus": "Langue choisie : {{language}}. Votre choix prime sur la localisation.",
+  "locationExplanation": "La position n’est demandée qu’après votre clic. Les coordonnées approximatives restent dans ce navigateur et servent aussi au calcul du lever et du coucher du soleil pour le thème automatique. Sans position enregistrée, Auto utilise l’anglais et le thème clair.",
+  "locating": "Localisation en cours…",
+  "useLocation": "Utiliser la position de l’appareil",
+  "updateLocation": "Actualiser la position de l’appareil",
+  "forgetLocation": "Oublier la position enregistrée",
+  "approximation": "La langue est suggérée à partir d’une carte locale des pays. Aux frontières et dans les pays multilingues, ce choix peut être imparfait. Choisissez librement une langue ci-dessus. Actualisez la position en voyage ; aucun suivi en arrière-plan n’est effectué.",
+  "locationUnavailable": "Impossible d’obtenir votre position. Réessayez ou choisissez une langue manuellement.",
+  "locationDenied": "La localisation n’a pas été autorisée. Auto utilise l’anglais et le thème clair ; les choix manuels restent prioritaires.",
+  "storageUnavailable": "Le stockage du navigateur est indisponible. Les changements s’appliquent uniquement à cet onglet.",
+  "loadFailed": "Impossible de charger cette langue. La langue actuelle reste active. Vérifiez la connexion et réessayez.",
+  "retry": "Réessayer le chargement"
+}

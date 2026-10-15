@@ -1,0 +1,6 @@
+{
+  "recordedValues": "Zapisane wartości.",
+  "observedValuesPosteriorMean95CredibleIntervalAnd95": "Obserwacje, średnia a posteriori, 95% przedział wiarygodności i 95% przedział predykcyjny.",
+  "timeSeriesIn": "Szereg czasowy w {{value0}}. {{value1}}",
+  "forecast": "Predykcja →"
+}

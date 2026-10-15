@@ -1,3 +1,8 @@
+import { MessageValue } from '../components/MessageValue';
+import { ActivitySelect } from '../components/ActivitySelect';
+import { supportsSets } from '../../shared/activities';
+import { useTranslation, Trans } from 'react-i18next';
+import { enumLabel, t as tr } from '../i18n';
 import { invalidField } from '../lib/form-feedback';
 import { LabelsEditor } from '../components/LabelsEditor';
 import { useEffect, useRef, useState } from 'react';
@@ -18,9 +23,9 @@ import {
   type Workout,
 } from '../../shared/schema';
 import { ErrorBox, Field, Loading, NumberField, PageHeading, Panel, Scale } from '../components/ui';
-const humanize = (value: string) =>
-  value.replaceAll('_', ' ').replace(/^./, (s) => s.toUpperCase());
+const humanize = enumLabel;
 export function CheckIn() {
+  useTranslation();
   const [params, setParams] = useSearchParams(),
     date = params.get('date') || localDate();
   const validDate = dateSchema.safeParse(date).success;
@@ -46,11 +51,11 @@ export function CheckIn() {
   useEffect(() => {
     if (blocker.state !== 'blocked') return;
     if (saving) {
-      setError('Wait for the current save to finish before changing pages.');
+      setError('checkIn:waitForTheCurrentSaveToFinishBeforeChanging');
       blocker.reset();
       return;
     }
-    if (window.confirm('Discard your unsaved check-in?')) blocker.proceed();
+    if (window.confirm(tr('checkIn:discardYourUnsavedCheckIn'))) blocker.proceed();
     else blocker.reset();
   }, [blocker, saving]);
   useEffect(() => {
@@ -63,7 +68,7 @@ export function CheckIn() {
     if (!validDate) {
       setLoading(false);
       setLoadFailed(true);
-      setError('Choose a valid journal date.');
+      setError('checkIn:chooseAValidJournalDate');
       return;
     }
     requestRef
@@ -155,7 +160,7 @@ export function CheckIn() {
     setSaved(false);
     const parsed = entrySchema.safeParse(entry);
     if (!parsed.success) {
-      setError(parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; '));
+      setError(JSON.stringify(parsed.error.issues));
       requestAnimationFrame(() => {
         errorRef.current?.focus();
         errorRef.current?.scrollIntoView({ block: 'center' });
@@ -182,7 +187,9 @@ export function CheckIn() {
   async function remove() {
     if (saving || loadFailed) return;
     if (
-      !window.confirm(`Permanently delete the entry for ${date}? This cannot be undone in the app.`)
+      !window.confirm(
+        tr('checkIn:permanentlyDeleteTheEntryForThisCannotBeUndone', { value0: date }),
+      )
     )
       return;
     setSaving(true);
@@ -203,13 +210,13 @@ export function CheckIn() {
   return (
     <>
       <PageHeading
-        eyebrow="A MOMENT FOR YOURSELF"
-        title="How was your day?"
-        description="Start with the numbers. Add a little context if it helps."
+        eyebrow={tr('checkIn:aMomentForYourself')}
+        title={tr('checkIn:howWasYourDay')}
+        description={tr('checkIn:startWithTheNumbersAddALittleContextIf')}
         action={
-          <Field label="Journal date">
+          <Field label={tr('checkIn:journalDate')}>
             <input
-              aria-label="Journal date"
+              aria-label={tr('checkIn:journalDate')}
               type="date"
               disabled={saving}
               value={validDate ? date : ''}
@@ -220,11 +227,11 @@ export function CheckIn() {
           </Field>
         }
       />
-      <nav className="checkin-sections" aria-label="Check-in sections">
-        <a href="#daily-ratings">Daily ratings</a>
-        <a href="#sleep">Sleep</a>
-        <a href="#body-signals">Body signals & symptoms</a>
-        <a href="#training">Training</a>
+      <nav className="checkin-sections" aria-label={tr('checkIn:checkInSections')}>
+        <a href="#daily-ratings">{tr('checkIn:dailyRatings')}</a>
+        <a href="#sleep">{tr('checkIn:sleep')}</a>
+        <a href="#body-signals">{tr('checkIn:bodySignalsSymptoms')}</a>
+        <a href="#training">{tr('checkIn:training')}</a>
       </nav>
       {loading ? (
         <Loading />
@@ -235,8 +242,8 @@ export function CheckIn() {
               <div className="checkin-main">
                 <Panel
                   id="daily-ratings"
-                  title="01 · Your daily baseline"
-                  subtitle="Check a metric to record it. Unchecked metrics remain unknown."
+                  title={tr('checkIn:01YourDailyBaseline')}
+                  subtitle={tr('checkIn:checkAMetricToRecordItUncheckedMetricsRemain')}
                 >
                   <div className="section-icon">
                     <Heart size={20} />
@@ -259,48 +266,53 @@ export function CheckIn() {
                   />
                   <details className="notes-details">
                     <summary>
-                      Additional context <span>Optional</span>
-                      <ChevronDown size={15} />
+                      <Trans
+                        i18nKey="checkIn:additionalContextOptional"
+                        components={{ slot0: <span />, slot1: <ChevronDown size={15} /> }}
+                      />
                     </summary>
-                    <Field label="Daily notes">
+                    <Field label={tr('checkIn:dailyNotes')}>
                       <textarea
                         value={entry.notes}
                         onChange={(e) => update('notes', e.target.value)}
                         maxLength={50000}
                         rows={4}
-                        placeholder="Anything the numbers don't capture?"
+                        placeholder={tr('checkIn:anythingTheNumbersDonTCapture')}
                       />
                     </Field>
                   </details>
                 </Panel>
                 <Panel
                   id="sleep"
-                  title="02 · Last night’s sleep"
-                  subtitle="Record sleep against the day you woke up."
+                  title={tr('checkIn:02LastNightSSleep')}
+                  subtitle={tr('checkIn:recordSleepAgainstTheDayYouWokeUp')}
                 >
                   <div className="section-icon">
                     <Moon size={20} />
                   </div>
                   <div className="fields-grid three">
                     <NumberField
-                      label="Actual sleep (minutes)"
+                      label={tr('checkIn:actualSleepMinutes')}
                       value={entry.sleep.durationMinutes}
                       onChange={(v) => sleep('durationMinutes', v)}
                       max={1440}
                       hint={
                         entry.sleep.durationMinutes !== null
-                          ? `${Math.floor(entry.sleep.durationMinutes / 60)} h ${entry.sleep.durationMinutes % 60} min`
-                          : 'Total time asleep, excluding awakenings'
+                          ? tr('checkIn:hMin', {
+                              value0: Math.floor(entry.sleep.durationMinutes / 60),
+                              value1: entry.sleep.durationMinutes % 60,
+                            })
+                          : tr('checkIn:totalTimeAsleepExcludingAwakenings')
                       }
                     />
-                    <Field label="Bedtime">
+                    <Field label={tr('checkIn:bedtime')}>
                       <input
                         type="time"
                         value={entry.sleep.bedtime || ''}
                         onChange={(e) => sleep('bedtime', e.target.value || null)}
                       />
                     </Field>
-                    <Field label="Wake time">
+                    <Field label={tr('checkIn:wakeTime')}>
                       <input
                         type="time"
                         value={entry.sleep.wakeTime || ''}
@@ -308,39 +320,41 @@ export function CheckIn() {
                       />
                     </Field>
                     <NumberField
-                      label="Time to fall asleep (min)"
+                      label={tr('checkIn:timeToFallAsleepMin')}
                       value={entry.sleep.latencyMinutes}
                       onChange={(v) => sleep('latencyMinutes', v)}
                       max={720}
                     />
                     <NumberField
-                      label="Awakenings"
+                      label={tr('checkIn:awakenings')}
                       value={entry.sleep.awakenings}
                       onChange={(v) => sleep('awakenings', v)}
                       max={100}
                     />
                     <NumberField
-                      label="Device sleep score (0–100)"
+                      label={tr('checkIn:deviceSleepScore0100')}
                       value={entry.sleep.score}
                       onChange={(v) => sleep('score', v)}
                       max={100}
                     />
                   </div>
                   <Scale
-                    label="Perceived sleep quality"
+                    label={tr('checkIn:perceivedSleepQuality')}
                     min={1}
-                    low="Very poor"
-                    high="Excellent"
+                    low={tr('checkIn:veryPoor')}
+                    high={tr('checkIn:excellent')}
                     value={entry.sleep.quality}
                     onChange={(v) => sleep('quality', v)}
                   />
                   <details className="notes-details">
                     <summary>
-                      Sleep context <span>Optional</span>
-                      <ChevronDown size={15} />
+                      <Trans
+                        i18nKey="checkIn:sleepContextOptional"
+                        components={{ slot0: <span />, slot1: <ChevronDown size={15} /> }}
+                      />
                     </summary>
                     <textarea
-                      aria-label="Sleep notes"
+                      aria-label={tr('checkIn:sleepNotes')}
                       value={entry.sleepNotes}
                       onChange={(e) => update('sleepNotes', e.target.value)}
                       maxLength={50000}
@@ -350,22 +364,22 @@ export function CheckIn() {
                 </Panel>
                 <Panel
                   id="body-signals"
-                  title="03 · Body signals"
-                  subtitle="Use the same device, method, and measurement routine where possible."
+                  title={tr('checkIn:03BodySignals')}
+                  subtitle={tr('checkIn:useTheSameDeviceMethodAndMeasurementRoutineWhere')}
                 >
                   <div className="section-icon">
                     <Waves size={20} />
                   </div>
                   <div className="fields-grid three">
                     <NumberField
-                      label="HRV (ms)"
+                      label={tr('checkIn:hrvMs')}
                       value={entry.physiology.hrv}
                       onChange={(v) => physiology('hrv', v)}
                       min={1}
                       max={500}
                       step={0.1}
                     />
-                    <Field label="HRV method">
+                    <Field label={tr('checkIn:hrvMethod')}>
                       <select
                         value={entry.physiology.hrvMethod}
                         onChange={(e) =>
@@ -375,12 +389,12 @@ export function CheckIn() {
                           )
                         }
                       >
-                        <option value="unknown">Unknown / not specified</option>
-                        <option value="rmssd">rMSSD</option>
-                        <option value="sdnn">SDNN</option>
+                        <option value="unknown">{tr('checkIn:unknownNotSpecified')}</option>
+                        <option value="rmssd">{tr('checkIn:rmssd')}</option>
+                        <option value="sdnn">{tr('checkIn:sdnn')}</option>
                       </select>
                     </Field>
-                    <Field label="Measurement source">
+                    <Field label={tr('checkIn:measurementSource')}>
                       <select
                         value={entry.physiology.source}
                         onChange={(e) =>
@@ -397,14 +411,14 @@ export function CheckIn() {
                       </select>
                     </Field>
                     <NumberField
-                      label="Resting heart rate (bpm)"
+                      label={tr('checkIn:restingHeartRateBpm')}
                       value={entry.physiology.restingHeartRate}
                       onChange={(v) => physiology('restingHeartRate', v)}
                       min={20}
                       max={250}
                     />
                     <NumberField
-                      label="Respiratory rate (breaths/min)"
+                      label={tr('checkIn:respiratoryRateBreathsMin')}
                       value={entry.physiology.respiratoryRate}
                       onChange={(v) => physiology('respiratoryRate', v)}
                       min={3}
@@ -412,7 +426,7 @@ export function CheckIn() {
                       step={0.1}
                     />
                     <NumberField
-                      label="Temperature (°C)"
+                      label={tr('checkIn:temperatureC')}
                       value={entry.physiology.temperatureC}
                       onChange={(v) => physiology('temperatureC', v)}
                       min={30}
@@ -420,7 +434,7 @@ export function CheckIn() {
                       step={0.1}
                     />
                     <NumberField
-                      label="Body weight (kg)"
+                      label={tr('checkIn:bodyWeightKg')}
                       value={entry.physiology.weightKg}
                       onChange={(v) => physiology('weightKg', v)}
                       min={20}
@@ -435,7 +449,10 @@ export function CheckIn() {
                     onChange={(v) => update('illnessSeverity', v)}
                   />
                   <p className="field-label">
-                    Specific symptoms <span className="muted">· select to rate severity</span>
+                    <Trans
+                      i18nKey="checkIn:specificSymptomsSelectToRateSeverity"
+                      components={{ slot0: <span className="muted" /> }}
+                    />
                   </p>
                   <div className="symptom-options">
                     {symptomTypes.map((name) => (
@@ -465,8 +482,8 @@ export function CheckIn() {
                         key={s.name}
                         label={humanize(s.name)}
                         min={1}
-                        low="Mild"
-                        high="Severe"
+                        low={tr('checkIn:mild')}
+                        high={tr('checkIn:severe')}
                         value={s.severity}
                         onChange={(v) =>
                           update(
@@ -483,11 +500,13 @@ export function CheckIn() {
                   </div>
                   <details className="notes-details">
                     <summary>
-                      Symptom context <span>Optional</span>
-                      <ChevronDown size={15} />
+                      <Trans
+                        i18nKey="checkIn:symptomContextOptional"
+                        components={{ slot0: <span />, slot1: <ChevronDown size={15} /> }}
+                      />
                     </summary>
                     <textarea
-                      aria-label="Illness notes"
+                      aria-label={tr('checkIn:illnessNotes')}
                       value={entry.illnessNotes}
                       onChange={(e) => update('illnessNotes', e.target.value)}
                       maxLength={50000}
@@ -497,36 +516,41 @@ export function CheckIn() {
                 </Panel>
                 <Panel
                   id="training"
-                  title="04 · Movement & training"
-                  subtitle="An explicit rest day is a useful observation, too."
+                  title={tr('checkIn:04MovementTraining')}
+                  subtitle={tr('checkIn:anExplicitRestDayIsAUsefulObservationToo')}
                 >
                   <div className="section-icon">
                     <Dumbbell size={20} />
                   </div>
-                  <Field label="Training status">
+                  <Field label={tr('checkIn:trainingStatus')}>
                     <select
                       value={entry.trainingStatus}
                       onChange={(e) => {
                         if (entry.workouts.length && e.target.value !== 'trained') {
-                          setError('Remove the workouts before marking a rest or unrecorded day.');
+                          setError('checkIn:removeTheWorkoutsBeforeMarkingARestOrUnrecorded');
                           return;
                         }
                         update('trainingStatus', e.target.value as Entry['trainingStatus']);
                       }}
                     >
-                      <option value="unrecorded">Not recorded</option>
-                      <option value="rest">Rest day</option>
-                      <option value="trained">Trained</option>
+                      <option value="unrecorded">{tr('checkIn:notRecorded')}</option>
+                      <option value="rest">{tr('checkIn:restDay')}</option>
+                      <option value="trained">{tr('checkIn:trained')}</option>
                     </select>
                   </Field>
                   {entry.workouts.map((w, index) => (
                     <div className="workout-editor" key={w.id}>
                       <div className="workout-heading">
-                        <h3>Session {index + 1}</h3>
+                        <h3>
+                          <Trans
+                            i18nKey="checkIn:session"
+                            components={{ slot0: <MessageValue value={index + 1} /> }}
+                          />
+                        </h3>
                         <button
                           type="button"
                           className="icon-button danger-text"
-                          aria-label={`Remove session ${index + 1}`}
+                          aria-label={tr('checkIn:removeSession', { value0: index + 1 })}
                           onClick={() =>
                             update(
                               'workouts',
@@ -538,44 +562,39 @@ export function CheckIn() {
                         </button>
                       </div>
                       <div className="fields-grid">
-                        <Field label="Activity">
-                          <select
+                        <div className="field">
+                          <span>{tr('checkIn:activity')}</span>
+                          <ActivitySelect
                             value={w.type}
-                            onChange={(e) =>
-                              editWorkout(index, { type: e.target.value as Workout['type'] })
-                            }
-                          >
-                            {workoutTypes.map((t) => (
-                              <option key={t} value={t}>
-                                {humanize(t)}
-                              </option>
-                            ))}
-                          </select>
-                        </Field>
-                        <Field label="Session title (optional)">
+                            onChange={(type) => {
+                              if (type !== 'all') editWorkout(index, { type });
+                            }}
+                          />
+                        </div>
+                        <Field label={tr('checkIn:sessionTitleOptional')}>
                           <input
                             value={w.title}
                             onChange={(e) => editWorkout(index, { title: e.target.value })}
                             maxLength={120}
-                            placeholder="e.g. Easy run"
+                            placeholder={tr('checkIn:eGEasyRun')}
                           />
                         </Field>
                         <NumberField
-                          label="Duration (minutes)"
+                          label={tr('checkIn:durationMinutes')}
                           value={w.durationMinutes || null}
                           onChange={(v) => editWorkout(index, { durationMinutes: v ?? 0 })}
                           min={1}
                           max={1440}
                         />
                         <NumberField
-                          label="Distance (km)"
+                          label={tr('checkIn:distanceKm')}
                           value={w.distanceKm}
                           onChange={(v) => editWorkout(index, { distanceKm: v })}
                           max={1000}
                           step={0.01}
                         />
                         <NumberField
-                          label="Average heart rate (bpm)"
+                          label={tr('checkIn:averageHeartRateBpm')}
                           value={w.averageHeartRate}
                           onChange={(v) => editWorkout(index, { averageHeartRate: v })}
                           min={25}
@@ -584,27 +603,27 @@ export function CheckIn() {
                       </div>
                       <div className="scales-grid">
                         <Scale
-                          label="Perceived effort"
+                          label={tr('checkIn:perceivedEffort')}
                           min={1}
-                          low="Very easy"
-                          high="Maximal"
+                          low={tr('checkIn:veryEasy')}
+                          high={tr('checkIn:maximal')}
                           value={w.effort}
                           onChange={(v) => editWorkout(index, { effort: v })}
                         />
                         <Scale
-                          label="Pain during training"
-                          low="None"
-                          high="Extreme"
+                          label={tr('checkIn:painDuringTraining')}
+                          low={tr('checkIn:none')}
+                          high={tr('checkIn:extreme')}
                           value={w.pain}
                           onChange={(v) => editWorkout(index, { pain: v })}
                         />
                       </div>
-                      {w.type === 'strength' && (
+                      {supportsSets(w.type) && (
                         <div className="strength-sets">
-                          <p className="field-label">Exercises & sets</p>
+                          <p className="field-label">{tr('checkIn:exercisesSets')}</p>
                           {w.sets.map((set, si) => (
                             <div className="set-row" key={si}>
-                              <Field label="Exercise">
+                              <Field label={tr('checkIn:exercise')}>
                                 <input
                                   value={set.exercise}
                                   maxLength={120}
@@ -637,7 +656,7 @@ export function CheckIn() {
                               <button
                                 type="button"
                                 className="icon-button"
-                                aria-label={`Remove exercise ${si + 1}`}
+                                aria-label={tr('checkIn:removeExercise', { value0: si + 1 })}
                                 onClick={() =>
                                   editWorkout(index, { sets: w.sets.filter((_, j) => j !== si) })
                                 }
@@ -655,17 +674,19 @@ export function CheckIn() {
                               })
                             }
                           >
-                            Add exercise
+                            {tr('checkIn:addExercise')}
                           </button>
                         </div>
                       )}
                       <details className="notes-details">
                         <summary>
-                          Session notes <span>Optional</span>
-                          <ChevronDown size={15} />
+                          <Trans
+                            i18nKey="checkIn:sessionNotesOptional"
+                            components={{ slot0: <span />, slot1: <ChevronDown size={15} /> }}
+                          />
                         </summary>
                         <textarea
-                          aria-label={`Session ${index + 1} notes`}
+                          aria-label={tr('checkIn:sessionNotes', { value0: index + 1 })}
                           value={w.notes}
                           maxLength={50000}
                           onChange={(e) => editWorkout(index, { notes: e.target.value })}
@@ -680,31 +701,34 @@ export function CheckIn() {
                     disabled={entry.workouts.length >= 20}
                     onClick={addWorkout}
                   >
-                    <Plus size={16} /> Add training session
+                    <Trans
+                      i18nKey="checkIn:addTrainingSession"
+                      components={{ slot0: <Plus size={16} /> }}
+                    />
                   </button>
                 </Panel>
               </div>
               <aside className="checkin-aside">
                 <div className="checkin-tips">
-                  <span className="eyebrow">MAKE IT A RITUAL</span>
+                  <span className="eyebrow">{tr('checkIn:makeItARitual')}</span>
                   <h2>
-                    Consistency
-                    <br />
-                    over perfection.
+                    <Trans
+                      i18nKey="checkIn:consistencyOverPerfection"
+                      components={{ slot0: <br /> }}
+                    />
                   </h2>
-                  <p>Check in at a similar time each day. Use the same meaning for your ratings.</p>
+                  <p>{tr('checkIn:checkInAtASimilarTimeEachDayUse')}</p>
                   <div className="divider" />
-                  <strong>Missing is okay.</strong>
-                  <p>
-                    Leave a field blank if you haven’t measured it. A zero means you actually
-                    observed zero.
-                  </p>
-                  <strong>Numbers first. Words second.</strong>
-                  <p>
-                    Your ratings power the charts. Notes preserve the context you might want to
-                    revisit.
-                  </p>
-                  <span className="timezone-label">Time zone: {entry.timezone}</span>
+                  <strong>{tr('checkIn:missingIsOkay')}</strong>
+                  <p>{tr('checkIn:leaveAFieldBlankIfYouHavenTMeasured')}</p>
+                  <strong>{tr('checkIn:numbersFirstWordsSecond')}</strong>
+                  <p>{tr('checkIn:yourRatingsPowerTheChartsNotesPreserveTheContext')}</p>
+                  <span className="timezone-label">
+                    <Trans
+                      i18nKey="checkIn:timeZone"
+                      components={{ slot0: <MessageValue value={entry.timezone} /> }}
+                    />
+                  </span>
                 </div>
               </aside>
             </div>
@@ -714,15 +738,15 @@ export function CheckIn() {
               {saved ? (
                 <span className="saved-state">
                   <Check size={16} />
-                  {demo ? 'Saved in demo memory' : 'Saved to your journal'}
+                  {demo ? tr('checkIn:savedInDemoMemory') : tr('checkIn:savedToYourJournal')}
                 </span>
               ) : (
                 <span className="muted">
                   {dirty
-                    ? 'You have unsaved changes'
+                    ? tr('checkIn:youHaveUnsavedChanges')
                     : revision
-                      ? `Existing entry · revision ${revision}`
-                      : 'Your entry is not saved yet'}
+                      ? tr('checkIn:existingEntryRevision', { value0: revision })
+                      : tr('checkIn:yourEntryIsNotSavedYet')}
                 </span>
               )}
             </div>
@@ -734,12 +758,12 @@ export function CheckIn() {
                   onClick={remove}
                   disabled={saving || loadFailed}
                 >
-                  <Trash2 size={16} /> Delete
+                  <Trans i18nKey="checkIn:delete" components={{ slot0: <Trash2 size={16} /> }} />
                 </button>
               )}
               <button className="button primary" type="submit" disabled={saving || loadFailed}>
                 <Save size={16} />
-                {saving ? 'Saving…' : 'Save check-in'}
+                {saving ? tr('checkIn:saving') : tr('checkIn:saveCheckIn')}
               </button>
             </div>
           </div>
@@ -752,7 +776,7 @@ export function CheckIn() {
               className="button secondary"
               onClick={() => setLoadAttempt((v) => v + 1)}
             >
-              Retry loading this day
+              {tr('checkIn:retryLoadingThisDay')}
             </button>
           )}
         </form>

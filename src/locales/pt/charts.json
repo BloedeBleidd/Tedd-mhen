@@ -1,0 +1,6 @@
+{
+  "recordedValues": "Valores registados.",
+  "observedValuesPosteriorMean95CredibleIntervalAnd95": "Valores observados, média a posteriori, intervalo de credibilidade de 95 % e intervalo preditivo de 95 %.",
+  "timeSeriesIn": "Série temporal em {{value0}}. {{value1}}",
+  "forecast": "Previsão →"
+}

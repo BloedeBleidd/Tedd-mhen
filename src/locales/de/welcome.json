@@ -1,0 +1,13 @@
+{
+  "signIn": "Anmelden",
+  "createAccount": "Konto erstellen",
+  "accountAccess": "Kontozugang",
+  "trainingSleepRecovery": "TRAINING · SCHLAF · ERHOLUNG",
+  "yourDaysAClearerPicture": "Deine Tage. <slot0/>Ein klareres Bild.",
+  "connectHowYouTrainSleepAndFeelExploreYour": "Verbinde Training, Schlaf und Wohlbefinden. Entdecke Muster mit verständlichen Diagrammen, Korrelationen und bayesianischen Vorhersagen.",
+  "tryDemo": "<slot0/> Demo ausprobieren <slot1/>",
+  "noAccountNeededExploreACompleteExampleJournal": "Kein Konto nötig. Erkunde ein vollständiges Beispiel-Tagebuch.",
+  "dailyCheckInsTraining": "Tageseinträge und Training",
+  "relationshipsPredictions": "Zusammenhänge und Vorhersagen",
+  "importExport": "Import und Export"
+}

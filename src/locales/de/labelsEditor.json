@@ -1,0 +1,9 @@
+{
+  "recordContextLabels": "<slot0/> Kontextlabels erfassen",
+  "examplesTravelLateMealEveningSessionCheckedWithNo": "Beispiele: Reise, spätes Essen, Abendtraining. Aktiviert ohne Labels bedeutet ausdrücklich keine; deaktiviert bedeutet unbekannt. Verwende einheitliche Labels für die Analyse.",
+  "removeLabel": "Label {{value0}} entfernen",
+  "newContextLabel": "Neues Kontextlabel",
+  "addAReusableLabel": "Wiederverwendbares Label hinzufügen",
+  "addLabel": "Label hinzufügen",
+  "12LabelsLabelsDescribeContextOptionalNotesAreNot": "<slot0/> / 12 Labels. Labels beschreiben den Kontext; optionale Notizen gehen nicht ins Modell ein."
+}

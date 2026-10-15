@@ -1,0 +1,19 @@
+{
+  "search": "Aktivitäten suchen",
+  "activity": "Aktivität",
+  "all": "Alle Aktivitäten",
+  "matches": "Passende Aktivitäten: {{count}}",
+  "none": "Keine Treffer. Deine aktuelle Auswahl bleibt erhalten.",
+  "endurance": "Laufen und Ausdauer",
+  "strength": "Kraft und Fitness",
+  "cycling": "Radsport",
+  "water": "Wassersport",
+  "combat": "Kampfkunst und Kampfsport",
+  "team": "Mannschaftssport",
+  "racket": "Rückschlagsport",
+  "outdoors": "Outdoor und Abenteuer",
+  "winter": "Wintersport",
+  "mind_body": "Mobilität und bewusste Bewegung",
+  "movement": "Tanz, Turnen und Gleichgewicht",
+  "other": "Sonstiges"
+}

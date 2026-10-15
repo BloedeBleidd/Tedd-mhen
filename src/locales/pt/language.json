@@ -1,0 +1,19 @@
+{
+  "open": "Alterar idioma",
+  "title": "Idioma",
+  "close": "Fechar definições de idioma",
+  "auto": "Auto · localização do dispositivo",
+  "automaticStatus": "Idioma automático: {{language}}.",
+  "manualStatus": "Idioma escolhido: {{language}}. A tua escolha tem prioridade sobre a localização.",
+  "locationExplanation": "A localização só é pedida após clicares. As coordenadas aproximadas ficam neste navegador e também determinam o nascer e o pôr do sol para o tema automático. Sem localização guardada, Auto usa inglês e o tema claro.",
+  "locating": "A obter localização…",
+  "useLocation": "Usar localização do dispositivo",
+  "updateLocation": "Atualizar localização do dispositivo",
+  "forgetLocation": "Esquecer localização guardada",
+  "approximation": "O idioma é sugerido por um mapa de países local. Perto de fronteiras e em países multilingues, a sugestão pode não ser adequada. Escolhe qualquer idioma acima. Atualiza a localização em viagem; não há seguimento em segundo plano.",
+  "locationUnavailable": "Não foi possível obter a localização. Tenta novamente ou escolhe um idioma manualmente.",
+  "locationDenied": "A localização não foi autorizada. Auto usa inglês e o tema claro; as escolhas manuais continuam a aplicar-se.",
+  "storageUnavailable": "O armazenamento do navegador está indisponível. As alterações só se aplicam a este separador.",
+  "loadFailed": "Não foi possível carregar o idioma. Mantém-se o atual. Verifique a ligação e tente novamente.",
+  "retry": "Tentar carregar o idioma novamente"
+}

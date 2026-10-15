@@ -1,0 +1,9 @@
+{
+  "recordContextLabels": "<slot0/> Record context labels",
+  "examplesTravelLateMealEveningSessionCheckedWithNo": "Examples: travel, late meal, evening session. Checked with no labels means explicitly none; unchecked means unknown. Use consistent labels for analysis.",
+  "removeLabel": "Remove label {{value0}}",
+  "newContextLabel": "New context label",
+  "addAReusableLabel": "Add a reusable label",
+  "addLabel": "Add label",
+  "12LabelsLabelsDescribeContextOptionalNotesAreNot": "<slot0/> / 12 labels. Labels describe context; optional notes are not model inputs."
+}

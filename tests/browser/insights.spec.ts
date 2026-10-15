@@ -176,7 +176,7 @@ test('context labels persist and the public author page is available', async ({
   await page.getByRole('button', { name: 'Save check-in' }).click();
   await expect(page.getByText('Saved to your journal')).toBeVisible();
   await page.reload();
-  await expect(page.getByRole('button', { name: 'Remove label travel' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Remove label Travel' })).toBeVisible();
   const saved = await (await request.get(`/api/entries/${date}`)).json();
   await request.delete(`/api/entries/${date}?revision=${saved.revision}`, {
     headers: { 'X-Teddmhen-Request': '1' },

@@ -1,7 +1,10 @@
+import { useTranslation } from 'react-i18next';
+import { t as tr } from '../i18n';
 import { useEffect, type RefObject } from 'react';
 import { useBlocker } from 'react-router-dom';
 
 export function PendingAccountGuard({ pending }: { pending: RefObject<boolean> }) {
+  useTranslation();
   const blocker = useBlocker(() => pending.current);
   useEffect(() => {
     if (blocker.state === 'blocked') blocker.reset();
@@ -16,9 +19,6 @@ export function PendingAccountGuard({ pending }: { pending: RefObject<boolean> }
     return () => window.removeEventListener('beforeunload', protect);
   }, [pending]);
   return pending.current ? (
-    <p role="status">
-      Keep this page open while your account request finishes. Navigation will be available when it
-      completes.
-    </p>
+    <p role="status">{tr('pendingAccountGuard:keepThisPageOpenWhileYourAccountRequestFinishes')}</p>
   ) : null;
 }

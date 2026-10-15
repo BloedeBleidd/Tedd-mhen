@@ -1,0 +1,9 @@
+{
+  "recordContextLabels": "<slot0/> Registar etiquetas de contexto",
+  "examplesTravelLateMealEveningSessionCheckedWithNo": "Exemplos: viagem, refeição tardia, sessão à noite. Assinalado sem etiquetas significa explicitamente nenhuma; não assinalado significa desconhecido. Usa etiquetas consistentes na análise.",
+  "removeLabel": "Remover etiqueta {{value0}}",
+  "newContextLabel": "Nova etiqueta de contexto",
+  "addAReusableLabel": "Adicionar uma etiqueta reutilizável",
+  "addLabel": "Adicionar etiqueta",
+  "12LabelsLabelsDescribeContextOptionalNotesAreNot": "<slot0/> / 12 etiquetas. As etiquetas descrevem o contexto; as notas opcionais não entram no modelo."
+}

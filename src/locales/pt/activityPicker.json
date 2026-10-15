@@ -1,0 +1,19 @@
+{
+  "search": "Pesquisar atividades",
+  "activity": "Atividade",
+  "all": "Todas as atividades",
+  "matches": "Atividades encontradas: {{count}}",
+  "none": "Sem resultados. A seleção atual é mantida.",
+  "endurance": "Corrida e resistência",
+  "strength": "Força e fitness",
+  "cycling": "Ciclismo",
+  "water": "Desportos aquáticos",
+  "combat": "Artes marciais e combate",
+  "team": "Desportos coletivos",
+  "racket": "Desportos de raquete",
+  "outdoors": "Ar livre e aventura",
+  "winter": "Desportos de inverno",
+  "mind_body": "Mobilidade e movimento consciente",
+  "movement": "Dança, ginástica e equilíbrio",
+  "other": "Outros"
+}

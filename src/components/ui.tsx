@@ -1,14 +1,17 @@
+import { errorText } from '../lib/validation-messages';
+import { useTranslation, Trans } from 'react-i18next';
+import { localize, t as tr, locale } from '../i18n';
 import { ArrowUpRight, CircleHelp, LoaderCircle } from 'lucide-react';
 import { WorkspaceLink as Link } from '../components/WorkspaceLink';
 import type { ReactNode } from 'react';
 import { useReveal } from '../lib/motion';
 export const prettyDate = (date: string, options?: Intl.DateTimeFormatOptions) =>
   new Date(`${date}T12:00:00`).toLocaleDateString(
-    'en-GB',
+    locale(),
     options || { day: 'numeric', month: 'short' },
   );
 export const number = (value: number | null | undefined, digits = 1) =>
-  value == null ? '—' : value.toLocaleString('en-GB', { maximumFractionDigits: digits });
+  value == null ? '—' : value.toLocaleString(locale(), { maximumFractionDigits: digits });
 export function PageHeading({
   eyebrow,
   title,
@@ -20,6 +23,7 @@ export function PageHeading({
   description: string;
   action?: ReactNode;
 }) {
+  useTranslation();
   return (
     <div className="page-heading">
       <div>
@@ -46,6 +50,7 @@ export function Panel({
   className?: string;
   id?: string;
 }) {
+  useTranslation();
   const reveal = useReveal<HTMLElement>();
   return (
     <section id={id} ref={reveal} className={`panel ${className}`}>
@@ -63,28 +68,36 @@ export function Panel({
   );
 }
 export function Loading() {
+  useTranslation();
   return (
     <div className="loading" role="status">
-      <LoaderCircle className="spin" size={22} /> Loading your journal…
+      <Trans
+        i18nKey="ui:loadingYourJournal"
+        components={{ slot0: <LoaderCircle className="spin" size={22} /> }}
+      />
     </div>
   );
 }
 export function ErrorBox({ message }: { message: string | null }) {
+  useTranslation();
   return message ? (
     <div className="notice error" role="alert">
-      {message}
+      {errorText(message)}
     </div>
   ) : null;
 }
 export function EmptyState({
-  title = 'A little data. A clearer picture.',
-  description = 'Start with one check-in. Your personal patterns will take shape over time.',
+  title = localize('A little data. A clearer picture.'),
+  description = localize(
+    'Start with one check-in. Your personal patterns will take shape over time.',
+  ),
   action = true,
 }: {
   title?: string;
   description?: string;
   action?: boolean;
 }) {
+  useTranslation();
   return (
     <div className="empty-state">
       <div className="empty-symbol">↗</div>
@@ -92,7 +105,10 @@ export function EmptyState({
       <p>{description}</p>
       {action && (
         <Link className="button primary" to="/check-in">
-          Record your first day <ArrowUpRight size={17} />
+          <Trans
+            i18nKey="ui:recordYourFirstDay"
+            components={{ slot0: <ArrowUpRight size={17} /> }}
+          />
         </Link>
       )}
     </div>
@@ -107,6 +123,7 @@ export function Field({
   hint?: string;
   children: ReactNode;
 }) {
+  useTranslation();
   return (
     <label className="field">
       <span>{label}</span>
@@ -132,6 +149,7 @@ export function NumberField({
   step?: number;
   hint?: string;
 }) {
+  useTranslation();
   return (
     <Field label={label} hint={hint}>
       <input
@@ -141,7 +159,7 @@ export function NumberField({
         min={min}
         max={max}
         step={step}
-        placeholder="Not recorded"
+        placeholder={tr('ui:notRecorded')}
       />
     </Field>
   );
@@ -163,6 +181,7 @@ export function Scale({
   high: string;
   onChange: (v: number | null) => void;
 }) {
+  useTranslation();
   return (
     <div className={`scale ${value === null ? 'unrecorded' : ''}`}>
       <div className="scale-top">
@@ -172,11 +191,11 @@ export function Scale({
             checked={value !== null}
             onChange={(e) => onChange(e.target.checked ? Math.round((min + max) / 2) : null)}
           />
-          {label}
+          {localize(label)}
         </label>
         <span className="scale-value">
           {value === null ? (
-            'Not recorded'
+            localize('Not recorded')
           ) : (
             <>
               {value}
@@ -186,7 +205,7 @@ export function Scale({
         </span>
       </div>
       <input
-        aria-label={label}
+        aria-label={localize(label)}
         type="range"
         min={min}
         max={max}
@@ -196,19 +215,20 @@ export function Scale({
       />
       <div className="scale-anchors">
         <span>
-          {min} · {low}
+          {min} · {localize(low)}
         </span>
         <span>
-          {max} · {high}
+          {max} · {localize(high)}
         </span>
       </div>
     </div>
   );
 }
 export function HelpLink() {
+  useTranslation();
   return (
     <Link className="text-link" to="/help">
-      <CircleHelp size={15} /> How to read this
+      <Trans i18nKey="ui:howToReadThis" components={{ slot0: <CircleHelp size={15} /> }} />
     </Link>
   );
 }

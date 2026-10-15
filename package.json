@@ -24,11 +24,13 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
+    "i18next": "^26.4.5",
     "jose": "^6.0.0",
     "jstat": "^1.9.6",
     "lucide-react": "^0.468.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-i18next": "^17.0.16",
     "react-router-dom": "^7.9.0",
     "recharts": "^3.0.0",
     "suncalc": "^2.1.1",

@@ -1,0 +1,19 @@
+{
+  "open": "Sprache ändern",
+  "title": "Sprache",
+  "close": "Spracheinstellungen schließen",
+  "auto": "Auto · Gerätestandort",
+  "automaticStatus": "Automatische Sprache: {{language}}.",
+  "manualStatus": "Gewählte Sprache: {{language}}. Deine Auswahl hat Vorrang vor dem Standort.",
+  "locationExplanation": "Der Standort wird erst nach dem Klicken angefordert. Ungefähre Koordinaten bleiben in diesem Browser und bestimmen auch Sonnenaufgang und Sonnenuntergang für das automatische Design. Ohne gespeicherten Standort verwendet Auto Englisch und das helle Design.",
+  "locating": "Standort wird ermittelt…",
+  "useLocation": "Gerätestandort verwenden",
+  "updateLocation": "Gerätestandort aktualisieren",
+  "forgetLocation": "Gespeicherten Standort löschen",
+  "approximation": "Die Sprache wird anhand einer lokalen Länderkarte vorgeschlagen. An Grenzen und in mehrsprachigen Ländern kann der Vorschlag unpassend sein. Du kannst oben jede Sprache wählen. Aktualisiere den Standort auf Reisen; es gibt keine Ortung im Hintergrund.",
+  "locationUnavailable": "Dein Standort konnte nicht ermittelt werden. Versuche es erneut oder wähle eine Sprache manuell.",
+  "locationDenied": "Die Standortfreigabe wurde nicht erteilt. Auto verwendet Englisch und das helle Design; manuelle Einstellungen gelten weiterhin.",
+  "storageUnavailable": "Der Browserspeicher ist nicht verfügbar. Änderungen gelten nur für diesen Tab.",
+  "loadFailed": "Die Sprache konnte nicht geladen werden. Die aktuelle bleibt aktiv. Verbindung prüfen und erneut versuchen.",
+  "retry": "Sprache erneut laden"
+}

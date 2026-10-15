@@ -1,3 +1,6 @@
+import { MessageValue } from '../components/MessageValue';
+import { useTranslation, Trans } from 'react-i18next';
+import { enumLabel, localize, t as tr } from '../i18n';
 import { WorkspaceLink as Link } from '../components/WorkspaceLink';
 import { useMemo, useState } from 'react';
 import { ArrowDownRight, ArrowUpRight, Download, Info } from 'lucide-react';
@@ -18,6 +21,7 @@ import {
   prettyDate,
 } from '../components/ui';
 export function Analysis() {
+  useTranslation();
   const { demo } = useApi();
   const [from, setFrom] = useState(shiftDate(localDate(), -27)),
     [to, setTo] = useState(localDate()),
@@ -56,33 +60,33 @@ export function Analysis() {
   return (
     <>
       <PageHeading
-        eyebrow="FOLLOW THE EVIDENCE"
-        title="A pattern, or just a day?"
-        description="Explore your trajectory, with room for uncertainty."
+        eyebrow={tr('analysis:followTheEvidence')}
+        title={tr('analysis:aPatternOrJustADay')}
+        description={tr('analysis:exploreYourTrajectoryWithRoomForUncertainty')}
         action={<HelpLink />}
       />
       <Panel className="filter-panel">
         <div className="analysis-filters">
-          <Field label="What would you like to understand?">
+          <Field label={tr('analysis:whatWouldYouLikeToUnderstand')}>
             <select value={metric} onChange={(e) => setMetric(e.target.value as MetricKey)}>
               {Object.entries(metrics).map(([k, m]) => (
                 <option key={k} value={k}>
-                  {m.label}
+                  {localize(m.label)}
                 </option>
               ))}
             </select>
           </Field>
-          <Field label="From">
+          <Field label={tr('analysis:from')}>
             <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
           </Field>
-          <Field label="To">
+          <Field label={tr('analysis:to')}>
             <input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
           </Field>
-          <Field label="Forecast horizon">
+          <Field label={tr('analysis:forecastHorizon')}>
             <select value={horizon} onChange={(e) => setHorizon(Number(e.target.value))}>
-              <option value="0">No forecast</option>
-              <option value="3">3 days</option>
-              <option value="7">7 days</option>
+              <option value="0">{tr('analysis:noForecast')}</option>
+              <option value="3">{tr('analysis:3Days')}</option>
+              <option value="7">{tr('analysis:7Days')}</option>
             </select>
           </Field>
         </div>
@@ -95,7 +99,10 @@ export function Analysis() {
                 setTo(localDate());
               }}
             >
-              Last {days} days
+              <Trans
+                i18nKey="analysis:lastDays"
+                components={{ slot0: <MessageValue value={days} /> }}
+              />
             </button>
           ))}
           <button
@@ -105,307 +112,381 @@ export function Analysis() {
               setMethod('all');
             }}
           >
-            Clear observation filters
+            {tr('analysis:clearObservationFilters')}
           </button>
         </div>
         <details className="analysis-options">
           <summary>
-            Model settings & data selection ·{' '}
-            {
-              [illness, source, ...(metric === 'hrv' ? [method] : [])].filter(
-                (value) => value !== 'all',
-              ).length
-            }{' '}
-            filters active
+            <Trans
+              i18nKey="analysis:modelSettingsDataSelectionFiltersActive"
+              components={{
+                slot0: (
+                  <MessageValue
+                    value={
+                      [illness, source, ...(metric === 'hrv' ? [method] : [])].filter(
+                        (value) => value !== 'all',
+                      ).length
+                    }
+                  />
+                ),
+              }}
+            />
           </summary>
           <div className="fields-grid three">
-            <Field label="Prior on the weekly slope">
+            <Field label={tr('analysis:priorOnTheWeeklySlope')}>
               <select value={prior} onChange={(e) => setPrior(e.target.value as Prior)}>
-                <option value="weak">Weak shrinkage</option>
-                <option value="regular">Regular shrinkage</option>
-                <option value="strong">Strong shrinkage</option>
+                <option value="weak">{tr('analysis:weakShrinkage')}</option>
+                <option value="regular">{tr('analysis:regularShrinkage')}</option>
+                <option value="strong">{tr('analysis:strongShrinkage')}</option>
               </select>
             </Field>
-            <Field label="Illness selection">
+            <Field label={tr('analysis:illnessSelection')}>
               <select value={illness} onChange={(e) => setIllness(e.target.value)}>
-                <option value="all">All days, including unknown</option>
-                <option value="no">Only explicitly illness-free days</option>
-                <option value="yes">Only illness / symptom days</option>
+                <option value="all">{tr('analysis:allDaysIncludingUnknown')}</option>
+                <option value="no">{tr('analysis:onlyExplicitlyIllnessFreeDays')}</option>
+                <option value="yes">{tr('analysis:onlyIllnessSymptomDays')}</option>
               </select>
             </Field>
-            <Field label="Measurement source">
+            <Field label={tr('analysis:measurementSource')}>
               <select value={source} onChange={(e) => setSource(e.target.value)}>
-                <option value="all">All sources</option>
+                <option value="all">{tr('analysis:allSources')}</option>
                 {['manual', 'garmin', 'apple', 'oura', 'whoop', 'polar', 'other'].map((s) => (
                   <option key={s} value={s}>
-                    {s}
+                    {enumLabel(s)}
                   </option>
                 ))}
               </select>
             </Field>
             {metric === 'hrv' && (
-              <Field label="HRV method">
+              <Field label={tr('analysis:hrvMethod')}>
                 <select value={method} onChange={(e) => setMethod(e.target.value)}>
-                  <option value="all">All methods</option>
-                  <option value="rmssd">rMSSD only</option>
-                  <option value="sdnn">SDNN only</option>
-                  <option value="unknown">Unknown method only</option>
+                  <option value="all">{tr('analysis:allMethods')}</option>
+                  <option value="rmssd">{tr('analysis:rmssdOnly')}</option>
+                  <option value="sdnn">{tr('analysis:sdnnOnly')}</option>
+                  <option value="unknown">{tr('analysis:unknownMethodOnly')}</option>
                 </select>
               </Field>
             )}
           </div>
           <p className="muted small">
-            Priors shrink the weekly slope toward zero. Compare settings to see how much your
-            conclusion depends on that assumption.
+            {tr('analysis:priorsShrinkTheWeeklySlopeTowardZeroCompareSettings')}
           </p>
         </details>
       </Panel>
-      <ErrorBox message={!valid ? 'Select a valid date range of up to five years.' : error} />
+      <ErrorBox message={!valid ? tr('analysis:selectAValidDateRangeOfUpToFive') : error} />
       {loading ? (
         <Loading />
       ) : (
         valid &&
         !error && (
-          <>
-            {model ? (
-              <>
-                <div className="analysis-stats">
-                  <div>
-                    <span className="stat-label">Recorded observations</span>
-                    <strong>
-                      {model.n}
-                      <small> / {selectedDays} days</small>
-                    </strong>
-                    <p>{selectedDays - observedDays.size} days missing or excluded</p>
+          <MessageValue
+            value={
+              model ? (
+                <>
+                  <div className="analysis-stats">
+                    <div>
+                      <span className="stat-label">{tr('analysis:recordedObservations')}</span>
+                      <strong>
+                        {model.n}
+                        <small>
+                          <Trans
+                            i18nKey="analysis:days"
+                            components={{ slot0: <>{selectedDays}</> }}
+                          />
+                        </small>
+                      </strong>
+                      <p>
+                        <Trans
+                          i18nKey="analysis:daysMissingOrExcluded"
+                          components={{ slot0: <>{selectedDays - observedDays.size}</> }}
+                        />
+                      </p>
+                    </div>
+                    <div>
+                      <span className="stat-label">{tr('analysis:estimatedWeeklyChange')}</span>
+                      <strong>
+                        {model.slope >= 0 ? '+' : ''}
+                        {number(model.slope, 2)}
+                        <small> {localize(spec.unit)}</small>
+                      </strong>
+                      <p>
+                        <Trans
+                          i18nKey="analysis:95CriTo"
+                          components={{
+                            slot0: <>{number(model.slopeInterval[0], 2)}</>,
+                            slot1: <>{number(model.slopeInterval[1], 2)}</>,
+                          }}
+                        />
+                      </p>
+                    </div>
+                    <div>
+                      <span className="stat-label">
+                        {tr('analysis:probabilityOfAnIncreasingTrend')}
+                      </span>
+                      <strong>
+                        {number(model.probabilityIncreasing * 100)}
+                        <small>%</small>
+                        {model.slope >= 0 ? (
+                          <ArrowUpRight size={24} />
+                        ) : (
+                          <ArrowDownRight size={24} />
+                        )}
+                      </strong>
+                      <p>{tr('analysis:conditionalOnThisModelAndPrior')}</p>
+                    </div>
                   </div>
-                  <div>
-                    <span className="stat-label">Estimated weekly change</span>
-                    <strong>
-                      {model.slope >= 0 ? '+' : ''}
-                      {number(model.slope, 2)}
-                      <small> {spec.unit}</small>
-                    </strong>
-                    <p>
-                      95% CrI: {number(model.slopeInterval[0], 2)} to{' '}
-                      {number(model.slopeInterval[1], 2)}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="stat-label">Probability of an increasing trend</span>
-                    <strong>
-                      {number(model.probabilityIncreasing * 100)}
-                      <small>%</small>
-                      {model.slope >= 0 ? <ArrowUpRight size={24} /> : <ArrowDownRight size={24} />}
-                    </strong>
-                    <p>Conditional on this model and prior</p>
-                  </div>
-                </div>
-                <Panel
-                  title={`${spec.label}, with perspective`}
-                  subtitle={`${prettyDate(model.firstDate)} – ${prettyDate(model.lastDate)} · ${horizon ? `${horizon}-day extrapolation from the last observation` : 'Observed period only'}`}
-                  action={<span className="tag">Bayesian linear trend</span>}
-                >
-                  <TrendChart
-                    data={model.curve}
-                    forecastStart={horizon ? model.lastDate : undefined}
-                    unit={spec.unit}
-                  />
-                  <div className="chart-legend">
-                    <span>
-                      <i className="legend-dot" /> Observed
-                    </span>
-                    <span>
-                      <i className="legend-line" /> Posterior mean
-                    </span>
-                    <span>
-                      <i className="legend-area credible" /> 95% credible interval
-                    </span>
-                    <span>
-                      <i className="legend-area" /> 95% predictive interval
-                    </span>
-                  </div>
-                </Panel>
-                <div className="analysis-explanation">
-                  <Panel title="What this suggests">
-                    <p className="finding">
-                      {model.slopeInterval[0] > 0
-                        ? 'The model supports an increasing trend in this window.'
-                        : model.slopeInterval[1] < 0
-                          ? 'The model supports a decreasing trend in this window.'
-                          : 'The direction is still uncertain in this window.'}
-                    </p>
-                    <p className="muted">
-                      Increasing is a direction, not a judgment of health. This is a within-person
-                      time trend; it does not explain what caused the change.
-                    </p>
-                    {horizon > 0 && last && (
-                      <div className="forecast-result">
-                        <span>
-                          For{' '}
-                          {prettyDate(last.date, {
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric',
-                          })}
-                        </span>
-                        <strong>
-                          {number(last.mean, 2)} <small>{spec.unit}</small>
-                        </strong>
-                        <span>
-                          Single-observation 95% predictive interval:
-                          <br />
-                          <b>
-                            {number(last.predictive[0], 2)} – {number(last.predictive[1], 2)}{' '}
-                            {spec.unit}
-                          </b>
-                        </span>
-                      </div>
-                    )}
-                  </Panel>
-                  <Panel title="Before you draw a conclusion">
-                    <ul className="insight-list">
-                      <li>
-                        <Info size={16} />
-                        <span>
-                          The darker band describes uncertainty about the average trend. The lighter
-                          band includes day-to-day variation.
-                        </span>
-                      </li>
-                      <li>
-                        <Info size={16} />
-                        <span>
-                          {model.residualAutocorrelation !== null
-                            ? `Consecutive-day residual correlation: ${number(model.residualAutocorrelation, 2)} (${model.residualPairs} pairs). ${Math.abs(model.residualAutocorrelation) > 0.3 ? 'Dependence may make these intervals too narrow.' : 'This diagnostic does not establish independence.'}`
-                            : 'Too few consecutive-day residual pairs to assess serial dependence.'}
-                        </span>
-                      </li>
-                      {model.boundaryWarning && (
-                        <li>
-                          <Info size={16} />
-                          <span>
-                            The Gaussian model extends beyond this metric’s physical scale.
-                            Intervals are shown untrimmed; treat boundary forecasts cautiously.
-                          </span>
-                        </li>
-                      )}
-                      {metric === 'hrv' && (methods.size > 1 || methods.has('unknown')) && (
-                        <li>
-                          <Info size={16} />
-                          <span>
-                            HRV methods are mixed or unknown. Select one known method for a more
-                            interpretable trend.
-                          </span>
-                        </li>
-                      )}
-                      {sources.size > 1 && (
-                        <li>
-                          <Info size={16} />
-                          <span>
-                            This selection mixes measurement sources. Device changes can resemble
-                            changes in health.
-                          </span>
-                        </li>
-                      )}
-                      {to > model.lastDate && (
-                        <li>
-                          <Info size={16} />
-                          <span>
-                            The last observation is {model.lastDate}. Forecast dates are based on
-                            that observation, not today.
-                          </span>
-                        </li>
-                      )}
-                      <li>
-                        <Info size={16} />
-                        <span>
-                          Missingness and illness filtering can bias the sample. Fourteen
-                          observations are a display threshold, not a guarantee of reliable
-                          inference.
-                        </span>
-                      </li>
-                    </ul>
-                  </Panel>
-                </div>
-                <details className="panel model-details">
-                  <summary>Model specification, values & reproducibility</summary>
-                  <p>
-                    y = intercept + slope × centered elapsed weeks + Gaussian noise. Fixed scaling:
-                    (value − {model.prior.center}) / {model.prior.scale}. Prior variance:
-                    InvGamma(2, 1); coefficient covariance conditional on noise: diag(10,{' '}
-                    {model.prior.slopeVariance}). Posterior degrees of freedom: {model.posterior.df}
-                    .
-                  </p>
-                  <button
-                    className="button secondary small-button"
-                    onClick={() =>
-                      download(
-                        JSON.stringify(
-                          {
-                            synthetic: demo,
-                            settings: { metric, from, to, prior, horizon, illness, method, source },
-                            observations,
-                            model,
-                          },
-                          null,
-                          2,
-                        ),
-                        `teddmhen-model-${metric}.json`,
-                        'application/json',
-                      )
-                    }
+                  <Panel
+                    title={tr('analysis:withPerspective', { value0: localize(spec.label) })}
+                    subtitle={`${prettyDate(model.firstDate)} – ${prettyDate(model.lastDate)} · ${horizon ? tr('analysis:dayExtrapolationFromTheLastObservation', { value0: horizon }) : tr('analysis:observedPeriodOnly')}`}
+                    action={<span className="tag">{tr('analysis:bayesianLinearTrend')}</span>}
                   >
-                    <Download size={15} /> Download model & observations
-                  </button>
-                  <div className="table-scroll">
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Date</th>
-                          <th>Observed</th>
-                          <th>Mean</th>
-                          <th>95% credible interval</th>
-                          <th>95% predictive interval</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {model.curve.map((row) => (
-                          <tr key={row.date}>
-                            <td>
-                              {row.date}
-                              {row.forecast ? ' *' : ''}
-                            </td>
-                            <td>{number(row.observed, 2)}</td>
-                            <td>{number(row.mean, 2)}</td>
-                            <td>{row.credible.map((v) => number(v, 2)).join(' – ')}</td>
-                            <td>{row.predictive.map((v) => number(v, 2)).join(' – ')}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                    <TrendChart
+                      data={model.curve}
+                      forecastStart={horizon ? model.lastDate : undefined}
+                      unit={localize(spec.unit)}
+                    />
+                    <div className="chart-legend">
+                      <span>
+                        <Trans
+                          i18nKey="analysis:observed"
+                          components={{ slot0: <i className="legend-dot" /> }}
+                        />
+                      </span>
+                      <span>
+                        <Trans
+                          i18nKey="analysis:posteriorMean"
+                          components={{ slot0: <i className="legend-line" /> }}
+                        />
+                      </span>
+                      <span>
+                        <Trans
+                          i18nKey="analysis:95CredibleInterval"
+                          components={{ slot0: <i className="legend-area credible" /> }}
+                        />
+                      </span>
+                      <span>
+                        <Trans
+                          i18nKey="analysis:95PredictiveInterval"
+                          components={{ slot0: <i className="legend-area" /> }}
+                        />
+                      </span>
+                    </div>
+                  </Panel>
+                  <div className="analysis-explanation">
+                    <Panel title={tr('analysis:whatThisSuggests')}>
+                      <p className="finding">
+                        {model.slopeInterval[0] > 0
+                          ? tr('analysis:theModelSupportsAnIncreasingTrendInThisWindow')
+                          : model.slopeInterval[1] < 0
+                            ? tr('analysis:theModelSupportsADecreasingTrendInThisWindow')
+                            : tr('analysis:theDirectionIsStillUncertainInThisWindow')}
+                      </p>
+                      <p className="muted">
+                        {tr('analysis:increasingIsADirectionNotAJudgmentOfHealth')}
+                      </p>
+                      {horizon > 0 && last && (
+                        <div className="forecast-result">
+                          <span>
+                            <Trans
+                              i18nKey="analysis:for"
+                              components={{
+                                slot0: (
+                                  <>
+                                    {prettyDate(last.date, {
+                                      day: 'numeric',
+                                      month: 'long',
+                                      year: 'numeric',
+                                    })}
+                                  </>
+                                ),
+                              }}
+                            />
+                          </span>
+                          <strong>
+                            {number(last.mean, 2)} <small>{localize(spec.unit)}</small>
+                          </strong>
+                          <span>
+                            <Trans
+                              i18nKey="analysis:singleObservation95PredictiveInterval"
+                              components={{
+                                slot0: <br />,
+                                slot1: <b />,
+                                slot2: <>{number(last.predictive[0], 2)}</>,
+                                slot3: <>{number(last.predictive[1], 2)}</>,
+                                slot4: <>{localize(spec.unit)}</>,
+                              }}
+                            />
+                          </span>
+                        </div>
+                      )}
+                    </Panel>
+                    <Panel title={tr('analysis:beforeYouDrawAConclusion')}>
+                      <ul className="insight-list">
+                        <li>
+                          <Info size={16} />
+                          <span>
+                            {tr('analysis:theDarkerBandDescribesUncertaintyAboutTheAverageTrend')}
+                          </span>
+                        </li>
+                        <li>
+                          <Info size={16} />
+                          <span>
+                            {model.residualAutocorrelation !== null
+                              ? tr('analysis:consecutiveDayResidualCorrelationPairs', {
+                                  value0: number(model.residualAutocorrelation, 2),
+                                  value1: model.residualPairs,
+                                  value2:
+                                    Math.abs(model.residualAutocorrelation) > 0.3
+                                      ? tr('analysis:dependenceMayMakeTheseIntervalsTooNarrow')
+                                      : tr('analysis:thisDiagnosticDoesNotEstablishIndependence'),
+                                })
+                              : tr('analysis:tooFewConsecutiveDayResidualPairsToAssessSerial')}
+                          </span>
+                        </li>
+                        {model.boundaryWarning && (
+                          <li>
+                            <Info size={16} />
+                            <span>
+                              {tr('analysis:theGaussianModelExtendsBeyondThisMetricSPhysical')}
+                            </span>
+                          </li>
+                        )}
+                        {metric === 'hrv' && (methods.size > 1 || methods.has('unknown')) && (
+                          <li>
+                            <Info size={16} />
+                            <span>{tr('analysis:hrvMethodsAreMixedOrUnknownSelectOneKnown')}</span>
+                          </li>
+                        )}
+                        {sources.size > 1 && (
+                          <li>
+                            <Info size={16} />
+                            <span>
+                              {tr(
+                                'analysis:thisSelectionMixesMeasurementSourcesDeviceChangesCanResemble',
+                              )}
+                            </span>
+                          </li>
+                        )}
+                        {to > model.lastDate && (
+                          <li>
+                            <Info size={16} />
+                            <span>
+                              <Trans
+                                i18nKey="analysis:theLastObservationIsForecastDatesAreBasedOn"
+                                components={{ slot0: <>{model.lastDate}</> }}
+                              />
+                            </span>
+                          </li>
+                        )}
+                        <li>
+                          <Info size={16} />
+                          <span>
+                            {tr('analysis:missingnessAndIllnessFilteringCanBiasTheSampleFourteen')}
+                          </span>
+                        </li>
+                      </ul>
+                    </Panel>
                   </div>
-                </details>
-              </>
-            ) : (
-              <Panel>
-                <EmptyState
-                  title="Let the evidence build."
-                  description={`${observations.length} of ${MIN_OBSERVATIONS} required observations for ${spec.label.toLowerCase()}. Record more days or widen your date range; missing values remain missing.`}
-                  action={false}
-                />
-                <Link className="button secondary" to="/check-in">
-                  Add a check-in
-                </Link>{' '}
-                <Link className="text-link" to="/import">
-                  Import journal data
-                </Link>
-              </Panel>
-            )}
-          </>
+                  <details className="panel model-details">
+                    <summary>{tr('analysis:modelSpecificationValuesReproducibility')}</summary>
+                    <p>
+                      <Trans
+                        i18nKey="analysis:yInterceptSlopeCenteredElapsedWeeksGaussianNoiseFixed"
+                        components={{
+                          slot0: <>{model.prior.center}</>,
+                          slot1: <>{model.prior.scale}</>,
+                          slot2: <>{model.prior.slopeVariance}</>,
+                          slot3: <>{model.posterior.df}</>,
+                        }}
+                      />
+                    </p>
+                    <button
+                      className="button secondary small-button"
+                      onClick={() =>
+                        download(
+                          JSON.stringify(
+                            {
+                              synthetic: demo,
+                              settings: {
+                                metric,
+                                from,
+                                to,
+                                prior,
+                                horizon,
+                                illness,
+                                method,
+                                source,
+                              },
+                              observations,
+                              model,
+                            },
+                            null,
+                            2,
+                          ),
+                          `teddmhen-model-${metric}.json`,
+                          'application/json',
+                        )
+                      }
+                    >
+                      <Trans
+                        i18nKey="analysis:downloadModelObservations"
+                        components={{ slot0: <Download size={15} /> }}
+                      />
+                    </button>
+                    <div className="table-scroll">
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>{tr('analysis:date')}</th>
+                            <th>{tr('analysis:observed2')}</th>
+                            <th>{tr('analysis:mean')}</th>
+                            <th>{tr('analysis:95CredibleInterval2')}</th>
+                            <th>{tr('analysis:95PredictiveInterval2')}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {model.curve.map((row) => (
+                            <tr key={row.date}>
+                              <td>
+                                {row.date}
+                                {row.forecast ? ' *' : ''}
+                              </td>
+                              <td>{number(row.observed, 2)}</td>
+                              <td>{number(row.mean, 2)}</td>
+                              <td>{row.credible.map((v) => number(v, 2)).join(' – ')}</td>
+                              <td>{row.predictive.map((v) => number(v, 2)).join(' – ')}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </details>
+                </>
+              ) : (
+                <Panel>
+                  <EmptyState
+                    title={tr('analysis:letTheEvidenceBuild')}
+                    description={tr('analysis:ofRequiredObservationsForRecordMoreDaysOrWiden', {
+                      value0: observations.length,
+                      value1: MIN_OBSERVATIONS,
+                      value2: localize(spec.label),
+                    })}
+                    action={false}
+                  />
+                  <Link className="button secondary" to="/check-in">
+                    {tr('analysis:addACheckIn')}
+                  </Link>{' '}
+                  <Link className="text-link" to="/import">
+                    {tr('analysis:importJournalData')}
+                  </Link>
+                </Panel>
+              )
+            }
+          />
         )
       )}
       <p className="data-caption">
-        Exploratory statistics, not a diagnostic or validated forecasting system. Predictions assume
-        the current linear pattern continues.
+        {tr('analysis:exploratoryStatisticsNotADiagnosticOrValidatedForecastingSystem')}
       </p>
     </>
   );

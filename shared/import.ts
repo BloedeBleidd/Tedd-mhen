@@ -1,4 +1,12 @@
 import { emptyEntry, entrySchema, dateSchema, type Entry } from './schema';
+function parseJson(value: string): unknown {
+  try {
+    return JSON.parse(value);
+  } catch {
+    throw new Error('Invalid JSON.');
+  }
+}
+
 export const IMPORT_MAX_ROWS = 500;
 export const IMPORT_MAX_BYTES = 20 * 1024 * 1024;
 export type ImportRow = { date: string; fields: Record<string, unknown> };
@@ -84,7 +92,7 @@ function csvRows(text: string) {
         if (metadata.has(root) && root !== 'timezone' && root !== 'date') continue;
         let value: unknown = raw;
         if (['labels', 'symptoms', 'workouts'].includes(root))
-          value = raw ? JSON.parse(raw) : root === 'labels' ? null : [];
+          value = raw ? parseJson(raw) : root === 'labels' ? null : [];
         else if (
           root === 'date' ||
           root === 'timezone' ||
@@ -150,8 +158,7 @@ export function mergeImported(row: ImportRow, existing?: Entry): Entry {
     } else (base as Record<string, unknown>)[key] = value;
   }
   const parsed = entrySchema.safeParse(base);
-  if (!parsed.success)
-    throw new Error(parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; '));
+  if (!parsed.success) throw new Error(JSON.stringify(parsed.error.issues));
   if (
     new TextEncoder().encode(JSON.stringify({ entry: parsed.data, revision: 0 })).length >
     256 * 1024
@@ -175,9 +182,9 @@ export function parseImport(text: string, format: 'json' | 'ndjson' | 'csv'): Im
     records = clean
       .split(/\r?\n/)
       .filter((line) => line.trim())
-      .map((line) => JSON.parse(line))
+      .map((line) => parseJson(line))
       .filter((row, index) => {
-        if (row && typeof row === 'object' && Object.hasOwn(row, '_meta')) {
+        if (row && typeof row === 'object' && '_meta' in row) {
           if (index !== 0 || Object.keys(row).length !== 1)
             throw new Error('NDJSON metadata must occupy the first line by itself.');
           validateMetadata(row._meta);
@@ -186,9 +193,9 @@ export function parseImport(text: string, format: 'json' | 'ndjson' | 'csv'): Im
         return true;
       });
   else {
-    const parsed = JSON.parse(clean);
+    const parsed = parseJson(clean);
     if (!Array.isArray(parsed)) validateMetadata(parsed);
-    records = Array.isArray(parsed) ? parsed : parsed?.entries;
+    records = Array.isArray(parsed) ? parsed : (parsed as Record<string, unknown>).entries;
   }
   if (!Array.isArray(records) || !records.length)
     throw new Error('No observations found. Use a Tedd’mhen JSON, NDJSON or CSV export.');

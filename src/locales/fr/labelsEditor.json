@@ -1,0 +1,9 @@
+{
+  "recordContextLabels": "<slot0/> Renseigner les étiquettes de contexte",
+  "examplesTravelLateMealEveningSessionCheckedWithNo": "Exemples : voyage, repas tardif, séance du soir. Coché sans étiquette signifie explicitement aucune ; décoché signifie inconnu. Utilisez des étiquettes cohérentes pour l’analyse.",
+  "removeLabel": "Supprimer l’étiquette {{value0}}",
+  "newContextLabel": "Nouvelle étiquette de contexte",
+  "addAReusableLabel": "Ajouter une étiquette réutilisable",
+  "addLabel": "Ajouter une étiquette",
+  "12LabelsLabelsDescribeContextOptionalNotesAreNot": "<slot0/> / 12 étiquettes. Les étiquettes décrivent le contexte ; les notes facultatives ne sont pas utilisées par le modèle."
+}

@@ -70,13 +70,13 @@ export function solarTheme(now: Date, location: SunLocation) {
     polar: times.alwaysUp ? ('day' as const) : times.alwaysDown ? ('night' as const) : null,
   };
 }
-export function resolveAppearance(settings: Appearance, now: Date, systemDark: boolean) {
+export function resolveAppearance(settings: Appearance, now: Date, _systemDark?: boolean) {
   if (settings.mode !== 'auto')
     return { theme: settings.mode, source: 'manual' as const, next: null, polar: null };
   if (!settings.location)
     return {
-      theme: systemDark ? ('dark' as const) : ('light' as const),
-      source: 'system' as const,
+      theme: 'light' as const,
+      source: 'fallback' as const,
       next: null,
       polar: null,
     };

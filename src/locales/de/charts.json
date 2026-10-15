@@ -1,0 +1,6 @@
+{
+  "recordedValues": "Erfasste Werte.",
+  "observedValuesPosteriorMean95CredibleIntervalAnd95": "Beobachtete Werte, Posterior-Mittelwert, 95-%-Kredibilitätsintervall und 95-%-Vorhersageintervall.",
+  "timeSeriesIn": "Zeitreihe in {{value0}}. {{value1}}",
+  "forecast": "Vorhersage →"
+}

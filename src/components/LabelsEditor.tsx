@@ -1,3 +1,6 @@
+import { MessageValue } from '../components/MessageValue';
+import { useTranslation, Trans } from 'react-i18next';
+import { t as tr } from '../i18n';
 import { useState } from 'react';
 export function LabelsEditor({
   value,
@@ -6,9 +9,10 @@ export function LabelsEditor({
   value: string[] | null;
   onChange: (value: string[] | null) => void;
 }) {
+  useTranslation();
   const [draft, setDraft] = useState('');
   const add = () => {
-    const label = draft.trim().toLowerCase().replace(/\s+/g, ' ');
+    const label = draft.trim();
     if (
       label &&
       label.length <= 40 &&
@@ -22,16 +26,21 @@ export function LabelsEditor({
   return (
     <div className="labels-editor">
       <label className="check-label">
-        <input
-          type="checkbox"
-          checked={value !== null}
-          onChange={(e) => onChange(e.target.checked ? [] : null)}
+        <Trans
+          i18nKey="labelsEditor:recordContextLabels"
+          components={{
+            slot0: (
+              <input
+                type="checkbox"
+                checked={value !== null}
+                onChange={(e) => onChange(e.target.checked ? [] : null)}
+              />
+            ),
+          }}
         />
-        Record context labels
       </label>
       <p className="small muted">
-        Examples: travel, late meal, evening session. Checked with no labels means explicitly none;
-        unchecked means unknown. Use consistent labels for analysis.
+        {tr('labelsEditor:examplesTravelLateMealEveningSessionCheckedWithNo')}
       </p>
       {value !== null && (
         <>
@@ -42,7 +51,7 @@ export function LabelsEditor({
                 className="tag"
                 key={label}
                 onClick={() => onChange(value.filter((v) => v !== label))}
-                aria-label={`Remove label ${label}`}
+                aria-label={tr('labelsEditor:removeLabel', { value0: label })}
               >
                 {label} ×
               </button>
@@ -50,10 +59,10 @@ export function LabelsEditor({
           </div>
           <div className="label-add">
             <input
-              aria-label="New context label"
+              aria-label={tr('labelsEditor:newContextLabel')}
               value={draft}
               maxLength={40}
-              placeholder="Add a reusable label"
+              placeholder={tr('labelsEditor:addAReusableLabel')}
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
@@ -68,12 +77,14 @@ export function LabelsEditor({
               onClick={add}
               disabled={!draft.trim() || value.length >= 12}
             >
-              Add label
+              {tr('labelsEditor:addLabel')}
             </button>
           </div>
           <p className="small muted">
-            {value.length} / 12 labels. Labels describe context; optional notes are not model
-            inputs.
+            <Trans
+              i18nKey="labelsEditor:12LabelsLabelsDescribeContextOptionalNotesAreNot"
+              components={{ slot0: <MessageValue value={value.length} /> }}
+            />
           </p>
         </>
       )}

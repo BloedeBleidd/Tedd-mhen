@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+import { localize, t as tr } from '../i18n';
 import {
   Area,
   CartesianGrid,
@@ -11,7 +13,7 @@ import {
 } from 'recharts';
 import { dayNumber } from '../../shared/schema';
 import type { Prediction } from '../../shared/bayes';
-import { prettyDate } from './ui';
+import { prettyDate, number } from './ui';
 import { useReveal, useReducedMotion } from '../lib/motion';
 export function TrendChart({
   data,
@@ -24,6 +26,7 @@ export function TrendChart({
   unit: string;
   simple?: boolean;
 }) {
+  useTranslation();
   const reveal = useReveal<HTMLDivElement>(
     'chart',
     JSON.stringify([data, unit, simple, forecastStart]),
@@ -34,7 +37,12 @@ export function TrendChart({
       ref={reveal}
       className="chart"
       role="img"
-      aria-label={`Time series in ${unit}. ${simple ? 'Recorded values.' : 'Observed values, posterior mean, 95% credible interval, and 95% predictive interval.'}`}
+      aria-label={tr('charts:timeSeriesIn', {
+        value0: unit,
+        value1: simple
+          ? tr('charts:recordedValues')
+          : tr('charts:observedValuesPosteriorMean95CredibleIntervalAnd95'),
+      })}
     >
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart
@@ -61,7 +69,7 @@ export function TrendChart({
             axisLine={false}
             tick={{ fontSize: 11, fill: 'var(--muted)' }}
             domain={['auto', 'auto']}
-            tickFormatter={(v) => Number(v.toFixed(1)).toString()}
+            tickFormatter={(v) => number(v, 1)}
           />
           <Tooltip
             isAnimationActive={!reduced}
@@ -76,8 +84,8 @@ export function TrendChart({
             }
             formatter={(value, name) => [
               Array.isArray(value)
-                ? `${value.map((v) => Number(v).toFixed(2)).join(' – ')} ${unit}`
-                : `${Number(value).toFixed(2)} ${unit}`,
+                ? `${value.map((v) => number(Number(v), 2)).join(' – ')} ${unit}`
+                : `${number(Number(value), 2)} ${unit}`,
               name,
             ]}
             contentStyle={{
@@ -94,7 +102,7 @@ export function TrendChart({
               <Area
                 className="chart-series chart-band"
                 dataKey="predictive"
-                name="95% predictive interval"
+                name={localize('95% predictive interval')}
                 stroke="none"
                 fill="var(--chart-predictive)"
                 isAnimationActive={false}
@@ -102,7 +110,7 @@ export function TrendChart({
               <Area
                 className="chart-series chart-band"
                 dataKey="credible"
-                name="95% credible interval"
+                name={localize('95% credible interval')}
                 stroke="none"
                 fill="var(--chart-credible)"
                 fillOpacity={0.65}
@@ -112,7 +120,7 @@ export function TrendChart({
                 className="chart-series chart-line"
                 type="linear"
                 dataKey="mean"
-                name="Posterior mean"
+                name={localize('Posterior mean')}
                 stroke="var(--chart-mean)"
                 dot={false}
                 strokeWidth={2}
@@ -124,7 +132,7 @@ export function TrendChart({
             className={`chart-series ${simple ? 'chart-line' : 'chart-points'}`}
             type="linear"
             dataKey="observed"
-            name="Observed"
+            name={localize('Observed')}
             stroke={simple ? 'var(--chart-mean)' : 'transparent'}
             strokeWidth={2.5}
             dot={
@@ -141,7 +149,7 @@ export function TrendChart({
               stroke="var(--chart-forecast)"
               strokeDasharray="4 4"
               label={{
-                value: 'Forecast →',
+                value: tr('charts:forecast'),
                 position: 'insideTopRight',
                 fontSize: 10,
                 fill: 'var(--chart-forecast)',

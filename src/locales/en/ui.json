@@ -1,0 +1,6 @@
+{
+  "loadingYourJournal": "<slot0/> Loading your journal…",
+  "recordYourFirstDay": "Record your first day <slot0/>",
+  "notRecorded": "Not recorded",
+  "howToReadThis": "<slot0/> How to read this"
+}

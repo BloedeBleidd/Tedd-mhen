@@ -1,6 +1,12 @@
 # Interface and motion
 
-The English interface uses shared color tokens for light/dark appearance, explicit form labels, anchored numeric scales, and visible keyboard focus. Main content has a skip link. Dialogs use native modal focus management. See [Data dictionary](DATA_DICTIONARY.md) for field semantics and [Data lifecycle](DATA_STORAGE.md) for local appearance preferences.
+The six-language interface uses shared color tokens for light/dark appearance, explicit form labels, anchored numeric scales, and visible keyboard focus. Main content has a skip link. Dialogs use native modal focus management. See [Data dictionary](DATA_DICTIONARY.md) for field semantics and [Data lifecycle](DATA_STORAGE.md) for local appearance preferences.
+
+## Language and activity controls
+
+The animated globe sits beside Appearance and opens manual language selection or consent-based location use. Auto defaults to English and light without location. The device language and dark-mode preference do not replace these defaults. Both dialogs preserve active drafts and honor reduced motion. See [Localization](LOCALIZATION.md) for catalog structure, local geography and canonical storage.
+
+Activity selection has an accent-insensitive search and grouped choices. The current choice stays visible while searching, so typing does not silently change a recorded activity. Strength disciplines expose exercise sets. Analysis pickers omit activity indicators absent from the selected observations.
 
 ## Account form feedback
 

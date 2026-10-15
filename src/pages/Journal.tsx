@@ -1,3 +1,7 @@
+import { ActivitySelect } from '../components/ActivitySelect';
+import { MessageValue } from '../components/MessageValue';
+import { useTranslation, Trans } from 'react-i18next';
+import { t as tr } from '../i18n';
 import { useEffect, useState } from 'react';
 import { ArrowDown, ArrowUpRight, Plus, Search, SlidersHorizontal } from 'lucide-react';
 import { WorkspaceLink as Link } from '../components/WorkspaceLink';
@@ -14,6 +18,7 @@ import {
   prettyDate,
 } from '../components/ui';
 export function Journal() {
+  useTranslation();
   const [from, setFrom] = useState(''),
     [to, setTo] = useState(''),
     [q, setQ] = useState(''),
@@ -55,38 +60,38 @@ export function Journal() {
   return (
     <>
       <PageHeading
-        eyebrow="YOUR PERSONAL RECORD"
-        title="Every day tells a story."
-        description="Revisit the details. Find the days that matter."
+        eyebrow={tr('journal:yourPersonalRecord')}
+        title={tr('journal:everyDayTellsAStory')}
+        description={tr('journal:revisitTheDetailsFindTheDaysThatMatter')}
         action={
           <Link className="button primary" to="/check-in">
-            <Plus size={17} /> Add a check-in
+            <Trans i18nKey="journal:addACheckIn" components={{ slot0: <Plus size={17} /> }} />
           </Link>
         }
       />
       <Panel className="filter-panel">
         <div className="filter-title">
           <SlidersHorizontal size={17} />
-          <strong>Filter your journal</strong>
+          <strong>{tr('journal:filterYourJournal')}</strong>
           {filtered && (
             <button className="text-link" onClick={reset}>
-              Clear filters
+              {tr('journal:clearFilters')}
             </button>
           )}
         </div>
         <div className="journal-filters">
-          <Field label="Search">
+          <Field label={tr('journal:search')}>
             <span className="search-input">
               <Search size={16} />
               <input
                 value={q}
                 maxLength={200}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Notes, sessions, symptoms…"
+                placeholder={tr('journal:notesSessionsSymptoms')}
               />
             </span>
           </Field>
-          <Field label="From">
+          <Field label={tr('journal:from')}>
             <input
               type="date"
               value={from}
@@ -96,7 +101,7 @@ export function Journal() {
               }}
             />
           </Field>
-          <Field label="To">
+          <Field label={tr('journal:to')}>
             <input
               type="date"
               value={to}
@@ -106,23 +111,18 @@ export function Journal() {
               }}
             />
           </Field>
-          <Field label="Activity">
-            <select
-              value={type}
-              onChange={(e) => {
-                setType(e.target.value);
+          <div className="field">
+            <span>{tr('journal:activity')}</span>
+            <ActivitySelect
+              value={type || 'all'}
+              includeAll
+              onChange={(value) => {
+                setType(value === 'all' ? '' : value);
                 setCursors([]);
               }}
-            >
-              <option value="">All activities</option>
-              {workoutTypes.map((t) => (
-                <option key={t} value={t}>
-                  {t[0].toUpperCase() + t.slice(1)}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <Field label="Illness">
+            />
+          </div>
+          <Field label={tr('journal:illness')}>
             <select
               value={illness}
               onChange={(e) => {
@@ -130,9 +130,9 @@ export function Journal() {
                 setCursors([]);
               }}
             >
-              <option value="all">All days</option>
-              <option value="yes">Illness / symptoms</option>
-              <option value="no">Explicitly no illness</option>
+              <option value="all">{tr('journal:allDays')}</option>
+              <option value="yes">{tr('journal:illnessSymptoms')}</option>
+              <option value="no">{tr('journal:explicitlyNoIllness')}</option>
             </select>
           </Field>
         </div>
@@ -143,17 +143,30 @@ export function Journal() {
       ) : (
         data && (
           <Panel
-            title={`${data.total} ${data.total === 1 ? 'day' : 'days'} in your journal`}
-            subtitle="Newest first · click a date to view or edit the complete entry"
-            action={<span className="tag">Page {cursors.length + 1}</span>}
+            title={tr('journal:inYourJournal', {
+              count: data.total,
+            })}
+            subtitle={tr('journal:newestFirstClickADateToViewOrEdit')}
+            action={
+              <span className="tag">
+                <Trans
+                  i18nKey="journal:page"
+                  components={{ slot0: <MessageValue value={cursors.length + 1} /> }}
+                />
+              </span>
+            }
           >
             {data.entries.length === 0 ? (
               <EmptyState
-                title={filtered ? 'No days match these filters.' : 'Your journal starts here.'}
+                title={
+                  filtered
+                    ? tr('journal:noDaysMatchTheseFilters')
+                    : tr('journal:yourJournalStartsHere')
+                }
                 description={
                   filtered
-                    ? 'Try a wider date range or clear a filter.'
-                    : 'Record a check-in to build your personal history.'
+                    ? tr('journal:tryAWiderDateRangeOrClearAFilter')
+                    : tr('journal:recordACheckInToBuildYourPersonalHistory')
                 }
                 action={!filtered}
               />
@@ -164,16 +177,19 @@ export function Journal() {
                     <thead>
                       <tr>
                         <th>
-                          Date <ArrowDown size={12} />
+                          <Trans
+                            i18nKey="journal:date"
+                            components={{ slot0: <ArrowDown size={12} /> }}
+                          />
                         </th>
-                        <th>Activity</th>
-                        <th>Wellbeing</th>
-                        <th>Sleep</th>
-                        <th>HRV</th>
-                        <th>Training</th>
-                        <th>Illness</th>
+                        <th>{tr('journal:activity')}</th>
+                        <th>{tr('journal:wellbeing')}</th>
+                        <th>{tr('journal:sleep')}</th>
+                        <th>{tr('journal:hrv')}</th>
+                        <th>{tr('journal:training')}</th>
+                        <th>{tr('journal:illness')}</th>
                         <th>
-                          <span className="sr-only">Edit</span>
+                          <span className="sr-only">{tr('journal:edit')}</span>
                         </th>
                       </tr>
                     </thead>
@@ -195,12 +211,14 @@ export function Journal() {
                               {e.workoutTypes.length ? (
                                 e.workoutTypes.map((t) => (
                                   <span key={t} className="tag">
-                                    {t}
+                                    {tr(`activities:${t}`)}
                                   </span>
                                 ))
                               ) : (
                                 <span className="muted">
-                                  {e.trainingStatus === 'rest' ? 'Rest day' : 'Not recorded'}
+                                  {e.trainingStatus === 'rest'
+                                    ? tr('journal:restDay')
+                                    : tr('journal:notRecorded')}
                                 </span>
                               )}
                             </div>
@@ -215,10 +233,14 @@ export function Journal() {
                               : `${number(e.sleep.durationMinutes / 60)} h`}
                           </td>
                           <td>
-                            {e.physiology.hrv === null ? '—' : `${number(e.physiology.hrv)} ms`}
+                            {e.physiology.hrv === null
+                              ? '—'
+                              : tr('journal:ms', { value0: number(e.physiology.hrv) })}
                           </td>
                           <td>
-                            {e.trainingMinutes === null ? '—' : `${number(e.trainingMinutes)} min`}
+                            {e.trainingMinutes === null
+                              ? '—'
+                              : tr('journal:min', { value0: number(e.trainingMinutes) })}
                           </td>
                           <td>
                             {e.illnessSeverity === null ? (
@@ -233,7 +255,7 @@ export function Journal() {
                             <Link
                               className="icon-button"
                               to={`/check-in?date=${e.date}`}
-                              aria-label={`Edit ${e.date}`}
+                              aria-label={tr('journal:edit2', { value0: e.date })}
                             >
                               <ArrowUpRight size={17} />
                             </Link>
@@ -245,8 +267,14 @@ export function Journal() {
                 </div>
                 <div className="pagination">
                   <span>
-                    {cursors.length * 30 + 1}–{cursors.length * 30 + data.entries.length} of{' '}
-                    {data.total} days
+                    <Trans
+                      i18nKey="journal:ofDays"
+                      components={{
+                        slot0: <MessageValue value={cursors.length * 30 + 1} />,
+                        slot1: <MessageValue value={cursors.length * 30 + data.entries.length} />,
+                        slot2: <MessageValue value={data.total} />,
+                      }}
+                    />
                   </span>
                   <div className="button-group">
                     <button
@@ -254,14 +282,14 @@ export function Journal() {
                       disabled={!cursors.length}
                       onClick={() => setCursors((c) => c.slice(0, -1))}
                     >
-                      Previous
+                      {tr('journal:previous')}
                     </button>
                     <button
                       className="button secondary small-button"
                       disabled={!data.nextCursor}
                       onClick={() => setCursors((c) => [...c, data.nextCursor!])}
                     >
-                      Next
+                      {tr('journal:next')}
                     </button>
                   </div>
                 </div>

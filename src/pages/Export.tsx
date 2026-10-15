@@ -1,3 +1,6 @@
+import { MessageValue } from '../components/MessageValue';
+import { useTranslation, Trans } from 'react-i18next';
+import { localize, t as tr } from '../i18n';
 import { useState } from 'react';
 import { Check, Download, FileJson, FileSpreadsheet, FileText, ShieldCheck } from 'lucide-react';
 import { useApi, useLoad, download } from '../lib/api';
@@ -44,6 +47,7 @@ const groupInfo: Record<ExportGroup, { title: string; description: string }> = {
   },
 };
 export function Export() {
+  useTranslation();
   const { demo, getDemoEntries, response: getResponse } = useApi();
   const [from, setFrom] = useState(shiftDate(localDate(), -89)),
     [to, setTo] = useState(localDate()),
@@ -107,7 +111,7 @@ export function Export() {
         if (format === 'md')
           text =
             '# Tedd’mhen · Synthetic demonstration export\n' +
-            markdownEntry({ date: 'Metadata', ...meta }) +
+            markdownEntry({ date: tr('export:metadata'), ...meta }) +
             rows.map(markdownEntry).join('');
         if (format === 'csv') {
           const flat = rows.map((r) => flatten(r)),
@@ -190,17 +194,13 @@ export function Export() {
   return (
     <>
       <PageHeading
-        eyebrow="YOUR DATA, YOUR NEXT STEP"
-        title="Take the full picture with you."
-        description="Build a focused dataset for your own analysis, a spreadsheet, or an external LLM."
+        eyebrow={tr('export:yourDataYourNextStep')}
+        title={tr('export:takeTheFullPictureWithYou')}
+        description={tr('export:buildAFocusedDatasetForYourOwnAnalysisA')}
       />
       <fieldset className="form-fieldset" disabled={busy}>
-        <Panel title="Keep a complete copy">
-          <p>
-            Choose all measurements, labels and notes in JSON for a restorable journal export. The
-            preset includes all recorded dates when they fit within five years; otherwise export
-            your history in separate date ranges. Imports accept up to 500 days per file.
-          </p>
+        <Panel title={tr('export:keepACompleteCopy')}>
+          <p>{tr('export:chooseAllMeasurementsLabelsAndNotesInJsonFor')}</p>
           <button
             className="button secondary"
             onClick={() => {
@@ -215,14 +215,17 @@ export function Export() {
               }
             }}
           >
-            Select complete JSON backup
+            {tr('export:selectCompleteJsonBackup')}
           </button>
         </Panel>
         <div className="export-layout">
           <div>
-            <Panel title="01 · Choose a time window" subtitle="Export up to five years at a time.">
+            <Panel
+              title={tr('export:01ChooseATimeWindow')}
+              subtitle={tr('export:exportUpToFiveYearsAtATime')}
+            >
               <div className="fields-grid">
-                <Field label="From">
+                <Field label={tr('export:from')}>
                   <input
                     type="date"
                     value={from}
@@ -232,7 +235,7 @@ export function Export() {
                     }}
                   />
                 </Field>
-                <Field label="To">
+                <Field label={tr('export:to')}>
                   <input
                     type="date"
                     value={to}
@@ -253,14 +256,17 @@ export function Export() {
                       setSuccess(false);
                     }}
                   >
-                    Last {days} days
+                    <Trans
+                      i18nKey="export:lastDays"
+                      components={{ slot0: <MessageValue value={days} /> }}
+                    />
                   </button>
                 ))}
               </div>
             </Panel>
             <Panel
-              title="02 · Select what to include"
-              subtitle="Dates, time zones, schema version, and record timestamps are always included."
+              title={tr('export:02SelectWhatToInclude')}
+              subtitle={tr('export:datesTimeZonesSchemaVersionAndRecordTimestampsAre')}
               action={
                 <button
                   className="text-link"
@@ -268,7 +274,9 @@ export function Export() {
                     setGroups(groups.length === exportGroups.length ? [] : [...exportGroups])
                   }
                 >
-                  {groups.length === exportGroups.length ? 'Clear all' : 'Select all'}
+                  {groups.length === exportGroups.length
+                    ? tr('export:clearAll')
+                    : tr('export:selectAll')}
                 </button>
               }
             >
@@ -284,22 +292,21 @@ export function Export() {
                       onChange={() => toggle(group)}
                     />
                     <span>
-                      <strong>{groupInfo[group].title}</strong>
-                      <small>{groupInfo[group].description}</small>
+                      <strong>{localize(groupInfo[group].title)}</strong>
+                      <small>{localize(groupInfo[group].description)}</small>
                     </span>
                     {groups.includes(group) && <Check size={17} />}
                   </label>
                 ))}
               </div>
               <details className="export-field-details">
-                <summary>Choose individual measurements</summary>
+                <summary>{tr('export:chooseIndividualMeasurements')}</summary>
                 <p className="muted small">
-                  Keep source and HRV method selected when exporting HRV so the measurement remains
-                  interpretable.
+                  {tr('export:keepSourceAndHrvMethodSelectedWhenExportingHrv')}
                 </p>
                 {groups.map((group) => (
                   <div className="export-field-group" key={group}>
-                    <strong>{groupInfo[group].title}</strong>
+                    <strong>{localize(groupInfo[group].title)}</strong>
                     <div className="export-field-options">
                       {exportFieldOptions[group].map((field) => (
                         <label key={field.path}>
@@ -315,7 +322,7 @@ export function Export() {
                               setSuccess(false);
                             }}
                           />
-                          {field.label}
+                          {localize(field.label)}
                         </label>
                       ))}
                     </div>
@@ -323,32 +330,32 @@ export function Export() {
                 ))}
               </details>
             </Panel>
-            <Panel title="03 · Choose a format">
+            <Panel title={tr('export:03ChooseAFormat')}>
               <div className="format-grid">
                 {(
                   [
                     {
                       key: 'json',
                       title: 'JSON',
-                      detail: 'Complete, structured context',
+                      detail: tr('export:completeStructuredContext'),
                       icon: FileJson,
                     },
                     {
                       key: 'md',
-                      title: 'Markdown',
-                      detail: 'Easy to read and share with an LLM',
+                      title: tr('export:markdown'),
+                      detail: tr('export:easyToReadAndShareWithAnLlm'),
                       icon: FileText,
                     },
                     {
                       key: 'csv',
                       title: 'CSV',
-                      detail: 'Spreadsheet-friendly columns',
+                      detail: tr('export:spreadsheetFriendlyColumns'),
                       icon: FileSpreadsheet,
                     },
                     {
                       key: 'ndjson',
                       title: 'NDJSON',
-                      detail: 'One record per line',
+                      detail: tr('export:oneRecordPerLine'),
                       icon: FileJson,
                     },
                   ] as const
@@ -372,42 +379,46 @@ export function Export() {
               </div>
               {format === 'csv' && (
                 <p className="muted small">
-                  Nested objects use dotted columns; workouts and symptoms remain JSON arrays in
-                  cells. CSV omits the data dictionary. Formula-like text is prefixed with an
-                  apostrophe for spreadsheet safety.
+                  {tr('export:nestedObjectsUseDottedColumnsWorkoutsAndSymptomsRemain')}
                 </p>
               )}
             </Panel>
           </div>
           <aside>
             <Panel className="export-summary">
-              <span className="eyebrow">READY TO TRAVEL</span>
+              <span className="eyebrow">{tr('export:readyToTravel')}</span>
               <div className="export-file-icon">
                 <Download size={28} strokeWidth={1.3} />
               </div>
               <h2>
-                Your journal,
-                <br />
-                in your hands.
+                <Trans i18nKey="export:yourJournalInYourHands" components={{ slot0: <br /> }} />
               </h2>
               <dl>
                 <div>
-                  <dt>Recorded days</dt>
+                  <dt>{tr('export:recordedDays')}</dt>
                   <dd>{count.loading ? '…' : (count.data?.total ?? '—')}</dd>
                 </div>
                 <div>
-                  <dt>Data groups</dt>
+                  <dt>{tr('export:dataGroups')}</dt>
                   <dd>
-                    {groups.length} of {exportGroups.length}
+                    <Trans
+                      i18nKey="export:of"
+                      components={{
+                        slot0: <MessageValue value={groups.length} />,
+                        slot1: <MessageValue value={exportGroups.length} />,
+                      }}
+                    />
                   </dd>
                 </div>
                 <div>
-                  <dt>Format</dt>
+                  <dt>{tr('export:format')}</dt>
                   <dd>{format.toUpperCase()}</dd>
                 </div>
                 <div>
-                  <dt>Written notes</dt>
-                  <dd>{groups.includes('notes') ? 'Included' : 'Excluded'}</dd>
+                  <dt>{tr('export:writtenNotes')}</dt>
+                  <dd>
+                    {groups.includes('notes') ? tr('export:included') : tr('export:excluded')}
+                  </dd>
                 </div>
               </dl>
               <button
@@ -423,46 +434,42 @@ export function Export() {
                 onClick={runExport}
               >
                 <Download size={17} />
-                {busy ? 'Preparing export…' : 'Download export'}
+                {busy ? tr('export:preparingExport') : tr('export:downloadExport')}
               </button>
               <ErrorBox
                 message={
-                  !valid ? 'Select a valid range of up to five years.' : error || count.error
+                  !valid ? tr('export:selectAValidRangeOfUpToFiveYears') : error || count.error
                 }
               />
               {!count.loading && valid && !count.error && !count.data?.total && (
-                <p role="status">
-                  No recorded days in this range. Choose dates containing your observations.
-                </p>
+                <p role="status">{tr('export:noRecordedDaysInThisRangeChooseDatesContaining')}</p>
               )}
               {(!groups.length || !selectedFields.length) && (
-                <p role="status">Select at least one measurement to export.</p>
+                <p role="status">{tr('export:selectAtLeastOneMeasurementToExport')}</p>
               )}
               {(count.data?.total ?? 0) > 500 && (
-                <p className="small">
-                  This export exceeds the 500-day import limit. For files you can restore directly,
-                  choose ranges containing at most 500 recorded days and keep each file below 20
-                  MiB.
-                </p>
+                <p className="small">{tr('export:thisExportExceedsThe500DayImportLimitFor')}</p>
               )}
               <div aria-live="polite">
                 {success && (
                   <p className="saved-state">
-                    <Check size={16} /> Export prepared. Check your downloads.
+                    <Trans
+                      i18nKey="export:exportPreparedCheckYourDownloads"
+                      components={{ slot0: <Check size={16} /> }}
+                    />
                   </p>
                 )}
               </div>
               <p className="export-privacy">
-                <ShieldCheck size={15} />
-                The app never sends this export to an AI provider. You choose where it goes next.
+                <Trans
+                  i18nKey="export:theAppNeverSendsThisExportToAnAi"
+                  components={{ slot0: <ShieldCheck size={15} /> }}
+                />
               </p>
             </Panel>
             <div className="export-tip">
-              <strong>A useful prompt starts with context.</strong>
-              <p>
-                Tell your LLM your goal, the measurement routine, and any changes in equipment. Ask
-                it to distinguish observations from hypotheses and account for missing data.
-              </p>
+              <strong>{tr('export:aUsefulPromptStartsWithContext')}</strong>
+              <p>{tr('export:tellYourLlmYourGoalTheMeasurementRoutineAnd')}</p>
             </div>
           </aside>
         </div>

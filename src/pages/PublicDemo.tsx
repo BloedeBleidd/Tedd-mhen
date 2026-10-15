@@ -1,3 +1,6 @@
+import { LanguageControl } from '../components/LanguageControl';
+import { useTranslation } from 'react-i18next';
+import { t as tr } from '../i18n';
 import { useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { App } from '../App';
@@ -7,6 +10,7 @@ import { AppearanceControl } from '../components/AppearanceControl';
 import { ErrorBox, Loading } from '../components/ui';
 
 export function PublicDemo() {
+  useTranslation();
   const [workspace, setWorkspace] = useState<DemoWorkspace | null>(null);
   const [signedIn, setSignedIn] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +34,7 @@ export function PublicDemo() {
           setError(
             cause instanceof ApiError
               ? cause.message
-              : 'Could not load the demo. Please try again.',
+              : tr('publicDemo:couldNotLoadTheDemoPleaseTryAgain'),
           );
       }
     }
@@ -48,27 +52,30 @@ export function PublicDemo() {
     <div className="public-shell">
       <header className="public-header">
         <Link className="public-brand" to="/">
-          Tedd’mhen
+          {tr('publicDemo:teddMhen')}
         </Link>
-        <AppearanceControl />
+        <div className="topbar-tools">
+          <AppearanceControl />
+          <LanguageControl />
+        </div>
       </header>
       <main id="main">
         <section className="auth-card">
-          <h1>Explore the demo.</h1>
-          <p>A complete example journal. No account required.</p>
+          <h1>{tr('publicDemo:exploreTheDemo')}</h1>
+          <p>{tr('publicDemo:aCompleteExampleJournalNoAccountRequired')}</p>
           {error ? (
             <>
               <ErrorBox message={error} />
               <button className="button primary" onClick={() => setAttempt((value) => value + 1)}>
-                Try again
+                {tr('publicDemo:tryAgain')}
               </button>
             </>
           ) : (
             <Loading />
           )}
-          <nav className="auth-links" aria-label="Account access">
-            <Link to="/sign-in">Sign in</Link>
-            <Link to="/register">Create account</Link>
+          <nav className="auth-links" aria-label={tr('publicDemo:accountAccess')}>
+            <Link to="/sign-in">{tr('publicDemo:signIn')}</Link>
+            <Link to="/register">{tr('publicDemo:createAccount')}</Link>
           </nav>
         </section>
       </main>

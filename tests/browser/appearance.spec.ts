@@ -32,6 +32,7 @@ test('location is opt-in and Auto switches at sunset without reloading', async (
   page,
   context,
 }) => {
+  await page.addInitScript(() => localStorage.setItem('teddmhen.language.v1', 'en'));
   await context.grantPermissions(['geolocation']);
   await context.setGeolocation({ latitude: 52.23, longitude: 21.01 });
   const sunset = getTimes(new Date('2026-06-21T12:00:00Z'), 52.23, 21.01).sunset!;

@@ -1,3 +1,5 @@
+import { useTranslation, Trans } from 'react-i18next';
+import { t as tr } from './i18n';
 import {
   Activity,
   ArrowUpRight,
@@ -17,6 +19,7 @@ import { Link, Route, Routes, useLocation } from 'react-router-dom';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { useApi, useLoad } from './lib/api';
 import { EmptyState, ErrorBox, Loading } from './components/ui';
+import { LanguageControl } from './components/LanguageControl';
 import { AppearanceControl } from './components/AppearanceControl';
 import { PrivacyNotice } from './components/PrivacyNotice';
 import { WorkspaceNavLink as NavLink, WorkspaceLink } from './components/WorkspaceLink';
@@ -36,6 +39,7 @@ const Account = lazy(() => import('./pages/Account').then((m) => ({ default: m.A
 const Import = lazy(() => import('./pages/Import').then((m) => ({ default: m.Import })));
 const Admin = lazy(() => import('./pages/Admin').then((m) => ({ default: m.Admin })));
 export function App() {
+  useTranslation();
   const { demo } = useApi(),
     location = useLocation(),
     [menuOpen, setMenuOpen] = useState(false);
@@ -81,14 +85,14 @@ export function App() {
     window.scrollTo(0, 0);
   }, [location.pathname]);
   const nav = [
-    { to: '/', icon: LayoutDashboard, label: 'Overview' },
-    { to: '/check-in', icon: Plus, label: 'Daily check-in' },
-    { to: '/journal', icon: BookOpen, label: 'Journal' },
-    { to: '/analysis', icon: ChartNoAxesCombined, label: 'Trends & predictions' },
-    { to: '/export', icon: Download, label: 'Export data' },
-    { to: '/import', icon: Upload, label: 'Import data' },
+    { to: '/', icon: LayoutDashboard, label: tr('app:overview') },
+    { to: '/check-in', icon: Plus, label: tr('app:dailyCheckIn') },
+    { to: '/journal', icon: BookOpen, label: tr('app:journal') },
+    { to: '/analysis', icon: ChartNoAxesCombined, label: tr('app:trendsPredictions') },
+    { to: '/export', icon: Download, label: tr('app:exportData') },
+    { to: '/import', icon: Upload, label: tr('app:importData') },
     ...(session.data?.admin && !demo
-      ? [{ to: '/admin', icon: ShieldCheck, label: 'Administration' }]
+      ? [{ to: '/admin', icon: ShieldCheck, label: tr('app:administration') }]
       : []),
   ];
   const pathname = demo
@@ -102,9 +106,12 @@ export function App() {
       <div className="public-shell">
         <header className="public-header">
           <NavLink to="/" className="public-brand">
-            Tedd’mhen
+            {tr('app:teddMhen')}
           </NavLink>
-          <AppearanceControl />
+          <div className="topbar-tools">
+            <AppearanceControl />
+            <LanguageControl />
+          </div>
         </header>
         <main id="main">
           {location.pathname === '/about' ? (
@@ -115,13 +122,13 @@ export function App() {
             <Loading />
           ) : !authRoute && session.error && session.status !== 401 ? (
             <section className="auth-card panel">
-              <h1>Could not open your journal.</h1>
+              <h1>{tr('app:couldNotOpenYourJournal')}</h1>
               <ErrorBox message={session.error} />
               <button className="button primary" onClick={session.retry}>
-                Try again
+                {tr('app:tryAgain')}
               </button>
-              <p>Your saved data is still in your account.</p>
-              <Link to="/sign-in">Go to sign in</Link>
+              <p>{tr('app:yourSavedDataIsStillInYourAccount')}</p>
+              <Link to="/sign-in">{tr('app:goToSignIn')}</Link>
             </section>
           ) : location.pathname === '/' ? (
             <Welcome />
@@ -131,9 +138,9 @@ export function App() {
         </main>
         <PrivacyNotice />
         <footer className="public-footer">
-          <NavLink to="/privacy">Privacy & data</NavLink>
-          <NavLink to="/about">About the author</NavLink>
-          <span>A personal training & recovery journal.</span>
+          <NavLink to="/privacy">{tr('app:privacyData')}</NavLink>
+          <NavLink to="/about">{tr('app:aboutTheAuthor')}</NavLink>
+          <span>{tr('app:aPersonalTrainingRecoveryJournal')}</span>
         </footer>
       </div>
     );
@@ -141,7 +148,7 @@ export function App() {
   return (
     <div className="app-shell">
       <a className="skip-link" href="#main">
-        Skip to content
+        {tr('app:skipToContent')}
       </a>
       <aside
         ref={sidebar}
@@ -150,21 +157,24 @@ export function App() {
       >
         <button
           className="icon-button mobile-menu sidebar-close"
-          aria-label="Close navigation"
+          aria-label={tr('app:closeNavigation')}
           onClick={() => setMenuOpen(false)}
         >
           <X size={20} />
         </button>
         <NavLink className="brand" to="/" onClick={() => setMenuOpen(false)}>
           <span className="brand-mark">
-            t<span>·</span>
+            <Trans i18nKey="app:t" components={{ slot0: <span /> }} />
           </span>
           <span>
-            Tedd’mhen<small>YOUR PERSONAL OBSERVATORY</small>
+            <Trans
+              i18nKey="app:teddMhenYourPersonalObservatory"
+              components={{ slot0: <small /> }}
+            />
           </span>
         </NavLink>
-        <p className="nav-caption">WORKSPACE</p>
-        <nav aria-label="Main navigation">
+        <p className="nav-caption">{tr('app:workspace')}</p>
+        <nav aria-label={tr('app:mainNavigation')}>
           {nav.map(({ to, icon: Icon, label }) => (
             <NavLink key={to} to={to} end={to === '/'} onClick={() => setMenuOpen(false)}>
               <Icon size={18} strokeWidth={1.7} />
@@ -175,32 +185,33 @@ export function App() {
         <div className="sidebar-note">
           <span className="leaf-decoration">✳</span>
           <p>
-            Notice your patterns.
-            <br />
-            Find your rhythm.
+            <Trans i18nKey="app:noticeYourPatternsFindYourRhythm" components={{ slot0: <br /> }} />
           </p>
-          <span>One day at a time.</span>
+          <span>{tr('app:oneDayAtATime')}</span>
         </div>
         <div className="sidebar-bottom">
           <NavLink to="/account" onClick={() => setMenuOpen(false)}>
-            <UserRound size={17} /> Account
+            <Trans i18nKey="app:account" components={{ slot0: <UserRound size={17} /> }} />
           </NavLink>
           <NavLink to="/privacy" onClick={() => setMenuOpen(false)}>
-            <ShieldCheck size={17} /> Privacy & data
+            <Trans i18nKey="app:privacyData2" components={{ slot0: <ShieldCheck size={17} /> }} />
           </NavLink>
           <NavLink to="/help" onClick={() => setMenuOpen(false)}>
-            <BookOpen size={17} /> Guide & methodology <ArrowUpRight size={14} />
+            <Trans
+              i18nKey="app:guideMethodology"
+              components={{ slot0: <BookOpen size={17} />, slot1: <ArrowUpRight size={14} /> }}
+            />
           </NavLink>
           <div className="profile">
             <span className="avatar">{demo ? 'D' : 'Y'}</span>
             <div>
-              <strong>{demo ? 'Demo workspace' : 'Your workspace'}</strong>
+              <strong>{demo ? tr('app:demoWorkspace') : tr('app:yourWorkspace')}</strong>
               <small>
                 {session.data?.local
-                  ? 'Local development'
+                  ? tr('app:localDevelopment')
                   : demo
-                    ? 'Synthetic data only'
-                    : 'Private journal'}
+                    ? tr('app:syntheticDataOnly')
+                    : tr('app:privateJournal')}
               </small>
             </div>
             <ShieldCheck size={16} />
@@ -210,7 +221,7 @@ export function App() {
       {menuOpen && (
         <button
           className="nav-backdrop"
-          aria-label="Dismiss navigation"
+          aria-label={tr('app:dismissNavigation')}
           onClick={() => setMenuOpen(false)}
         />
       )}
@@ -222,13 +233,13 @@ export function App() {
               className="icon-button mobile-menu"
               aria-controls="workspace-navigation"
               aria-expanded={menuOpen}
-              aria-label={menuOpen ? 'Close navigation' : 'Open navigation'}
+              aria-label={menuOpen ? tr('app:closeNavigation') : tr('app:openNavigation')}
               onClick={() => setMenuOpen(!menuOpen)}
             >
               {menuOpen ? <X size={20} /> : <Menu size={20} />}
-              <span className="menu-label">Menu</span>
+              <span className="menu-label">{tr('app:menu')}</span>
             </button>
-            <span>Workspace</span>
+            <span>{tr('app:workspace2')}</span>
             <span className="slash">/</span>
             <strong>
               {nav.find(
@@ -236,37 +247,45 @@ export function App() {
                   n.to === pathname || (n.to === '/analysis' && pathname.startsWith('/analysis/')),
               )?.label ||
                 (pathname === '/about'
-                  ? 'About the author'
+                  ? tr('app:aboutTheAuthor')
                   : pathname === '/privacy'
-                    ? 'Privacy & data'
+                    ? tr('app:privacyData')
                     : pathname === '/account'
-                      ? 'Account'
-                      : 'Guide & methodology')}
+                      ? tr('app:account2')
+                      : tr('app:guideMethodology2'))}
             </strong>
           </div>
           <div className="topbar-tools">
             <AppearanceControl />
+            <LanguageControl />
             <span className={`privacy-pill ${demo ? 'demo' : ''}`}>
               <span />
-              {demo ? 'DEMO DATA' : session.data?.local ? 'LOCAL WORKSPACE' : 'PRIVATE BY DESIGN'}
+              {demo
+                ? tr('app:demoData')
+                : session.data?.local
+                  ? tr('app:localWorkspace')
+                  : tr('app:privateByDesign')}
             </span>
           </div>
         </header>
         {demo && (
-          <aside className="demo-banner" aria-label="Demo information">
+          <aside className="demo-banner" aria-label={tr('app:demoInformation')}>
             <div className="demo-description">
               <FlaskConical size={20} />
               <div>
-                <strong>Explore the demo</strong>
-                <p>Synthetic data. Edits reset when you leave or reload.</p>
+                <strong>{tr('app:exploreTheDemo')}</strong>
+                <p>{tr('app:syntheticDataEditsResetWhenYouLeaveOrReload')}</p>
               </div>
             </div>
-            <nav className="demo-actions" aria-label="Account access">
+            <nav className="demo-actions" aria-label={tr('app:accountAccess')}>
               <Link className="button secondary" to="/sign-in">
-                Sign in
+                {tr('app:signIn')}
               </Link>
               <Link className="button primary" to="/register">
-                Create account <ArrowUpRight size={15} />
+                <Trans
+                  i18nKey="app:createAccount"
+                  components={{ slot0: <ArrowUpRight size={15} /> }}
+                />
               </Link>
             </nav>
           </aside>
@@ -276,9 +295,9 @@ export function App() {
             <ShieldCheck size={17} />
             <span>{session.error}</span>
             <button className="button secondary" onClick={session.retry}>
-              Retry connection
+              {tr('app:retryConnection')}
             </button>
-            <Link to="/sign-in">Sign in again</Link>
+            <Link to="/sign-in">{tr('app:signInAgain')}</Link>
           </div>
         )}
         <main id="main" tabIndex={-1}>
@@ -300,12 +319,12 @@ export function App() {
                 element={
                   <section className="panel">
                     <EmptyState
-                      title="This page could not be found."
-                      description="Return to your overview and choose a page from the menu."
+                      title={tr('app:thisPageCouldNotBeFound')}
+                      description={tr('app:returnToYourOverviewAndChooseAPageFrom')}
                       action={false}
                     />
                     <WorkspaceLink className="button primary" to="/">
-                      Back to overview
+                      {tr('app:backToOverview')}
                     </WorkspaceLink>
                   </section>
                 }
@@ -315,11 +334,11 @@ export function App() {
           <PrivacyNotice />
           <footer className="page-footer">
             <span>
-              <Activity size={13} /> Tedd’mhen
+              <Trans i18nKey="app:teddMhen2" components={{ slot0: <Activity size={13} /> }} />
             </span>
-            <span>Your observations. A little more perspective.</span>
-            <NavLink to="/privacy">Privacy & data</NavLink>
-            <NavLink to="/about">About the author</NavLink>
+            <span>{tr('app:yourObservationsALittleMorePerspective')}</span>
+            <NavLink to="/privacy">{tr('app:privacyData')}</NavLink>
+            <NavLink to="/about">{tr('app:aboutTheAuthor')}</NavLink>
           </footer>
         </main>
       </div>

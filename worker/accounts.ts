@@ -268,7 +268,10 @@ export async function handleAccount(
   } catch (error) {
     if (error instanceof Response) return error;
     if (error instanceof z.ZodError)
-      return json({ error: error.issues.map((issue) => issue.message).join(' ') }, 400);
+      return json(
+        { issues: error.issues, error: error.issues.map((issue) => issue.message).join(' ') },
+        400,
+      );
     // Never log credential bodies, session tokens, recovery codes, or email addresses.
     console.error('Account operation failed', {
       category: error instanceof Error ? error.name : 'unknown',

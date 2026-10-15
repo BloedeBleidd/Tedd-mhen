@@ -1,6 +1,6 @@
 # Contributing
 
-Tedd’mhen is maintained as a production application, with English source, UI copy, and documentation.
+Tedd’mhen is maintained as a production application, with English source and documentation, canonical English data identifiers, and six source-controlled interface languages. Follow [Localization](docs/LOCALIZATION.md) when adding user-visible copy or activities.
 
 1. Install the Node.js version in `.nvmrc`, run `npm ci`, then `npm run setup`.
 2. Keep a change focused and describe the user-visible behavior it affects.

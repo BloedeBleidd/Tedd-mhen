@@ -32,12 +32,12 @@ describe('Solar appearance', () => {
     expect(solarTheme(new Date('2026-12-21T23:30:00Z'), auckland).theme).toBe('light');
     expect(solarTheme(new Date('2026-12-21T11:30:00Z'), auckland).theme).toBe('dark');
   });
-  it('honours manual choices and uses the system without a location', () => {
+  it('honours manual choices and uses light without a location', () => {
     const now = new Date('2026-06-21T12:00:00Z');
     expect(resolveAppearance({ mode: 'dark', location: warsaw }, now, false).theme).toBe('dark');
     expect(resolveAppearance({ mode: 'auto', location: null }, now, true)).toMatchObject({
-      theme: 'dark',
-      source: 'system',
+      theme: 'light',
+      source: 'fallback',
     });
   });
   it('rejects malformed local preferences and invalid coordinates', () => {

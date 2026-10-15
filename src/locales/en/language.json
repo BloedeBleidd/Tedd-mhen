@@ -1,0 +1,19 @@
+{
+  "open": "Change language",
+  "title": "Language",
+  "close": "Close language settings",
+  "auto": "Auto · device location",
+  "automaticStatus": "Automatic language: {{language}}.",
+  "manualStatus": "Selected language: {{language}}. Your choice overrides location.",
+  "locationExplanation": "Location is requested only after you click. Approximate coordinates stay in this browser and also set sunrise and sunset for Auto appearance. Without a saved location, Auto uses English and a light theme.",
+  "locating": "Finding location…",
+  "useLocation": "Use device location",
+  "updateLocation": "Update device location",
+  "forgetLocation": "Forget saved location",
+  "approximation": "Language is suggested from an offline country map. Borders and multilingual countries can make this suggestion imperfect. Choose any language above. Update location when travelling; there is no background tracking.",
+  "locationUnavailable": "Could not get your location. Try again or choose a language manually.",
+  "locationDenied": "Location permission was not granted. Auto uses English and a light theme; manual choices still apply.",
+  "storageUnavailable": "Browser storage is unavailable. Changes apply to this tab only.",
+  "loadFailed": "Could not load this language. Your current language stays active. Check your connection and retry.",
+  "retry": "Retry loading language"
+}

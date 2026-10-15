@@ -30,27 +30,20 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
   const latestSettings = useRef(settings);
   latestSettings.current = settings;
   const [now, setNow] = useState(() => new Date());
-  const [systemDark, setSystemDark] = useState(
-    () => matchMedia('(prefers-color-scheme: dark)').matches,
-  );
-  const resolved = resolveAppearance(settings, now, systemDark);
+  const resolved = resolveAppearance(settings, now);
   useLayoutEffect(() => applyTheme(resolved.theme), [resolved.theme]);
   useEffect(() => {
     const refresh = () => setNow(new Date());
-    const media = matchMedia('(prefers-color-scheme: dark)');
-    const systemChange = () => setSystemDark(media.matches);
     const storageChange = (event: StorageEvent) => {
       if (event.key === APPEARANCE_KEY || event.key === null) {
         setSettings(parseAppearance(readLocal(APPEARANCE_KEY)));
         refresh();
       }
     };
-    media.addEventListener('change', systemChange);
     window.addEventListener('storage', storageChange);
     window.addEventListener('focus', refresh);
     document.addEventListener('visibilitychange', refresh);
     return () => {
-      media.removeEventListener('change', systemChange);
       window.removeEventListener('storage', storageChange);
       window.removeEventListener('focus', refresh);
       document.removeEventListener('visibilitychange', refresh);

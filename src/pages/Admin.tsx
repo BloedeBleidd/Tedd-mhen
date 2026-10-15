@@ -1,5 +1,8 @@
+import { MessageValue } from '../components/MessageValue';
+import { useTranslation, Trans } from 'react-i18next';
+import { t as tr, locale } from '../i18n';
 import { useLoad } from '../lib/api';
-import { ErrorBox, Loading, PageHeading, Panel, number } from '../components/ui';
+import { ErrorBox, Loading, PageHeading, Panel, number, prettyDate } from '../components/ui';
 type Overview = {
   generatedAt: string;
   accounts: { accounts: number; joined7: number | null; joined30: number | null };
@@ -16,13 +19,14 @@ type Overview = {
   demo: { entries: number; payloadBytes: number };
 };
 export function Admin() {
+  useTranslation();
   const { data, loading, error } = useLoad<Overview>('/api/admin/overview');
   return (
     <>
       <PageHeading
-        eyebrow="ADMINISTRATION"
-        title="The project, in numbers."
-        description="Aggregate account and storage statistics. Private journal contents stay outside this panel."
+        eyebrow={tr('admin:administration')}
+        title={tr('admin:theProjectInNumbers')}
+        description={tr('admin:aggregateAccountAndStorageStatisticsPrivateJournalContentsStay')}
       />
       <ErrorBox message={error} />
       {loading && <Loading />}
@@ -30,80 +34,105 @@ export function Admin() {
         <>
           <div className="analysis-stats">
             <div>
-              <span className="stat-label">Registered accounts</span>
+              <span className="stat-label">{tr('admin:registeredAccounts')}</span>
               <strong>{data.accounts.accounts}</strong>
               <p>
-                {data.accounts.joined7 ?? 0} new in 7 days · {data.accounts.joined30 ?? 0} in 30
-                days
+                <Trans
+                  i18nKey="admin:newIn7DaysIn30Days"
+                  components={{
+                    slot0: <MessageValue value={data.accounts.joined7 ?? 0} />,
+                    slot1: <MessageValue value={data.accounts.joined30 ?? 0} />,
+                  }}
+                />
               </p>
             </div>
             <div>
-              <span className="stat-label">Journal entries</span>
+              <span className="stat-label">{tr('admin:journalEntries')}</span>
               <strong>{number(data.journal.entries, 0)}</strong>
-              <p>{data.journal.recordingAccounts} accounts have saved observations</p>
+              <p>
+                <Trans
+                  i18nKey="admin:accountsHaveSavedObservations"
+                  components={{ slot0: <MessageValue value={data.journal.recordingAccounts} /> }}
+                />
+              </p>
             </div>
             <div>
-              <span className="stat-label">Journal JSON payload</span>
+              <span className="stat-label">{tr('admin:journalJsonPayload')}</span>
               <strong>
                 {number(data.journal.payloadBytes / 1024 / 1024, 2)}
-                <small> MiB</small>
+                <small>{tr('admin:mib')}</small>
               </strong>
               <p>
-                {number(data.journal.payloadBytes, 0)} bytes · excludes database overhead and
-                accounts
+                <Trans
+                  i18nKey="admin:bytesExcludesDatabaseOverheadAndAccounts"
+                  components={{
+                    slot0: <MessageValue value={number(data.journal.payloadBytes, 0)} />,
+                  }}
+                />
               </p>
             </div>
           </div>
-          <Panel title="Shared demo journal">
+          <Panel title={tr('admin:sharedDemoJournal')}>
             <p>
-              {number(data.demo.entries, 0)} synthetic days ·{' '}
-              {number(data.demo.payloadBytes / 1024, 1)} KiB of JSON. These examples are excluded
-              from personal journal totals and registered account counts.
+              <Trans
+                i18nKey="admin:syntheticDaysKibOfJsonTheseExamplesAreExcluded"
+                components={{
+                  slot0: <MessageValue value={number(data.demo.entries, 0)} />,
+                  slot1: <MessageValue value={number(data.demo.payloadBytes / 1024, 1)} />,
+                }}
+              />
             </p>
           </Panel>
-          <Panel title="Activity and coverage">
+          <Panel title={tr('admin:activityAndCoverage')}>
             <dl className="method-glossary">
-              <dt>Accounts with an unexpired session</dt>
+              <dt>{tr('admin:accountsWithAnUnexpiredSession')}</dt>
               <dd>
-                {data.sessions.signedInAccounts}. This is session validity, not a count of people
-                currently online.
+                <Trans
+                  i18nKey="admin:thisIsSessionValidityNotACountOfPeople"
+                  components={{ slot0: <MessageValue value={data.sessions.signedInAccounts} /> }}
+                />
               </dd>
-              <dt>Entries last changed in the past 7 days</dt>
+              <dt>{tr('admin:entriesLastChangedInThePast7Days')}</dt>
               <dd>{data.journal.changed7 ?? 0}</dd>
-              <dt>Recorded date range</dt>
+              <dt>{tr('admin:recordedDateRange')}</dt>
               <dd>
-                {data.journal.earliestDate ?? 'No entries'} →{' '}
-                {data.journal.latestDate ?? 'No entries'}
+                {data.journal.earliestDate
+                  ? prettyDate(data.journal.earliestDate)
+                  : tr('admin:noEntries')}{' '}
+                →{' '}
+                {data.journal.latestDate
+                  ? prettyDate(data.journal.latestDate)
+                  : tr('admin:noEntries')}
               </dd>
-              <dt>Snapshot generated</dt>
-              <dd>{data.generatedAt}</dd>
+              <dt>{tr('admin:snapshotGenerated')}</dt>
+              <dd>
+                {new Date(data.generatedAt).toLocaleString(locale(), { timeZone: 'UTC' })} UTC
+              </dd>
             </dl>
             <p className="small muted">
-              Queries are an operational snapshot, not billing measurements. Cloudflare’s dashboard
-              is authoritative for storage overhead, request quotas and billing. Deleted
-              accounts/entries are absent from these counts.
+              {tr('admin:queriesAreAnOperationalSnapshotNotBillingMeasurementsCloudflare')}
             </p>
           </Panel>
-          <Panel title="Account creation · last 30 days">
+          <Panel title={tr('admin:accountCreationLast30Days')}>
             <div className="table-scroll">
               <table>
                 <thead>
                   <tr>
-                    <th>UTC date</th>
-                    <th>Accounts created</th>
+                    <th>{tr('admin:utcDate')}</th>
+                    <th>{tr('admin:accountsCreated')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.signups.map((row) => (
-                    <tr key={row.date}>
-                      <td>{row.date}</td>
+                    <tr key={prettyDate(row.date)}>
+                      <td>{prettyDate(row.date)}</td>
                       <td>{row.accounts}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-            {!data.signups.length && <p>No accounts created in this period.</p>}
+            {!data.signups.length && <p>{tr('admin:noAccountsCreatedInThisPeriod')}</p>}
           </Panel>
         </>
       )}

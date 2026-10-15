@@ -1,6 +1,6 @@
 # Repository instructions
 
-Treat Tedd’mhen as a production application. The repository is public; deployed health records are private. All application copy, source comments, README content, and technical documentation must be in English.
+Treat Tedd’mhen as a production application. The repository is public; deployed health records are private. Source comments, README content, technical documentation, database identifiers and interchange schemas use English. Interface copy is maintained in six source-controlled language catalogs; never use runtime translation services or translate user-authored text. See `docs/LOCALIZATION.md`.
 
 - Keep subjective experiences numerically analyzable with explicit scales and anchors. Narrative fields are optional context, not a substitute for structured measurements.
 - Preserve `null` for missing observations. Do not silently impute, coerce missing values to zero, or interpret an unrecorded training day as rest.

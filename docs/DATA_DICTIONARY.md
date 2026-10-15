@@ -54,7 +54,7 @@ HRV methods, recording duration, posture and devices affect comparability. Recor
 | Field (under each `workouts[]` item) | Unit / range                                                     |
 | ------------------------------------ | ---------------------------------------------------------------- |
 | `id`                                 | UUID                                                             |
-| `type`                               | running, strength, cycling, swimming, walking, mobility, other   |
+| `type`                               | stable English ID from the 150-activity registry                 |
 | `title`                              | optional string, up to 120 characters                            |
 | `durationMinutes`                    | positive minutes, up to 1,440                                    |
 | `distanceKm`                         | 0–1,000 km, or null                                              |
@@ -68,7 +68,9 @@ Derived training time sums duration only for explicitly recorded training/rest d
 
 ## Context labels and analytical features
 
-`labels` is null when context was not recorded, an empty array when explicitly no labels apply, or up to 12 distinct normalized lowercase strings of 1–40 characters. Labels such as `travel` or `late meal` are user-defined observations, not inferred from notes. Older version-1 records without this additive field are treated as null.
+`labels` is null when context was not recorded, an empty array when explicitly no labels apply, or up to 12 distinct case-preserving strings, trimmed at their boundaries, of 1–40 characters. Labels such as `travel` or `late meal` are user-defined observations, not inferred from notes. Older version-1 records without this additive field are treated as null.
+
+The activity registry is `shared/activities.ts`; localized names are presentation only. Custom notes, titles, exercise names and labels are never translated. See [Localization](LOCALIZATION.md).
 
 The analytical catalog contains numeric fields plus binary indicators for trained/rest status, activity types, symptoms, device source, HRV method, weekdays and observed custom labels. Monday, manual source and unknown HRV method are reference categories. Unknown training and label context remain null. A symptom absent from an otherwise recorded symptom/illness observation is zero; an unrecorded illness observation is unknown.
 

@@ -1,3 +1,4 @@
+import { workoutTypes } from './activities';
 import { z } from 'zod';
 
 export const dateSchema = z
@@ -18,15 +19,7 @@ const time = z
   .string()
   .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
   .nullable();
-export const workoutTypes = [
-  'running',
-  'strength',
-  'cycling',
-  'swimming',
-  'walking',
-  'mobility',
-  'other',
-] as const;
+export { workoutTypes } from './activities';
 export const symptomTypes = [
   'headache',
   'sore_throat',
@@ -83,7 +76,7 @@ export const entrySchema = z
     soreness: burden,
     illnessSeverity: burden,
     labels: z
-      .array(z.string().trim().toLowerCase().min(1).max(40))
+      .array(z.string().trim().min(1).max(40))
       .max(12)
       .refine((items) => new Set(items).size === items.length, 'Duplicate context label.')
       .nullable()

@@ -1,0 +1,9 @@
+{
+  "recordContextLabels": "<slot0/> Zapisz etykiety kontekstu",
+  "examplesTravelLateMealEveningSessionCheckedWithNo": "Przykłady: podróż, późny posiłek, wieczorny trening. Zaznaczenie bez etykiet oznacza ich wyraźny brak; odznaczenie — brak wiedzy. Używaj spójnych etykiet do analizy.",
+  "removeLabel": "Usuń etykietę {{value0}}",
+  "newContextLabel": "Nowa etykieta kontekstu",
+  "addAReusableLabel": "Dodaj etykietę wielokrotnego użytku",
+  "addLabel": "Dodaj etykietę",
+  "12LabelsLabelsDescribeContextOptionalNotesAreNot": "<slot0/> / 12 etykiet. Etykiety opisują kontekst; opcjonalne notatki nie są danymi wejściowymi modelu."
+}

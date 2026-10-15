@@ -1,3 +1,6 @@
+import { number, prettyDate } from './ui';
+import { useTranslation } from 'react-i18next';
+import { t as tr } from '../i18n';
 import {
   CartesianGrid,
   ResponsiveContainer,
@@ -18,6 +21,7 @@ export function RelationshipChart({
   xLabel: string;
   yLabel: string;
 }) {
+  useTranslation();
   const reveal = useReveal<HTMLDivElement>('chart', JSON.stringify([pairs, xLabel, yLabel]));
   const reduced = useReducedMotion();
   return (
@@ -25,7 +29,10 @@ export function RelationshipChart({
       ref={reveal}
       className="chart"
       role="img"
-      aria-label={`${xLabel} against ${yLabel}; each point is an aligned pair of days.`}
+      aria-label={tr('relationshipChart:againstEachPointIsAnAlignedPairOfDays', {
+        value0: xLabel,
+        value1: yLabel,
+      })}
     >
       <ResponsiveContainer width="100%" height="100%">
         <ScatterChart margin={{ top: 15, right: 25, bottom: 25, left: 15 }}>
@@ -34,6 +41,7 @@ export function RelationshipChart({
             dataKey="x"
             name={xLabel}
             type="number"
+            tickFormatter={(value) => number(Number(value))}
             domain={['auto', 'auto']}
             tick={{ fill: 'var(--muted)', fontSize: 11 }}
             label={{
@@ -48,6 +56,7 @@ export function RelationshipChart({
             dataKey="y"
             name={yLabel}
             type="number"
+            tickFormatter={(value) => number(Number(value))}
             domain={['auto', 'auto']}
             tick={{ fill: 'var(--muted)', fontSize: 11 }}
           />
@@ -60,13 +69,13 @@ export function RelationshipChart({
               return active && p ? (
                 <div className="chart-tooltip">
                   <strong>
-                    {p.predictorDate} → {p.date}
+                    {prettyDate(p.predictorDate)} → {prettyDate(p.date)}
                   </strong>
                   <p>
-                    {xLabel}: {p.x.toFixed(2)}
+                    {xLabel}: {number(p.x, 2)}
                   </p>
                   <p>
-                    {yLabel}: {p.y.toFixed(2)}
+                    {yLabel}: {number(p.y, 2)}
                   </p>
                 </div>
               ) : null;

@@ -427,6 +427,7 @@ export default {
       else if (cause instanceof z.ZodError)
         response = json(
           {
+            issues: cause.issues,
             error: cause.issues
               .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
               .join('; '),

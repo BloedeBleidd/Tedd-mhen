@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+import { t as tr } from '../i18n';
 import { PendingAccountGuard } from '../components/PendingAccountGuard';
 import { useRef, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -7,6 +9,7 @@ import { loginPassword, passwordSchema } from '../../shared/credentials';
 import { RecoverySecret } from './Auth';
 
 export function Account() {
+  useTranslation();
   const { request, invalidate, demo } = useApi();
   const pending = useRef(false);
   const session = useLoad<{ email: string; local: boolean }>('/api/session');
@@ -52,7 +55,7 @@ export function Account() {
         navigate('/sign-in');
       }
     } catch (cause) {
-      showError(cause instanceof Error ? cause.message : 'Unable to complete this request.');
+      showError(cause instanceof Error ? cause.message : tr('account:unableToCompleteThisRequest'));
     } finally {
       pending.current = false;
       setBusy(false);
@@ -63,15 +66,21 @@ export function Account() {
     const current = loginPassword.safeParse(currentPassword);
     const next = passwordSchema.safeParse(password);
     if (!current.success) {
-      showError('Current password: ' + current.error.issues[0].message);
+      showError(
+        JSON.stringify(
+          current.error.issues.map((issue) => ({ ...issue, path: ['currentPassword'] })),
+        ),
+      );
       return;
     }
     if (!next.success) {
-      showError('New password: ' + next.error.issues[0].message);
+      showError(
+        JSON.stringify(next.error.issues.map((issue) => ({ ...issue, path: ['password'] }))),
+      );
       return;
     }
     if (password !== confirm) {
-      showError('Passwords do not match.');
+      showError('account:passwordsDoNotMatch');
       return;
     }
     void action('change-password');
@@ -91,31 +100,27 @@ export function Account() {
     <>
       <PendingAccountGuard pending={pending} />
       <PageHeading
-        eyebrow="ACCOUNT & ACCESS"
-        title="Your account."
-        description="Manage your password, recovery, and saved journal."
+        eyebrow={tr('account:accountAccess')}
+        title={tr('account:yourAccount')}
+        description={tr('account:manageYourPasswordRecoveryAndSavedJournal')}
       />
       <div ref={errorRef} tabIndex={-1}>
         <ErrorBox message={error || session.error} />
       </div>
-      <Panel title={session.data?.email || 'Account'} className="prose-panel">
-        <p>
-          Email is an unverified sign-in identifier. We do not send messages or password-reset
-          emails. Keep your recovery code in a password manager. Changing your password replaces the
-          recovery code and signs out other sessions.
-        </p>
+      <Panel title={session.data?.email || tr('app:account2')} className="prose-panel">
+        <p>{tr('account:emailIsAnUnverifiedSignInIdentifierWeDo')}</p>
         {unavailable ? (
           <>
             <p>
               {demo
-                ? 'Create an account to save your own journal. Demo changes are temporary and will not be transferred.'
+                ? tr('account:createAnAccountToSaveYourOwnJournalDemo')
                 : session.data?.local
-                  ? 'Account changes are unavailable in the local development bypass.'
-                  : 'Account details are unavailable. Reload or sign in again before making changes.'}
+                  ? tr('account:accountChangesAreUnavailableInTheLocalDevelopmentBypass')
+                  : tr('account:accountDetailsAreUnavailableReloadOrSignInAgain')}
             </p>
             {demo && (
               <Link className="button primary" to="/register">
-                Create account
+                {tr('account:createAccount')}
               </Link>
             )}
           </>
@@ -125,15 +130,15 @@ export function Account() {
             disabled={busy}
             onClick={() => void action('logout')}
           >
-            Sign out
+            {tr('account:signOut')}
           </button>
         )}
       </Panel>
       {!unavailable && (
-        <Panel title="Password & recovery" className="prose-panel">
+        <Panel title={tr('account:passwordRecovery')} className="prose-panel">
           <form noValidate className="auth-form" onSubmit={change}>
             <fieldset className="form-fieldset auth-form" disabled={busy}>
-              <Field label="Current password">
+              <Field label={tr('account:currentPassword')}>
                 <input
                   type="password"
                   value={currentPassword}
@@ -144,8 +149,8 @@ export function Account() {
                 />
               </Field>
               <Field
-                label="New password"
-                hint="12–128 characters. Changing it also replaces your recovery code."
+                label={tr('account:newPassword')}
+                hint={tr('account:12128CharactersChangingItAlsoReplacesYourRecovery')}
               >
                 <input
                   type="password"
@@ -157,7 +162,7 @@ export function Account() {
                   required
                 />
               </Field>
-              <Field label="Confirm new password">
+              <Field label={tr('account:confirmNewPassword')}>
                 <input
                   type="password"
                   value={confirm}
@@ -169,32 +174,28 @@ export function Account() {
                 />
               </Field>
               <button className="button primary" disabled={busy}>
-                Change password & recovery code
+                {tr('account:changePasswordRecoveryCode')}
               </button>
             </fieldset>
           </form>
           <div className="account-delete">
-            <h3>Delete account and journal</h3>
-            <p>
-              Export anything you want to keep first. This deletes your account, sessions, and all
-              journal entries from the active database. Backups and downloaded exports may retain
-              copies as described in Privacy & data.
-            </p>
+            <h3>{tr('account:deleteAccountAndJournal')}</h3>
+            <p>{tr('account:exportAnythingYouWantToKeepFirstThisDeletes')}</p>
             <button
               className="button danger"
               disabled={busy || !currentPassword}
               onClick={() => {
                 if (
-                  window.confirm(
-                    'Permanently delete your account and every journal entry? This cannot be undone in the app.',
-                  )
+                  window.confirm(tr('account:permanentlyDeleteYourAccountAndEveryJournalEntryThis'))
                 )
                   void action('delete-account');
               }}
             >
-              Delete account and all entries
+              {tr('account:deleteAccountAndAllEntries')}
             </button>
-            <p className="small muted">Enter your current password above to enable deletion.</p>
+            <p className="small muted">
+              {tr('account:enterYourCurrentPasswordAboveToEnableDeletion')}
+            </p>
           </div>
         </Panel>
       )}

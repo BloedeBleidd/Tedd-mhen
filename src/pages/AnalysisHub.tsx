@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+import { localize, t as tr } from '../i18n';
 import { WorkspaceNavLink as NavLink, WorkspaceLink as Link } from '../components/WorkspaceLink';
 import { Route, Routes } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
@@ -49,10 +51,11 @@ const views = [
   },
 ];
 export function AnalysisHub() {
+  useTranslation();
   return (
     <>
-      <nav className="analysis-navigation" aria-label="Analysis views">
-        <p className="analysis-nav-label">Explore your data</p>
+      <nav className="analysis-navigation" aria-label={tr('analysisHub:analysisViews')}>
+        <p className="analysis-nav-label">{tr('analysisHub:exploreYourData')}</p>
         <div className="analysis-tabs">
           {views.map(({ id, to, label, description, icon: Icon }) => (
             <NavLink
@@ -66,7 +69,7 @@ export function AnalysisHub() {
                 <>
                   <Icon className="analysis-nav-icon" size={20} aria-hidden="true" />
                   <span className="analysis-nav-title" id={`analysis-${id}-title`}>
-                    {label}
+                    {localize(label)}
                   </span>
                   {isActive ? (
                     <Check className="analysis-nav-indicator" size={16} aria-hidden="true" />
@@ -74,7 +77,7 @@ export function AnalysisHub() {
                     <ChevronRight className="analysis-nav-indicator" size={16} aria-hidden="true" />
                   )}
                   <span className="analysis-nav-description" id={`analysis-${id}-description`}>
-                    {description}
+                    {localize(description)}
                   </span>
                 </>
               )}
@@ -92,9 +95,9 @@ export function AnalysisHub() {
             path="*"
             element={
               <section className="panel">
-                <h1>Analysis page not found.</h1>
+                <h1>{tr('analysisHub:analysisPageNotFound')}</h1>
                 <Link className="button primary" to="/analysis">
-                  Open single-metric trends
+                  {tr('analysisHub:openSingleMetricTrends')}
                 </Link>
               </section>
             }

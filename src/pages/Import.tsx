@@ -1,3 +1,7 @@
+import { MessageValue } from '../components/MessageValue';
+import { useTranslation, Trans } from 'react-i18next';
+import { t as tr } from '../i18n';
+import { errorText, fieldName } from '../lib/validation-messages';
 import { useBlocker } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { ApiError, useApi, useLoad } from '../lib/api';
@@ -5,6 +9,7 @@ import { parseImport, mergeImported, IMPORT_MAX_BYTES, type ImportRow } from '..
 import type { StoredEntry } from '../../shared/schema';
 import { ErrorBox, Field, PageHeading, Panel } from '../components/ui';
 export function Import() {
+  useTranslation();
   const { request, invalidate, demo } = useApi(),
     session = useLoad<{ id: string; email: string }>('/api/session');
   const [rows, setRows] = useState<ImportRow[]>([]),
@@ -12,7 +17,9 @@ export function Import() {
     [error, setError] = useState(''),
     [mode, setMode] = useState<'skip' | 'merge'>('skip'),
     [busy, setBusy] = useState(false),
-    [results, setResults] = useState<{ date: string; status: string }[]>([]),
+    [results, setResults] = useState<
+      { date: string; status: 'created' | 'merged' | 'skipped' | 'failed'; error?: string }[]
+    >([]),
     [confirmed, setConfirmed] = useState(false);
   const stopped = useRef(false),
     readVersion = useRef(0);
@@ -37,11 +44,7 @@ export function Import() {
   const blocker = useBlocker(busy);
   useEffect(() => {
     if (blocker.state !== 'blocked') return;
-    if (
-      window.confirm(
-        'Stop importing and leave? Completed saves remain; a request already sent may still finish.',
-      )
-    ) {
+    if (window.confirm(tr('import:stopImportingAndLeaveCompletedSavesRemainARequest'))) {
       stopped.current = true;
       blocker.proceed();
     } else blocker.reset();
@@ -69,7 +72,7 @@ export function Import() {
       );
     } catch (e) {
       if (version !== readVersion.current) return;
-      setError(e instanceof Error ? e.message : 'Could not read this file.');
+      setError(e instanceof Error ? e.message : tr('import:couldNotReadThisFile'));
     }
   }
   async function run() {
@@ -78,7 +81,11 @@ export function Import() {
     setResults([]);
     stopped.current = false;
     setError('');
-    const completed: { date: string; status: string }[] = [];
+    const completed: {
+      date: string;
+      status: 'created' | 'merged' | 'skipped' | 'failed';
+      error?: string;
+    }[] = [];
     for (const row of rows) {
       if (stopped.current) break;
       try {
@@ -90,7 +97,7 @@ export function Import() {
         }
         if (stopped.current) break;
         if (existing && mode === 'skip') {
-          completed.push({ date: row.date, status: 'Skipped existing day' });
+          completed.push({ date: row.date, status: 'skipped' });
         } else {
           const entry = mergeImported(row, existing);
           await request(`/api/entries/${row.date}`, {
@@ -100,18 +107,17 @@ export function Import() {
           });
           completed.push({
             date: row.date,
-            status: existing ? 'Merged selected fields' : 'Created',
+            status: existing ? 'merged' : 'created',
           });
         }
       } catch (e) {
         completed.push({
           date: row.date,
-          status: `Not imported: ${e instanceof Error ? e.message : 'request failed'}`,
+          status: 'failed',
+          error: e instanceof Error ? e.message : 'Request failed.',
         });
         if (e instanceof ApiError && [401, 403].includes(e.status)) {
-          setError(
-            'Import stopped because account access changed. Completed rows are listed below.',
-          );
+          setError('import:importStoppedBecauseAccountAccessChangedCompletedRowsAre');
           break;
         }
       }
@@ -120,51 +126,49 @@ export function Import() {
     setResults(completed);
     setBusy(false);
     setConfirmed(false);
-    if (stopped.current)
-      setError(
-        'Import stopped. Completed saves remain in your journal; review the results before retrying.',
-      );
+    if (stopped.current) setError('import:importStoppedCompletedSavesRemainInYourJournalReview');
     invalidate();
   }
   return (
     <>
       <PageHeading
-        eyebrow="BRING YOUR HISTORY"
-        title="Import journal observations."
-        description="Preview a compatible export, choose how to handle existing days, then save into your own account."
+        eyebrow={tr('import:bringYourHistory')}
+        title={tr('import:importJournalObservations')}
+        description={tr('import:previewACompatibleExportChooseHowToHandleExisting')}
       />
-      <Panel title="Choose a file">
-        <p>
-          JSON and NDJSON preserve types and text best. CSV supports Tedd’mhen column names, quoted
-          multiline text and nested JSON arrays. Formula-protection apostrophes in CSV remain
-          intact; use JSON for an exact round trip.
-        </p>
-        <Field label="Journal export file">
+      <Panel title={tr('import:chooseAFile')}>
+        <p>{tr('import:jsonAndNdjsonPreserveTypesAndTextBestCsv')}</p>
+        <Field label={tr('import:journalExportFile')}>
           <input
+            className="sr-only"
             type="file"
             accept=".json,.ndjson,.jsonl,.csv"
             disabled={busy}
             onChange={(e) => void read(e.target.files?.[0])}
           />
+          <span className="button secondary">{tr('import:chooseAFile')}</span>
+          <small>{name || tr('import:noFile')}</small>
         </Field>
-        <p className="small muted">
-          Up to 500 days / 20 MiB per file. File content stays in the browser until you confirm.
-          Account IDs and source revisions are never imported. Markdown and analysis-model downloads
-          are reports, not journal backups.
-        </p>
+        <p className="small muted">{tr('import:upTo500Days20MibPerFileFile')}</p>
         <ErrorBox message={error || null} />
       </Panel>
       {rows.length > 0 && (
         <>
-          <Panel title={`${rows.length} days ready for review`} subtitle={name}>
+          <Panel title={tr('import:daysReadyForReview', { value0: rows.length })} subtitle={name}>
             <p>
-              Destination: <strong>{demo ? 'Synthetic demo memory' : session.data?.email}</strong>.
-              Missing fields stay unchanged on existing days; on new days they remain unknown or
-              empty context. Supplied fields replace their corresponding values, including explicit
-              nulls. A supplied workout list replaces the day’s sessions; omitted notes are
-              preserved for matching session IDs.
+              <Trans
+                i18nKey="import:destinationMissingFieldsStayUnchangedOnExistingDaysOn"
+                components={{
+                  slot0: <strong />,
+                  slot1: (
+                    <MessageValue
+                      value={demo ? tr('import:syntheticDemoMemory') : session.data?.email}
+                    />
+                  ),
+                }}
+              />
             </p>
-            <Field label="Existing-day policy">
+            <Field label={tr('import:existingDayPolicy')}>
               <select
                 value={mode}
                 disabled={busy}
@@ -173,36 +177,44 @@ export function Import() {
                   setConfirmed(false);
                 }}
               >
-                <option value="skip">Skip existing days</option>
-                <option value="merge">Merge only supplied fields into existing days</option>
+                <option value="skip">{tr('import:skipExistingDays')}</option>
+                <option value="merge">
+                  {tr('import:mergeOnlySuppliedFieldsIntoExistingDays')}
+                </option>
               </select>
             </Field>
             <div className="table-scroll import-preview">
               <table>
                 <thead>
                   <tr>
-                    <th>Date</th>
-                    <th>Supplied fields</th>
+                    <th>{tr('import:date')}</th>
+                    <th>{tr('import:suppliedFields')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {rows.map((row) => (
                     <tr key={row.date}>
                       <td>{row.date}</td>
-                      <td>{Object.keys(row.fields).join(', ')}</td>
+                      <td>{Object.keys(row.fields).map(fieldName).join(', ')}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
             <label className="check-label">
-              <input
-                type="checkbox"
-                checked={confirmed}
-                disabled={busy}
-                onChange={(e) => setConfirmed(e.target.checked)}
+              <Trans
+                i18nKey="import:iReviewedTheDestinationFieldsAndExistingDayPolicy"
+                components={{
+                  slot0: (
+                    <input
+                      type="checkbox"
+                      checked={confirmed}
+                      disabled={busy}
+                      onChange={(e) => setConfirmed(e.target.checked)}
+                    />
+                  ),
+                }}
               />
-              I reviewed the destination, fields and existing-day policy.
             </label>
             <button
               className="button primary"
@@ -210,8 +222,8 @@ export function Import() {
               onClick={() => void run()}
             >
               {busy
-                ? `Importing · ${results.length} / ${rows.length}`
-                : 'Import reviewed observations'}
+                ? tr('import:importing', { value0: results.length, value1: rows.length })
+                : tr('import:importReviewedObservations')}
             </button>
             {busy && (
               <button
@@ -220,39 +232,60 @@ export function Import() {
                   stopped.current = true;
                 }}
               >
-                Stop import
+                {tr('import:stopImport')}
               </button>
             )}
-            <p className="small muted">
-              Each day is saved separately with a revision check. Concurrent edits are reported as
-              conflicts and never overwritten automatically. Partial completion is possible if a
-              request fails. Stop import or leaving this page stops further rows; a save already
-              sent can still finish. Retry with Skip existing days to preserve completed saves.
-            </p>
+            <p className="small muted">{tr('import:eachDayIsSavedSeparatelyWithARevisionCheck')}</p>
           </Panel>
           {results.length > 0 && (
-            <Panel title="Import results">
+            <Panel title={tr('import:importResults')}>
               <div role="status">
-                {
-                  results.filter((r) => ['Created', 'Merged selected fields'].includes(r.status))
-                    .length
-                }{' '}
-                days saved · {results.filter((r) => r.status === 'Skipped existing day').length}{' '}
-                skipped · {results.filter((r) => r.status.startsWith('Not imported')).length} failed
+                <Trans
+                  i18nKey="import:daysSavedSkippedFailed"
+                  components={{
+                    slot0: (
+                      <MessageValue
+                        value={
+                          results.filter((r) => ['created', 'merged'].includes(r.status)).length
+                        }
+                      />
+                    ),
+                    slot1: (
+                      <MessageValue value={results.filter((r) => r.status === 'skipped').length} />
+                    ),
+                    slot2: (
+                      <MessageValue
+                        value={
+                          results.filter(
+                            (r) => !['created', 'merged', 'skipped'].includes(r.status),
+                          ).length
+                        }
+                      />
+                    ),
+                  }}
+                />
               </div>
               <div className="table-scroll import-preview">
                 <table>
                   <thead>
                     <tr>
-                      <th>Date</th>
-                      <th>Result</th>
+                      <th>{tr('import:date')}</th>
+                      <th>{tr('import:result')}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {results.map((r) => (
                       <tr key={r.date}>
                         <td>{r.date}</td>
-                        <td>{r.status}</td>
+                        <td>
+                          {r.status === 'created'
+                            ? tr('import:created')
+                            : r.status === 'merged'
+                              ? tr('import:mergedSelectedFields')
+                              : r.status === 'skipped'
+                                ? tr('import:skippedExistingDay')
+                                : tr('import:notImported', { value0: errorText(r.error) })}
+                        </td>
                       </tr>
                     ))}
                   </tbody>

@@ -7,3 +7,4 @@ test-results
 release
 docs/_site
 docs/.jekyll-cache
+src/data/language-regions.json

@@ -1,3 +1,6 @@
+import { MessageValue } from '../components/MessageValue';
+import { useTranslation, Trans } from 'react-i18next';
+import { localize, t as tr } from '../i18n';
 import { PendingAccountGuard } from '../components/PendingAccountGuard';
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import { validateAuthForm, type AuthField } from '../../shared/credentials';
@@ -6,14 +9,14 @@ import { useApi } from '../lib/api';
 import { ErrorBox, Field } from '../components/ui';
 
 export function RecoverySecret({ code, onDone }: { code: string; onDone: () => void }) {
+  useTranslation();
   const [saved, setSaved] = useState(false);
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState('');
   const blocker = useBlocker(!saved);
   useEffect(() => {
     if (blocker.state === 'blocked') {
-      if (window.confirm('Have you saved your recovery code? Leaving hides it permanently.'))
-        blocker.proceed();
+      if (window.confirm(tr('auth:haveYouSavedYourRecoveryCodeLeavingHidesIt'))) blocker.proceed();
       else blocker.reset();
     }
   }, [blocker]);
@@ -28,12 +31,9 @@ export function RecoverySecret({ code, onDone }: { code: string; onDone: () => v
   }, [saved]);
   return (
     <section className="auth-card panel">
-      <h1>Save your recovery code.</h1>
-      <p>
-        This code is shown only now. Store it in your password manager, separately from your
-        password. Anyone with this code and your email can reset your account password.
-      </p>
-      <output className="recovery-secret" aria-label="Recovery code">
+      <h1>{tr('auth:saveYourRecoveryCode')}</h1>
+      <p>{tr('auth:thisCodeIsShownOnlyNowStoreItIn')}</p>
+      <output className="recovery-secret" aria-label={tr('auth:recoveryCode')}>
         {code}
       </output>
       <button
@@ -45,32 +45,33 @@ export function RecoverySecret({ code, onDone }: { code: string; onDone: () => v
             setCopyError('');
           } catch {
             setCopied(false);
-            setCopyError(
-              'Copy is unavailable in this browser. Select the code above and copy it manually before continuing.',
-            );
+            setCopyError(tr('auth:copyIsUnavailableInThisBrowserSelectTheCode'));
           }
         }}
       >
-        {copied ? 'Copied' : 'Copy recovery code'}
+        {copied ? tr('auth:copied') : tr('auth:copyRecoveryCode')}
       </button>
       <ErrorBox message={copyError || null} />
-      <p>
-        The code is single-use. Recovery or a password change replaces it and signs out older
-        sessions. We do not send reset emails. Without your password or this code, access cannot be
-        recovered through the app.
-      </p>
+      <p>{tr('auth:theCodeIsSingleUseRecoveryOrAPassword')}</p>
       <label className="check-label">
-        <input type="checkbox" checked={saved} onChange={(e) => setSaved(e.target.checked)} />I have
-        saved my recovery code somewhere safe.
+        <Trans
+          i18nKey="auth:iHaveSavedMyRecoveryCodeSomewhereSafe"
+          components={{
+            slot0: (
+              <input type="checkbox" checked={saved} onChange={(e) => setSaved(e.target.checked)} />
+            ),
+          }}
+        />
       </label>
       <button className="button primary" disabled={!saved} onClick={onDone}>
-        Continue to my journal
+        {tr('auth:continueToMyJournal')}
       </button>
     </section>
   );
 }
 
 export function AuthPage() {
+  useTranslation();
   const { request, invalidate } = useApi();
   const pending = useRef(false);
   const location = useLocation(),
@@ -114,7 +115,7 @@ export function AuthPage() {
   const feedback = (field: AuthField) =>
     visibleIssue(field) ? (
       <small id={`${id}-${field}-error`} className="field-error">
-        {visibleIssue(field)}
+        {localize(visibleIssue(field))}
       </small>
     ) : null;
   const finish = () => {
@@ -157,7 +158,7 @@ export function AuthPage() {
       if (result.recoveryCode) setSecret(result.recoveryCode);
       else finish();
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Unable to complete this request.');
+      setError(cause instanceof Error ? cause.message : tr('auth:unableToCompleteThisRequest'));
       requestAnimationFrame(() => {
         errorRef.current?.focus();
         errorRef.current?.scrollIntoView({ block: 'center', behavior: 'instant' });
@@ -170,37 +171,37 @@ export function AuthPage() {
   if (secret) return <RecoverySecret code={secret} onDone={finish} />;
   return (
     <section className="auth-card panel">
-      <p className="eyebrow">YOUR PERSONAL OBSERVATORY</p>
+      <p className="eyebrow">{tr('auth:yourPersonalObservatory')}</p>
       <h1>
         {mode === 'register'
-          ? 'Make room for your rhythm.'
+          ? tr('auth:makeRoomForYourRhythm')
           : mode === 'recover'
-            ? 'Recover your account.'
+            ? tr('auth:recoverYourAccount')
             : mode === 'claim'
-              ? 'Set up your journal account.'
-              : 'Welcome back.'}
+              ? tr('auth:setUpYourJournalAccount')
+              : tr('auth:welcomeBack')}
       </h1>
       <p>
         {mode === 'claim'
-          ? 'Your existing owner identity has been checked by Cloudflare. Choose a password to keep your current journal and use email sign-in from now on.'
+          ? tr('auth:yourExistingOwnerIdentityHasBeenCheckedByCloudflare')
           : mode === 'register'
-            ? 'Your own account. Your own private training and recovery journal.'
+            ? tr('auth:yourOwnAccountYourOwnPrivateTrainingAndRecovery')
             : mode === 'recover'
-              ? 'Use your email and saved recovery code to set a new password. The old code and all previous sessions will stop working.'
-              : 'Sign in with your email and password.'}
+              ? tr('auth:useYourEmailAndSavedRecoveryCodeToSet')
+              : tr('auth:signInWithYourEmailAndPassword')}
       </p>
       {mode !== 'claim' && (
         <Link className="auth-demo-link button secondary" to="/demo">
-          Try demo — no account needed
+          {tr('auth:tryDemoNoAccountNeeded')}
         </Link>
       )}
       <PendingAccountGuard pending={pending} />
       <form noValidate onSubmit={submit} className="auth-form" aria-busy={busy}>
         <fieldset className="form-fieldset auth-form" disabled={busy}>
           {mode !== 'claim' && (
-            <Field label="Email">
+            <Field label={tr('auth:email')}>
               <input
-                {...attributes('email', 'Email')}
+                {...attributes('email', tr('auth:email'))}
                 type="email"
                 autoComplete="username"
                 value={email}
@@ -212,9 +213,9 @@ export function AuthPage() {
             </Field>
           )}
           {mode === 'recover' && (
-            <Field label="Recovery code">
+            <Field label={tr('auth:recoveryCode')}>
               <input
-                {...attributes('code', 'Recovery code')}
+                {...attributes('code', tr('auth:recoveryCode'))}
                 autoComplete="off"
                 spellCheck={false}
                 value={code}
@@ -226,9 +227,12 @@ export function AuthPage() {
               {feedback('code')}
             </Field>
           )}
-          <Field label={mode === 'login' ? 'Password' : 'New password'}>
+          <Field label={mode === 'login' ? tr('auth:password') : tr('auth:newPassword')}>
             <input
-              {...attributes('password', mode === 'login' ? 'Password' : 'New password')}
+              {...attributes(
+                'password',
+                mode === 'login' ? tr('auth:password') : tr('auth:newPassword'),
+              )}
               type="password"
               autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
               value={password}
@@ -239,17 +243,33 @@ export function AuthPage() {
             />
             {mode !== 'login' && (
               <small id={`${id}-password-hint`}>
-                12–128 characters. A long, unique passphrase works well.{' '}
-                {password.length > 0 &&
-                  `${password.length} entered${password.length < 12 ? ` · ${12 - password.length} more needed` : ''}.`}
+                <Trans
+                  i18nKey="auth:12128CharactersALongUniquePassphraseWorksWell"
+                  components={{
+                    slot0: (
+                      <MessageValue
+                        value={
+                          password.length > 0 &&
+                          tr('auth:entered', {
+                            value0: password.length,
+                            value1:
+                              password.length < 12
+                                ? tr('auth:moreNeeded', { value0: 12 - password.length })
+                                : '',
+                          })
+                        }
+                      />
+                    ),
+                  }}
+                />
               </small>
             )}
             {feedback('password')}
           </Field>
           {mode !== 'login' && (
-            <Field label="Confirm password">
+            <Field label={tr('auth:confirmPassword')}>
               <input
-                {...attributes('confirm', 'Confirm password')}
+                {...attributes('confirm', tr('auth:confirmPassword'))}
                 type="password"
                 autoComplete="new-password"
                 value={confirm}
@@ -274,8 +294,10 @@ export function AuthPage() {
                   aria-describedby={visibleIssue('privacy') ? `${id}-privacy-error` : undefined}
                 />{' '}
                 <span>
-                  I have read <Link to="/privacy">Privacy & data</Link>. I understand that email
-                  addresses are not verified and account recovery requires my saved code.
+                  <Trans
+                    i18nKey="auth:iHaveReadPrivacyDataIUnderstandThatEmail"
+                    components={{ slot0: <Link to="/privacy" /> }}
+                  />
                 </span>
               </label>
               {feedback('privacy')}
@@ -283,7 +305,10 @@ export function AuthPage() {
           )}
           {attempted && Object.keys(issues).length > 0 && (
             <div className="notice error" role="alert">
-              Check the highlighted fields. {Object.values(issues)[0]}
+              <Trans
+                i18nKey="auth:checkTheHighlightedFields"
+                components={{ slot0: <MessageValue value={localize(Object.values(issues)[0])} /> }}
+              />
             </div>
           )}
           <div ref={errorRef} tabIndex={-1}>
@@ -291,26 +316,25 @@ export function AuthPage() {
           </div>
           <button className="button primary" disabled={busy}>
             {busy
-              ? 'Please wait…'
+              ? tr('auth:pleaseWait')
               : mode === 'register'
-                ? 'Create account'
+                ? tr('auth:createAccount')
                 : mode === 'recover'
-                  ? 'Reset password'
+                  ? tr('auth:resetPassword')
                   : mode === 'claim'
-                    ? 'Create password & keep my journal'
-                    : 'Sign in'}
+                    ? tr('auth:createPasswordKeepMyJournal')
+                    : tr('auth:signIn')}
           </button>
         </fieldset>
       </form>
       <div className="auth-links">
-        <Link to="/sign-in">Sign in</Link>
-        <Link to="/register">Create an account</Link>
-        <Link to="/recover">Recover account</Link>
+        <Link to="/sign-in">{tr('auth:signIn')}</Link>
+        <Link to="/register">{tr('auth:createAnAccount')}</Link>
+        <Link to="/recover">{tr('auth:recoverAccount')}</Link>
       </div>
       {mode === 'register' && (
         <p className="small muted">
-          Pilot access is free. Cloudflare storage and traffic quotas apply; there is no
-          unlimited-hosting promise. Email is a login identifier, not proof of identity.
+          {tr('auth:pilotAccessIsFreeCloudflareStorageAndTrafficQuotas')}
         </p>
       )}
     </section>

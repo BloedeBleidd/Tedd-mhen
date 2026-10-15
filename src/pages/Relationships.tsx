@@ -1,3 +1,7 @@
+import { MessageValue } from '../components/MessageValue';
+import { useTranslation, Trans } from 'react-i18next';
+import { featureDescription } from '../lib/feature-labels';
+import { localize, t as tr } from '../i18n';
 import { WorkspaceLink as Link } from '../components/WorkspaceLink';
 import { useMemo, useState } from 'react';
 import { metrics, type MetricKey } from '../../shared/metrics';
@@ -12,6 +16,7 @@ import { FeaturePicker, useAnalysisData } from '../components/AnalysisData';
 import { RelationshipChart } from '../components/RelationshipChart';
 import { ErrorBox, Field, PageHeading, Panel, number } from '../components/ui';
 export function Relationships() {
+  useTranslation();
   const { demo } = useApi();
   const data = useAnalysisData();
   const [target, setTarget] = useState<MetricKey>('wellbeing'),
@@ -55,84 +60,85 @@ export function Relationships() {
   return (
     <>
       <PageHeading
-        eyebrow="FIND CONNECTIONS"
-        title="What moves together?"
-        description="Compare measurements and context, across days and longer patterns."
+        eyebrow={tr('relationships:findConnections')}
+        title={tr('relationships:whatMovesTogether')}
+        description={tr('relationships:compareMeasurementsAndContextAcrossDaysAndLongerPatterns')}
       />
       {data.controls}
       <Panel>
         <div className="fields-grid three">
-          <Field label="Outcome">
+          <Field label={tr('relationships:outcome')}>
             <select value={target} onChange={(e) => setTarget(e.target.value as MetricKey)}>
               {Object.entries(metrics).map(([id, m]) => (
                 <option key={id} value={id}>
-                  {m.label}
+                  {localize(m.label)}
                 </option>
               ))}
             </select>
           </Field>
-          <Field label="Compare with">
+          <Field label={tr('relationships:compareWith')}>
             <select value={activePredictor} onChange={(e) => setPredictor(e.target.value)}>
               {data.catalog
                 .filter((f) => lag > 0 || f.id !== target)
                 .map((f) => (
                   <option key={f.id} value={f.id}>
-                    {f.label}
+                    {localize(f.label)}
                   </option>
                 ))}
             </select>
           </Field>
-          <Field label="Outcome occurs">
+          <Field label={tr('relationships:outcomeOccurs')}>
             <select value={lag} onChange={(e) => setLag(Number(e.target.value))}>
               {[0, 1, 2, 3, 7, 14, 28].map((n) => (
                 <option key={n} value={n}>
                   {n === 0
-                    ? 'On the same journal date'
-                    : `${n} calendar day${n === 1 ? '' : 's'} later`}
+                    ? tr('relationships:onTheSameJournalDate')
+                    : tr('relationships:calendarDayLater', {
+                        count: n,
+                      })}
                 </option>
               ))}
             </select>
           </Field>
-          <Field label="Perspective">
+          <Field label={tr('relationships:perspective')}>
             <select value={view} onChange={(e) => setView(e.target.value as RelationshipView)}>
-              <option value="daily">Recorded daily levels</option>
-              <option value="changes">Changes from the previous day</option>
-              <option value="detrended">Remove each linear time trend</option>
-              <option value="week">Trailing 7-day numeric means</option>
-              <option value="month">Trailing 28-day numeric means</option>
+              <option value="daily">{tr('relationships:recordedDailyLevels')}</option>
+              <option value="changes">{tr('relationships:changesFromThePreviousDay')}</option>
+              <option value="detrended">{tr('relationships:removeEachLinearTimeTrend')}</option>
+              <option value="week">{tr('relationships:trailing7DayNumericMeans')}</option>
+              <option value="month">{tr('relationships:trailing28DayNumericMeans')}</option>
             </select>
           </Field>
-          <Field label="Correlation method">
+          <Field label={tr('relationships:correlationMethod')}>
             <select
               value={method}
               onChange={(e) => setMethod(e.target.value as 'pearson' | 'spearman')}
             >
-              <option value="spearman">Spearman · monotonic association</option>
-              <option value="pearson">Pearson · linear association</option>
+              <option value="spearman">{tr('relationships:spearmanMonotonicAssociation')}</option>
+              <option value="pearson">{tr('relationships:pearsonLinearAssociation')}</option>
             </select>
           </Field>
-          <Field label="Bootstrap block length">
+          <Field label={tr('relationships:bootstrapBlockLength')}>
             <select value={block} onChange={(e) => setBlock(Number(e.target.value))}>
               {[7, 14, 28].map((n) => (
                 <option key={n} value={n}>
-                  {n} calendar days
+                  <Trans
+                    i18nKey="relationships:calendarDays"
+                    components={{ slot0: <MessageValue value={n} /> }}
+                  />
                 </option>
               ))}
             </select>
           </Field>
         </div>
         <p className="small muted">
-          Sleep belongs to the waking date. Training Monday → sleep Tuesday describes the night
-          after training. Same-date sleep usually precedes that day’s training; within-day ordering
-          is not measured. Rolling means require every day in the window; binary labels use the
-          predictor day.
+          {tr('relationships:sleepBelongsToTheWakingDateTrainingMondaySleep')}
         </p>
       </Panel>
       {!data.loading &&
         selected.some((id) => id !== target && !data.catalog.some((f) => f.id === id)) && (
           <p role="status">
-            Some selected inputs have no matching observations and are excluded. Open Choose inputs
-            to review them.
+            {tr('relationships:someSelectedInputsHaveNoMatchingObservationsAndAre')}
           </p>
         )}
       <FeaturePicker
@@ -142,18 +148,17 @@ export function Relationships() {
         target={target}
       />
       <ErrorBox message={data.error || analysis.error} />
-      {(data.loading || analysis.busy) && <p role="status">Calculating aligned relationships…</p>}
+      {(data.loading || analysis.busy) && (
+        <p role="status">{tr('relationships:calculatingAlignedRelationships')}</p>
+      )}
       {!data.loading && !data.entries.length && (
         <Panel>
-          <p>
-            No observations match this selection. Try All recorded dates, clear observation filters,
-            or add a check-in.
-          </p>
+          <p>{tr('relationships:noObservationsMatchThisSelectionTryAllRecordedDates')}</p>
           <Link className="button secondary" to="/check-in">
-            Add a check-in
+            {tr('relationships:addACheckIn')}
           </Link>{' '}
           <Link className="text-link" to="/import">
-            Import journal data
+            {tr('relationships:importJournalData')}
           </Link>
         </Panel>
       )}
@@ -162,51 +167,67 @@ export function Relationships() {
           <div className="analysis-stats">
             <div>
               <span className="stat-label">
-                {method === 'spearman' ? 'Spearman ρ' : 'Pearson r'}
+                {method === 'spearman'
+                  ? tr('relationships:spearman')
+                  : tr('relationships:pearsonR')}
               </span>
               <strong>{number(result.selected.coefficient, 2)}</strong>
-              <p>{result.selected.n} aligned pairs; 14 required, with variation</p>
-            </div>
-            <div>
-              <span className="stat-label">Approximate 95% block-bootstrap interval</span>
-              <strong className="compact-stat">
-                {result.interval
-                  ? result.interval.interval.map((v) => number(v, 2)).join(' to ')
-                  : 'Not available'}
-              </strong>
               <p>
-                {result.interval
-                  ? `${result.interval.block}-day blocks · ${result.interval.validReplicates} replicates`
-                  : 'Needs 28 pairs and a span of at least 4 blocks'}
+                <Trans
+                  i18nKey="relationships:alignedPairs14RequiredWithVariation"
+                  components={{ slot0: <MessageValue value={result.selected.n} /> }}
+                />
               </p>
             </div>
             <div>
-              <span className="stat-label">Compare definitions</span>
+              <span className="stat-label">
+                {tr('relationships:approximate95BlockBootstrapInterval')}
+              </span>
               <strong className="compact-stat">
-                r {number(result.selected.pearson, 2)} · ρ {number(result.selected.spearman, 2)}
+                {result.interval
+                  ? result.interval.interval.map((v) => number(v, 2)).join(tr('relationships:to'))
+                  : tr('relationships:notAvailable')}
               </strong>
-              <p>Linear vs rank association; neither implies causation</p>
+              <p>
+                {result.interval
+                  ? tr('relationships:dayBlocksReplicates', {
+                      value0: result.interval.block,
+                      value1: result.interval.validReplicates,
+                    })
+                  : tr('relationships:needs28PairsAndASpanOfAtLeast')}
+              </p>
+            </div>
+            <div>
+              <span className="stat-label">{tr('relationships:compareDefinitions')}</span>
+              <strong className="compact-stat">
+                <Trans
+                  i18nKey="relationships:r"
+                  components={{
+                    slot0: <MessageValue value={number(result.selected.pearson, 2)} />,
+                    slot1: <MessageValue value={number(result.selected.spearman, 2)} />,
+                  }}
+                />
+              </strong>
+              <p>{tr('relationships:linearVsRankAssociationNeitherImpliesCausation')}</p>
             </div>
           </div>
           <Panel
-            title={`${chosen?.label} → ${metrics[target].label}`}
-            subtitle={chosen?.description}
+            title={`${localize(chosen?.label)} → ${localize(metrics[target].label)}`}
+            subtitle={chosen ? featureDescription(chosen) : undefined}
           >
             <RelationshipChart
               pairs={result.pairs}
-              xLabel={chosen?.label || predictor}
-              yLabel={metrics[target].label}
+              xLabel={localize(chosen?.label) || predictor}
+              yLabel={localize(metrics[target].label)}
             />
             <p className="small muted">
-              An arrow specifies time alignment, not causal influence. Points use the selected
-              transformation. A shared trend, reverse direction, unmeasured factors and selective
-              recording can explain a relationship.
+              {tr('relationships:anArrowSpecifiesTimeAlignmentNotCausalInfluencePoints')}
             </p>
           </Panel>
           <div className="analysis-explanation">
             <Panel
-              title="Strongest observed associations"
-              subtitle="Sorted by absolute coefficient for this outcome, lag and selection. Each row may use different days."
+              title={tr('relationships:strongestObservedAssociations')}
+              subtitle={tr('relationships:sortedByAbsoluteCoefficientForThisOutcomeLagAnd')}
             >
               <div className="association-list">
                 {result.ranking.map((r) => (
@@ -216,8 +237,13 @@ export function Relationships() {
                     onClick={() => setPredictor(r.id)}
                   >
                     <span>
-                      {r.label}
-                      <small>{r.n} pairs</small>
+                      {localize(r.label)}
+                      <small>
+                        <Trans
+                          i18nKey="relationships:pairs"
+                          components={{ slot0: <MessageValue value={r.n} /> }}
+                        />
+                      </small>
                     </span>
                     <span className="association-bar">
                       <i style={{ width: `${Math.abs(r.coefficient ?? 0) * 100}%` }} />
@@ -227,14 +253,14 @@ export function Relationships() {
                 ))}
               </div>
             </Panel>
-            <Panel title="Does the timing change the pattern?">
+            <Panel title={tr('relationships:doesTheTimingChangeThePattern')}>
               <div className="table-scroll">
                 <table>
                   <thead>
                     <tr>
-                      <th>Outcome later by</th>
+                      <th>{tr('relationships:outcomeLaterBy')}</th>
                       <th>{method === 'pearson' ? 'r' : 'ρ'}</th>
-                      <th>Pairs</th>
+                      <th>{tr('relationships:pairs2')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -242,7 +268,10 @@ export function Relationships() {
                       <tr key={row.lag}>
                         <td>
                           <button className="text-link" onClick={() => setLag(row.lag)}>
-                            {row.lag} days
+                            <Trans
+                              i18nKey="relationships:days"
+                              components={{ slot0: <MessageValue value={row.lag} /> }}
+                            />
                           </button>
                         </td>
                         <td>{number(row.coefficient, 2)}</td>
@@ -253,18 +282,12 @@ export function Relationships() {
                 </table>
               </div>
               <p className="small muted">
-                Scanning many metrics, lags and filters makes large chance correlations more likely.
-                Rankings are exploration, with no significance stars or causal winners. Bootstrap
-                intervals are approximate under local stationarity, sensitive to block length and
-                not adjusted for this search.
+                {tr('relationships:scanningManyMetricsLagsAndFiltersMakesLargeChance')}
               </p>
             </Panel>
           </div>
-          <Panel title="Reproduce this result">
-            <p>
-              Missing pairs are excluded; gaps are never compressed. The download contains the exact
-              pairs, settings, rankings and bootstrap seed. It contains personal observations.
-            </p>
+          <Panel title={tr('relationships:reproduceThisResult')}>
+            <p>{tr('relationships:missingPairsAreExcludedGapsAreNeverCompressedThe')}</p>
             <button
               className="button secondary"
               onClick={() =>
@@ -275,7 +298,7 @@ export function Relationships() {
                 )
               }
             >
-              Download relationship analysis
+              {tr('relationships:downloadRelationshipAnalysis')}
             </button>
           </Panel>
         </>

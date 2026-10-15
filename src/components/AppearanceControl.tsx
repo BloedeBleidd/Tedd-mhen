@@ -1,9 +1,13 @@
+import { MessageValue } from '../components/MessageValue';
+import { useTranslation, Trans } from 'react-i18next';
+import { locale, t as tr } from '../i18n';
 import { MapPin, Moon, Sun, Sunrise, X } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useAppearance } from '../lib/appearance-context';
 import type { ThemeMode } from '../lib/appearance';
 
 export function AppearanceControl() {
+  useTranslation();
   const { settings, update, resolved, persistent } = useAppearance();
   const dialog = useRef<HTMLDialogElement>(null);
   const [locating, setLocating] = useState(false);
@@ -12,7 +16,7 @@ export function AppearanceControl() {
   function locate() {
     setError('');
     if (!navigator.geolocation) {
-      setError('Location is unavailable in this browser. You can still choose Light or Dark.');
+      setError('appearanceControl:locationIsUnavailableInThisBrowserYouCanStill');
       return;
     }
     setLocating(true);
@@ -28,10 +32,11 @@ export function AppearanceControl() {
         setLocating(false);
       },
       (cause) => {
+        if (cause.code === 1) update({ location: null });
         setError(
           cause.code === 1
-            ? 'Location permission was not granted. Auto follows your system theme until a location is saved.'
-            : 'Could not get your location. Try again, or choose Light or Dark.',
+            ? 'appearanceControl:locationPermissionWasNotGrantedAutoFollowsYourSystem'
+            : 'appearanceControl:couldNotGetYourLocationTryAgainOrChoose',
         );
         setLocating(false);
       },
@@ -43,30 +48,30 @@ export function AppearanceControl() {
       <button
         className="appearance-trigger button secondary small-button"
         onClick={() => dialog.current?.showModal()}
-        aria-label="Appearance"
+        aria-label={tr('appearanceControl:appearance')}
       >
         <Icon size={16} />
-        <span>Appearance</span>
+        <span>{tr('appearanceControl:appearance')}</span>
       </button>
       <dialog ref={dialog} className="appearance-dialog" aria-labelledby="appearance-title">
         <div className="dialog-heading">
-          <h2 id="appearance-title">Appearance</h2>
+          <h2 id="appearance-title">{tr('appearanceControl:appearance')}</h2>
           <button
             className="icon-button"
-            aria-label="Close appearance"
+            aria-label={tr('appearanceControl:closeAppearance')}
             onClick={() => dialog.current?.close()}
           >
             <X size={20} />
           </button>
         </div>
-        <p className="muted">A lighter day. A quieter evening.</p>
+        <p className="muted">{tr('appearanceControl:aLighterDayAQuieterEvening')}</p>
         <fieldset className="theme-options">
-          <legend className="sr-only">Theme</legend>
+          <legend className="sr-only">{tr('appearanceControl:theme')}</legend>
           {(
             [
-              { mode: 'auto', label: 'Auto', icon: Sunrise },
-              { mode: 'light', label: 'Light', icon: Sun },
-              { mode: 'dark', label: 'Dark', icon: Moon },
+              { mode: 'auto', label: tr('appearanceControl:auto'), icon: Sunrise },
+              { mode: 'light', label: tr('appearanceControl:light'), icon: Sun },
+              { mode: 'dark', label: tr('appearanceControl:dark'), icon: Moon },
             ] as const
           ).map(({ mode, label, icon: OptionIcon }) => (
             <label
@@ -87,34 +92,48 @@ export function AppearanceControl() {
         </fieldset>
         <p className="theme-status" role="status">
           {resolved.source === 'manual'
-            ? `${resolved.theme === 'light' ? 'Light' : 'Dark'} stays on until you change it.`
-            : resolved.source === 'system'
-              ? 'Auto is following your system theme. Add a location to follow the sun.'
+            ? tr('appearanceControl:staysOnUntilYouChangeIt', {
+                value0:
+                  resolved.theme === 'light'
+                    ? tr('appearanceControl:light')
+                    : tr('appearanceControl:dark'),
+              })
+            : resolved.source === 'fallback'
+              ? tr('appearanceControl:autoIsFollowingYourSystemThemeAddALocation')
               : resolved.polar
-                ? `Polar ${resolved.polar}: ${resolved.theme} mode stays on while the sun remains ${resolved.polar === 'day' ? 'above' : 'below'} the horizon.`
+                ? tr(
+                    resolved.polar === 'day'
+                      ? 'appearanceControl:polarDay'
+                      : 'appearanceControl:polarNight',
+                  )
                 : resolved.next
-                  ? `${resolved.next.theme === 'dark' ? 'Dark at sunset' : 'Light at sunrise'} · ${resolved.next.at.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })} (${Intl.DateTimeFormat().resolvedOptions().timeZone}).`
-                  : 'Auto follows sunrise and sunset.'}
+                  ? `${resolved.next.theme === 'dark' ? tr('appearanceControl:darkAtSunset') : tr('appearanceControl:lightAtSunrise')} · ${resolved.next.at.toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' })} (${Intl.DateTimeFormat().resolvedOptions().timeZone}).`
+                  : tr('appearanceControl:autoFollowsSunriseAndSunset')}
         </p>
         <div className="location-settings">
-          <h3>Follow your local sunrise & sunset</h3>
-          <p>
-            Location is requested only when you click below. Approximate coordinates stay in this
-            browser and are never sent to our database. Times are estimates.
-          </p>
+          <h3>{tr('appearanceControl:followYourLocalSunriseSunset')}</h3>
+          <p>{tr('appearanceControl:locationIsRequestedOnlyWhenYouClickBelowApproximate')}</p>
           <button className="button secondary" disabled={locating} onClick={locate}>
             <MapPin size={16} />
             {locating
-              ? 'Finding location…'
+              ? tr('appearanceControl:findingLocation')
               : settings.location
-                ? 'Update device location'
-                : 'Use device location'}
+                ? tr('appearanceControl:updateDeviceLocation')
+                : tr('appearanceControl:useDeviceLocation')}
           </button>
           {settings.location && (
             <>
               <p>
-                Saved on {new Date(settings.location.capturedAt).toLocaleDateString('en-GB')}.
-                Update when travelling; there is no background location tracking.
+                <Trans
+                  i18nKey="appearanceControl:savedOnUpdateWhenTravellingThereIsNoBackground"
+                  components={{
+                    slot0: (
+                      <MessageValue
+                        value={new Date(settings.location.capturedAt).toLocaleDateString(locale())}
+                      />
+                    ),
+                  }}
+                />
               </p>
               <button
                 className="text-link"
@@ -124,19 +143,19 @@ export function AppearanceControl() {
                   setError('');
                 }}
               >
-                Forget saved location
+                {tr('appearanceControl:forgetSavedLocation')}
               </button>
             </>
           )}
         </div>
         {error && (
           <p className="notice error" role="alert">
-            {error}
+            {tr(error)}
           </p>
         )}
         {!persistent && (
           <p role="status" className="muted">
-            Browser storage is unavailable. Changes apply to this tab only.
+            {tr('appearanceControl:browserStorageIsUnavailableChangesApplyToThisTab')}
           </p>
         )}
       </dialog>

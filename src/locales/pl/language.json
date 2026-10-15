@@ -1,0 +1,19 @@
+{
+  "open": "Zmień język",
+  "title": "Język",
+  "close": "Zamknij ustawienia języka",
+  "auto": "Auto · lokalizacja urządzenia",
+  "automaticStatus": "Język automatyczny: {{language}}.",
+  "manualStatus": "Wybrany język: {{language}}. Twój wybór ma pierwszeństwo przed lokalizacją.",
+  "locationExplanation": "O lokalizację poprosimy dopiero po kliknięciu. Przybliżone współrzędne pozostają w tej przeglądarce i służą też do obliczania wschodu i zachodu słońca dla automatycznego motywu. Bez zapisanej lokalizacji tryb Auto używa angielskiego i jasnego motywu.",
+  "locating": "Ustalanie lokalizacji…",
+  "useLocation": "Użyj lokalizacji urządzenia",
+  "updateLocation": "Zaktualizuj lokalizację urządzenia",
+  "forgetLocation": "Usuń zapisaną lokalizację",
+  "approximation": "Język sugerujemy na podstawie lokalnej mapy krajów. Przy granicach i w krajach wielojęzycznych sugestia może być nietrafna. Możesz wybrać dowolny język powyżej. Aktualizuj lokalizację w podróży; nie śledzimy jej w tle.",
+  "locationUnavailable": "Nie udało się ustalić lokalizacji. Spróbuj ponownie lub wybierz język ręcznie.",
+  "locationDenied": "Nie udzielono zgody na lokalizację. Tryb Auto używa angielskiego i jasnego motywu; wybory ręczne nadal obowiązują.",
+  "storageUnavailable": "Pamięć przeglądarki jest niedostępna. Zmiany dotyczą tylko tej karty.",
+  "loadFailed": "Nie udało się wczytać języka. Obecny pozostaje aktywny. Sprawdź połączenie i ponów próbę.",
+  "retry": "Ponów wczytywanie języka"
+}

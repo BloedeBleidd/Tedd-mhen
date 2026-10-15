@@ -3497,3 +3497,108 @@ main > .privacy-notice {
   outline: 2px solid var(--accent-strong);
   outline-offset: 2px;
 }
+
+.language-trigger {
+  flex-shrink: 0;
+  gap: 0.4rem;
+  min-height: 44px;
+}
+.language-globe {
+  animation: globe-greeting 2.4s ease-in-out 2;
+  transform-origin: center;
+}
+.language-trigger:hover .language-globe,
+.language-trigger:focus-visible .language-globe {
+  animation: globe-greeting 1.2s ease-in-out;
+}
+.language-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+  border: 0;
+  padding: 0;
+}
+.language-options .theme-option {
+  min-height: 48px;
+}
+.language-forget {
+  display: block;
+  margin-top: 1rem;
+}
+@keyframes globe-greeting {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  25% {
+    transform: rotate(-12deg);
+  }
+  65% {
+    transform: rotate(12deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .language-globe,
+  .language-trigger:hover .language-globe,
+  .language-trigger:focus-visible .language-globe {
+    animation: none;
+  }
+}
+@media (max-width: 420px) {
+  .topbar-tools {
+    gap: 0.35rem;
+  }
+  .appearance-trigger span {
+    display: none;
+  }
+  .language-trigger {
+    padding-inline: 0.5rem;
+  }
+  .public-header {
+    gap: 0.5rem;
+  }
+}
+.activity-select {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+}
+.activity-select select,
+.activity-select input {
+  max-width: 100%;
+  width: 100%;
+}
+.field,
+.fields-grid > *,
+.analysis-filters > *,
+.journal-filters > * {
+  min-width: 0;
+}
+select {
+  max-width: 100%;
+}
+.topbar-tools {
+  flex-shrink: 0;
+}
+@media (max-width: 720px) {
+  .breadcrumb {
+    min-width: 0;
+  }
+  .breadcrumb > strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.field:has(input[type='file']:focus-visible) .button {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+.field input[type='file'].sr-only {
+  width: 1px;
+  min-width: 0;
+  height: 1px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+}
