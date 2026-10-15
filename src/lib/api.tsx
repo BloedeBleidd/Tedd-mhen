@@ -16,6 +16,7 @@ type ApiContext = {
   demo: boolean;
   version: number;
   invalidate: () => void;
+  currentUser: () => string | null;
   response: (path: string, options?: RequestInit) => Promise<Response>;
   request: <T>(path: string, options?: RequestInit) => Promise<T>;
   getDemoEntries: () => StoredEntry[];
@@ -122,6 +123,7 @@ export function ApiProvider({
     },
     [workspace, response],
   );
+  const currentUser = useCallback(() => workspace?.id ?? owner.current, [workspace]);
   const getDemoEntries = useCallback(() => {
     if (!workspace || !mounted.current)
       throw new ApiError('Open the demo before exporting examples.', 409);
@@ -129,7 +131,15 @@ export function ApiProvider({
   }, [workspace]);
   return (
     <Context.Provider
-      value={{ demo: !!workspace, version, invalidate, request, response, getDemoEntries }}
+      value={{
+        demo: !!workspace,
+        version,
+        invalidate,
+        currentUser,
+        request,
+        response,
+        getDemoEntries,
+      }}
     >
       {children}
     </Context.Provider>
@@ -137,7 +147,7 @@ export function ApiProvider({
 }
 export const useApi = () => useContext(Context);
 export function useLoad<T>(path: string | null, keepDuringRefresh = false) {
-  const { request, version } = useApi();
+  const { request, version, currentUser } = useApi();
   const [attempt, retry] = useState(0);
   const [state, setState] = useState<{
     data: T | null;
@@ -152,12 +162,17 @@ export function useLoad<T>(path: string | null, keepDuringRefresh = false) {
   });
   useEffect(() => {
     let active = true;
+    const retained = (data: T | null) =>
+      keepDuringRefresh &&
+      (path !== '/api/session' || (data as { id?: string } | null)?.id === currentUser())
+        ? data
+        : null;
     if (!path) {
       setState({ data: null, loading: false, error: null, status: null });
       return;
     }
     setState((previous) => ({
-      data: keepDuringRefresh ? previous.data : null,
+      data: retained(previous.data),
       loading: true,
       error: null,
       status: null,
@@ -169,7 +184,10 @@ export function useLoad<T>(path: string | null, keepDuringRefresh = false) {
       .catch((error) => {
         if (active)
           setState((previous) => ({
-            data: keepDuringRefresh ? previous.data : null,
+            data:
+              error instanceof ApiError && [401, 403].includes(error.status)
+                ? null
+                : retained(previous.data),
             loading: false,
             error: error.message,
             status: error instanceof ApiError ? error.status : 0,
@@ -178,7 +196,7 @@ export function useLoad<T>(path: string | null, keepDuringRefresh = false) {
     return () => {
       active = false;
     };
-  }, [path, request, version, keepDuringRefresh, attempt]);
+  }, [path, request, version, keepDuringRefresh, attempt, currentUser]);
   return { ...state, retry: () => retry((value) => value + 1) };
 }
 export function download(content: BlobPart, filename: string, type: string) {

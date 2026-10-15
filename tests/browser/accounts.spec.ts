@@ -99,8 +99,20 @@ test('registration UI preserves recovery code until acknowledgement, sign out an
   await page.getByRole('button', { name: 'Continue to my journal' }).click();
   await expect(page.getByRole('heading', { name: 'Find your rhythm.' })).toBeVisible();
   await page.getByRole('link', { name: 'Account', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Sign out', exact: true })).toBeEnabled();
+  await page.route('**/api/session', (route) =>
+    route.fulfill({ status: 503, json: { error: 'Session unavailable after logout.' } }),
+  );
   await page.getByRole('button', { name: 'Sign out', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Welcome back.' })).toBeVisible();
+  await page.getByRole('link', { name: 'Tedd’mhen', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Could not open your journal.' })).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'Main navigation' })).toHaveCount(0);
+  await page.unroute('**/api/session');
+  await page.getByRole('button', { name: 'Try again', exact: true }).click();
+  await expect(page.getByRole('link', { name: 'Try demo', exact: true })).toBeVisible();
+  await page.getByRole('link', { name: 'Sign in', exact: true }).click();
+
   await page.getByLabel('Email', { exact: true }).fill(email);
   await page.getByLabel('Password', { exact: true }).fill(password);
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
