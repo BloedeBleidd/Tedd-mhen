@@ -90,6 +90,8 @@ Account data is separate from the journal export schema. `auth_accounts` contain
 
 `administrators` stores an explicit internal user ID and grant timestamp; account deletion cascades to this role. Administration exposes aggregate counts and JSON byte volume, not user identities or journal bodies.
 
+`demo_datasets` identifies the versioned synthetic journal, technical owner, title, fixed anchor date and expected record count. Demo entries use the same schema and scales as personal records. Their dates and timestamps shift together in the browser; their values are constructed examples, not measurements. See [Demo workspace](DEMO.md).
+
 The AuthService Durable Object stores hashed IP/email limiter keys, attempt counts and expiry instants for ten-minute windows. Expired keys are removed on later authentication requests. These are operational abuse controls and are never part of journal exports.
 
 Appearance mode and optional approximate device coordinates (two decimal places, with a capture timestamp) are browser-local preferences, not health observations. The notice acknowledgement is also browser-local. Neither enters D1, analysis, or exports. See the application's Privacy & data page for cookie lifetimes and retention.

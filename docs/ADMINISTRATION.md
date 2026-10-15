@@ -24,5 +24,6 @@ Do not grant by accepting an email from a registration request. Removing the row
 - Earliest/latest recorded journal dates and entries whose latest update occurred within seven days.
 - Accounts with at least one unexpired session at the current credential version. This is not a count of people currently online.
 - Account creation counts by UTC date over the past 30 days.
+- Shared demo entry count and UTF-8 JSON bytes, shown separately. Demo records are excluded from personal journal totals; the technical owner has no credentials and is excluded from registered account counts.
 
 Deleted records/accounts do not contribute. Queries form an operational snapshot and can observe concurrent changes between statements. The panel exposes no journal bodies, account email list, passwords, recovery hashes or session tokens. Cloudflare’s dashboard remains authoritative for infrastructure usage, quotas and billing. Responses use `private, no-store`.

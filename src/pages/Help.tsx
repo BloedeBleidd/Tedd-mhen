@@ -136,8 +136,26 @@ export function Help() {
           </p>
           <p>
             No AI provider is connected to this application. Exported records are personal data:
-            review your selection before using them elsewhere. The demo uses synthetic records and
-            never saves them to your database.
+            review your selection before using them elsewhere. Demo exports contain synthetic
+            examples, never your personal observations.
+          </p>
+        </Panel>
+        <Panel title="Explore with demo data">
+          <p>
+            Use the My data / Demo data switch at the bottom of any workspace page. The example
+            journal covers months of running, strength training, sleep, recovery, symptoms and
+            context labels. Dates shift to end today, so the charts and predictions are ready to
+            explore.
+          </p>
+          <p>
+            Try every journal, analysis, import and export view. Edits and imports affect only your
+            temporary copy and reset when you return to My data or reload. Your personal journal and
+            the shared examples stay unchanged. Account management requires My data; demo mode does
+            not grant administrator access.
+          </p>
+          <p>
+            The relationships were deliberately constructed to demonstrate the tools. They are not
+            observations from a real person or evidence of health effects.
           </p>
         </Panel>
         <Panel title="07 · Explore relationships">

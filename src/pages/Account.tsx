@@ -5,7 +5,7 @@ import { ErrorBox, Field, PageHeading, Panel } from '../components/ui';
 import { RecoverySecret } from './Auth';
 
 export function Account() {
-  const { request, invalidate, demo } = useApi();
+  const { request, invalidate, demo, toggleDemo } = useApi();
   const session = useLoad<{ email: string; local: boolean }>('/api/session');
   const navigate = useNavigate();
   const [currentPassword, setCurrent] = useState(''),
@@ -76,7 +76,18 @@ export function Account() {
           recovery code and signs out other sessions.
         </p>
         {unavailable ? (
-          <p>Account changes are unavailable in the demo and local development bypass.</p>
+          <>
+            <p>
+              {demo
+                ? 'You are exploring a temporary demo workspace. Switch to My data to manage your account.'
+                : 'Account changes are unavailable in the local development bypass.'}
+            </p>
+            {demo && (
+              <button className="button primary" onClick={toggleDemo}>
+                Back to my account
+              </button>
+            )}
+          </>
         ) : (
           <button
             className="button secondary"

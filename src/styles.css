@@ -3224,3 +3224,203 @@ input[type='radio'] {
     transition: none !important;
   }
 }
+
+/* Keep the data source visible while exploring any workspace page. */
+.main-shell {
+  --workspace-left: 236px;
+  --workspace-clearance: 112px;
+  padding-bottom: var(--workspace-clearance);
+}
+.main-shell .save-bar {
+  bottom: var(--workspace-clearance);
+}
+.workspace-switcher {
+  position: fixed;
+  z-index: 18;
+  bottom: max(14px, env(safe-area-inset-bottom));
+  left: calc(var(--workspace-left) + 24px);
+  right: 24px;
+  max-width: 1150px;
+  margin-inline: auto;
+}
+.workspace-dock {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 78px;
+  padding: 14px 18px;
+  border: 1px solid var(--green);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: 0 6px 32px #102a2326;
+}
+.workspace-spark {
+  display: grid;
+  place-items: center;
+  flex: 0 0 42px;
+  height: 42px;
+  color: var(--green);
+  background: var(--surface-subtle);
+  border-radius: 14px;
+}
+.workspace-copy {
+  flex: 1;
+  min-width: 0;
+}
+.workspace-copy strong {
+  display: block;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.workspace-copy > span {
+  display: block;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--muted);
+  margin-top: 3px;
+}
+.workspace-options {
+  display: flex;
+  padding: 4px;
+  gap: 4px;
+  background: var(--cream);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+.workspace-options button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 42px;
+  padding: 10px 13px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.workspace-options button[aria-pressed='true'] {
+  background: var(--green);
+  color: var(--on-green);
+  font-weight: 650;
+}
+.workspace-options button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+.workspace-error {
+  margin: 0 0 8px;
+  padding: 12px 16px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--green);
+  border-radius: 12px;
+  font-size: 12px;
+}
+@media (min-width: 1500px) {
+  .main-shell {
+    --workspace-left: 253px;
+  }
+}
+@media (max-width: 1200px) {
+  .main-shell {
+    --workspace-left: 210px;
+  }
+  .workspace-spark {
+    display: none;
+  }
+}
+@media (max-width: 980px) {
+  .main-shell {
+    --workspace-left: 195px;
+    --workspace-clearance: 152px;
+  }
+  .workspace-dock {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .workspace-options {
+    width: 100%;
+  }
+  .workspace-options button {
+    flex: 1;
+  }
+}
+@media (max-width: 720px) {
+  .main-shell {
+    --workspace-left: 0px;
+    --workspace-clearance: 158px;
+  }
+  .workspace-switcher {
+    left: 10px;
+    right: 10px;
+    bottom: max(10px, env(safe-area-inset-bottom));
+  }
+  .workspace-dock {
+    padding: 10px 12px;
+    border-radius: 14px;
+    gap: 7px;
+  }
+  .workspace-copy strong {
+    font-size: 12px;
+  }
+  .workspace-copy > span {
+    font-size: 10px;
+  }
+  .workspace-options {
+    padding: 3px;
+  }
+  .workspace-options button {
+    min-height: 38px;
+    padding: 8px;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .workspace-spark {
+    animation: workspace-spark 2s ease-in-out 2;
+  }
+  .workspace-options button {
+    transition:
+      background-color 180ms ease,
+      color 180ms ease;
+  }
+  @keyframes workspace-spark {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 transparent;
+    }
+    50% {
+      box-shadow: 0 0 0 7px color-mix(in srgb, var(--green) 14%, transparent);
+    }
+  }
+}
+@media print {
+  .workspace-switcher {
+    display: none;
+  }
+  .main-shell {
+    padding-bottom: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .workspace-flask {
+    animation: workspace-flask 2s ease-in-out 2;
+  }
+  @keyframes workspace-flask {
+    0%,
+    100% {
+      transform: rotate(0);
+    }
+    40% {
+      transform: rotate(-12deg);
+    }
+    60% {
+      transform: rotate(8deg);
+    }
+  }
+}

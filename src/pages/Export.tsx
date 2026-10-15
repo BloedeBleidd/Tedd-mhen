@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Check, Download, FileJson, FileSpreadsheet, FileText, ShieldCheck } from 'lucide-react';
 import { useApi, useLoad, download } from '../lib/api';
 import { dayNumber, localDate, shiftDate } from '../../shared/schema';
@@ -44,7 +44,7 @@ const groupInfo: Record<ExportGroup, { title: string; description: string }> = {
   },
 };
 export function Export() {
-  const { demo, demoEntries } = useApi();
+  const { demo, getDemoEntries } = useApi();
   const [from, setFrom] = useState(shiftDate(localDate(), -89)),
     [to, setTo] = useState(localDate()),
     [groups, setGroups] = useState<ExportGroup[]>([
@@ -59,6 +59,12 @@ export function Export() {
     [error, setError] = useState<string | null>(null),
     [success, setSuccess] = useState(false);
   const valid = !!from && !!to && from <= to && dayNumber(to) - dayNumber(from) <= 1830;
+  useEffect(() => {
+    if (!busy) return;
+    const preventSwitch = (event: Event) => event.preventDefault();
+    window.addEventListener('teddmhen:mode-change', preventSwitch);
+    return () => window.removeEventListener('teddmhen:mode-change', preventSwitch);
+  }, [busy]);
   const [fields, setFields] = useState<string[]>(allowedExportFields);
   const selectedFields = fields.filter((field) =>
     groups.some((group) => exportFieldOptions[group].some((option) => option.path === field)),
@@ -74,10 +80,10 @@ export function Export() {
     setBusy(true);
     setError(null);
     setSuccess(false);
-    const filename = `teddmhen-${from}-${to}.${format}`;
+    const filename = `teddmhen-${demo ? 'demo-' : ''}${from}-${to}.${format}`;
     try {
       if (demo) {
-        const rows = demoEntries
+        const rows = getDemoEntries()
           .filter((e) => e.date >= from && e.date <= to)
           .sort((a, b) => a.date.localeCompare(b.date))
           .map((e) => selectFields(e, groups, selectedFields));

@@ -8,7 +8,7 @@ Each saved day has an owner ID, journal date, timezone, schema version, optimist
 
 ## Persistence and access
 
-The owner’s Cloudflare account hosts the Worker, static application, D1 SQLite database and authentication Durable Object. Public source and static assets contain no journal records. Data APIs derive the owner from a verified application session, never from imported metadata or browser-supplied ownership.
+The owner’s Cloudflare account hosts the Worker, static application, D1 SQLite database and authentication Durable Object. Public source and static assets contain no personal journal records. The repository includes only synthetic example records for seeding the shared demo. Personal data APIs derive the owner from a verified application session, never from imported metadata or browser-supplied ownership.
 
 D1 stores journal JSON, account identifiers, salted password hashes, recovery-code hashes and session-token hashes. The authentication Durable Object stores expiring attempt counters keyed by hashed IP/email identifiers. Email is an unverified sign-in identifier. No mail service is connected. See [Security](https://github.com/BloedeBleidd/Tedd-mhen/blob/main/SECURITY.md) for authentication, session lifetime and local-only bypass rules.
 
@@ -21,6 +21,8 @@ List/analysis payloads omit long narratives and workout details. Statistical cal
 Appearance and optional approximate coordinates live in browser local storage. Geolocation is requested only after an explicit button action. Coordinates are rounded to two decimal places and are not sent to the application API or D1. Sunrise/sunset are calculated locally. Browser/OS location providers operate separately. The necessary-cookie notice acknowledgement is another local preference.
 
 Journal imports are parsed and previewed in the browser before confirmation. Confirmed imports use ordinary authenticated, revision-checked writes into the current account. Exports and model reports are downloaded to user-controlled files. See [Import and export](IMPORT_EXPORT.md).
+
+The [demo workspace](DEMO.md) loads a shared D1 baseline through a dedicated authenticated endpoint. A technical user owns these synthetic records and cannot sign in. Demo check-ins and imports change a browser-memory copy only; switching back or reloading discards it. There is no local-storage persistence of demo observations. Downloaded demo files remain until the user deletes them.
 
 ## Retention and deletion
 

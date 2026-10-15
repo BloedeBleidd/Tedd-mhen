@@ -5,12 +5,13 @@ import {
   type RelationshipSettings,
   type RelationshipView,
 } from '../../shared/relationships';
-import { download } from '../lib/api';
+import { useApi, download } from '../lib/api';
 import { useAnalysis } from '../lib/use-analysis';
 import { FeaturePicker, useAnalysisData } from '../components/AnalysisData';
 import { RelationshipChart } from '../components/RelationshipChart';
 import { ErrorBox, Field, PageHeading, Panel, number } from '../components/ui';
 export function Relationships() {
+  const { demo } = useApi();
   const data = useAnalysisData();
   const [target, setTarget] = useState<MetricKey>('wellbeing'),
     [predictor, setPredictor] = useState('sleepHours'),
@@ -234,7 +235,7 @@ export function Relationships() {
               className="button secondary"
               onClick={() =>
                 download(
-                  JSON.stringify({ ...result, selection: data.settings }, null, 2),
+                  JSON.stringify({ ...result, synthetic: demo, selection: data.settings }, null, 2),
                   'teddmhen-relationships.json',
                   'application/json',
                 )

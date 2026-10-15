@@ -3,11 +3,12 @@ import { metrics, type MetricKey } from '../../shared/metrics';
 import { fitMultivariable, type ModelSettings } from '../../shared/multivariable';
 import type { Prior } from '../../shared/bayes';
 import { useAnalysis } from '../lib/use-analysis';
-import { download } from '../lib/api';
+import { useApi, download } from '../lib/api';
 import { FeaturePicker, useAnalysisData } from '../components/AnalysisData';
 import { TrendChart } from '../components/Charts';
 import { ErrorBox, Field, PageHeading, Panel, number } from '../components/ui';
 export function Prediction() {
+  const { demo } = useApi();
   const data = useAnalysisData();
   const [target, setTarget] = useState<MetricKey>('wellbeing'),
     [features, setFeatures] = useState(['sleepHours', 'trainingLoad', 'stress', 'trained']),
@@ -373,7 +374,7 @@ export function Prediction() {
               className="button secondary"
               onClick={() =>
                 download(
-                  JSON.stringify({ ...model, selection: data.settings }, null, 2),
+                  JSON.stringify({ ...model, synthetic: demo, selection: data.settings }, null, 2),
                   'teddmhen-multivariable-model.json',
                   'application/json',
                 )

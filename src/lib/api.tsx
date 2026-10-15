@@ -1,118 +1,156 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
-import { entrySchema, summarize, type StoredEntry } from '../../shared/schema';
-import { makeDemo } from './demo';
-export class ApiError extends Error {
-  constructor(
-    message: string,
-    public status: number,
-  ) {
-    super(message);
-  }
-}
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
+import type { StoredEntry } from '../../shared/schema';
+import { DemoWorkspace } from './demo-workspace';
+import { ApiError } from './api-error';
+export { ApiError } from './api-error';
 type ApiContext = {
   demo: boolean;
+  demoLoading: boolean;
+  demoError: string | null;
+  demoRecordCount: number | null;
   toggleDemo: () => void;
+  cancelDemoLoad: () => void;
   version: number;
   invalidate: () => void;
   request: <T>(path: string, options?: RequestInit) => Promise<T>;
-  demoEntries: StoredEntry[];
+  getDemoEntries: () => StoredEntry[];
 };
 const Context = createContext<ApiContext>(null!);
+async function networkRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const headers = new Headers(options.headers);
+  if (!headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
+  headers.set('X-Teddmhen-Request', '1');
+  const response = await fetch(path, { ...options, credentials: 'same-origin', headers });
+  if (!response.ok) {
+    const body = (await response
+      .json()
+      .catch(() => ({ error: 'The server returned an unexpected response.' }))) as {
+      error?: string;
+    };
+    throw new ApiError(body.error || 'Request failed.', response.status);
+  }
+  return response.status === 204 ? (undefined as T) : response.json();
+}
 export function ApiProvider({ children }: { children: ReactNode }) {
-  const [demo, setDemo] = useState(false),
-    [demoEntries, setDemoEntries] = useState<StoredEntry[]>([]),
-    [version, setVersion] = useState(0);
-  const toggleDemo = useCallback(() => {
-    if (!window.dispatchEvent(new Event('teddmhen:mode-change', { cancelable: true }))) return;
-    setDemo((v) => !v);
-    setDemoEntries(makeDemo());
-    setVersion((v) => v + 1);
+  const [workspace, setWorkspace] = useState<DemoWorkspace | null>(null);
+  const [demoLoading, setDemoLoading] = useState(false);
+  const [demoError, setDemoError] = useState<string | null>(null);
+  const [version, setVersion] = useState(0);
+  const mode = useRef(workspace);
+  const pending = useRef<AbortController | null>(null);
+  const writes = useRef(0);
+  const cancelDemoLoad = useCallback(() => {
+    pending.current?.abort();
+    pending.current = null;
+    setDemoLoading(false);
+    setDemoError(null);
+  }, []);
+  useEffect(
+    () => () => {
+      pending.current?.abort();
+      pending.current = null;
+    },
+    [],
+  );
+  const toggleDemo = useCallback(async () => {
+    if (pending.current) return;
+    setDemoError(null);
+    const maySwitch = () => {
+      if (
+        writes.current ||
+        !window.dispatchEvent(new Event('teddmhen:mode-change', { cancelable: true }))
+      ) {
+        setDemoError(
+          'Workspace unchanged. Finish the current operation or resolve unsaved changes first.',
+        );
+        return false;
+      }
+      return true;
+    };
+    if (mode.current) {
+      if (!maySwitch()) return;
+      mode.current = null;
+      setWorkspace(null);
+      setVersion((v) => v + 1);
+      return;
+    }
+    if (writes.current) {
+      maySwitch();
+      return;
+    }
+    const controller = new AbortController();
+    pending.current = controller;
+    setDemoLoading(true);
+    try {
+      const snapshot = await networkRequest<unknown>('/api/demo', { signal: controller.signal });
+      if (pending.current !== controller) return;
+      const next = new DemoWorkspace(snapshot);
+      if (!maySwitch()) return;
+      mode.current = next;
+      setWorkspace(next);
+      setVersion((v) => v + 1);
+    } catch (error) {
+      if (pending.current === controller && !controller.signal.aborted)
+        setDemoError(
+          error instanceof ApiError
+            ? error.message
+            : 'Could not load the demo. Your journal is unchanged. Please try again.',
+        );
+    } finally {
+      if (pending.current === controller) {
+        pending.current = null;
+        setDemoLoading(false);
+      }
+    }
   }, []);
   const invalidate = useCallback(() => setVersion((v) => v + 1), []);
   const request = useCallback(
     async <T,>(path: string, options: RequestInit = {}): Promise<T> => {
-      if (!demo) {
-        const response = await fetch(path, {
-          ...options,
-          credentials: 'same-origin',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Teddmhen-Request': '1',
-            ...options.headers,
-          },
-        });
-        if (!response.ok) {
-          const body = (await response
-            .json()
-            .catch(() => ({ error: 'The server returned an unexpected response.' }))) as {
-            error?: string;
-          };
-          throw new ApiError(body.error || 'Request failed.', response.status);
-        }
-        return response.status === 204 ? (undefined as T) : response.json();
+      if (mode.current !== workspace)
+        throw new ApiError('Your workspace changed. Reload before continuing.', 409);
+      if (workspace) return workspace.request<T>(path, options);
+      const mutation = !['GET', 'HEAD'].includes((options.method || 'GET').toUpperCase());
+      if (mutation && path.startsWith('/api/auth/')) cancelDemoLoad();
+      if (mutation) writes.current++;
+      try {
+        const result = await networkRequest<T>(path, options);
+        if (mode.current !== workspace)
+          throw new ApiError('Your workspace changed. Reload before continuing.', 409);
+        return result;
+      } finally {
+        if (mutation) writes.current--;
       }
-      const url = new URL(path, window.location.origin),
-        date = url.pathname.match(/\/entries\/(.+)$/)?.[1];
-      if (url.pathname === '/api/session')
-        return { id: 'demo', email: 'Demo workspace', local: false, admin: false } as T;
-      if (url.pathname.startsWith('/api/admin/'))
-        throw new ApiError('Administration is unavailable in the synthetic demo.', 403);
-      if (date) {
-        const existing = demoEntries.find((e) => e.date === date);
-        if (options.method === 'PUT') {
-          const { entry, revision } = JSON.parse(options.body as string);
-          entrySchema.parse(entry);
-          if ((existing?.revision ?? 0) !== revision)
-            throw new ApiError('Entry changed. Reload before saving.', 409);
-          const next = {
-            ...entry,
-            revision: revision + 1,
-            createdAt: existing?.createdAt || new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          };
-          setDemoEntries((entries) => [...entries.filter((e) => e.date !== date), next]);
-          return { date, revision: next.revision } as T;
-        }
-        if (options.method === 'DELETE') {
-          setDemoEntries((entries) => entries.filter((e) => e.date !== date));
-          return undefined as T;
-        }
-        if (!existing) throw new ApiError('No entry for this day.', 404);
-        return existing as T;
-      }
-      const from = url.searchParams.get('from') || '',
-        to = url.searchParams.get('to') || '9999',
-        q = url.searchParams.get('q')?.toLowerCase(),
-        type = url.searchParams.get('type'),
-        illness = url.searchParams.get('illness');
-      const selected = demoEntries.filter(
-        (e) =>
-          e.date >= from &&
-          e.date <= to &&
-          (!q || JSON.stringify(e).toLowerCase().includes(q)) &&
-          (!type || e.workouts.some((w) => w.type === type)) &&
-          (illness !== 'yes' || (e.illnessSeverity ?? 0) > 0 || e.symptoms.length > 0) &&
-          (illness !== 'no' || e.illnessSeverity === 0),
-      );
-      if (url.pathname === '/api/series')
-        return {
-          entries: selected.sort((a, b) => a.date.localeCompare(b.date)).map(summarize),
-        } as T;
-      const cursor = url.searchParams.get('cursor') || '9999',
-        limit = Number(url.searchParams.get('limit') || 30);
-      const rows = selected
-        .filter((e) => e.date < cursor)
-        .sort((a, b) => b.date.localeCompare(a.date));
-      return {
-        entries: rows.slice(0, limit).map(summarize),
-        total: selected.length,
-        nextCursor: rows.length > limit ? rows[limit - 1].date : null,
-      } as T;
     },
-    [demo, demoEntries],
+    [workspace, cancelDemoLoad],
   );
+  const getDemoEntries = useCallback(() => {
+    if (!workspace || mode.current !== workspace)
+      throw new ApiError('Select Demo data before exporting examples.', 409);
+    return workspace.snapshot();
+  }, [workspace]);
   return (
-    <Context.Provider value={{ demo, toggleDemo, version, invalidate, request, demoEntries }}>
+    <Context.Provider
+      value={{
+        demo: !!workspace,
+        demoLoading,
+        demoError,
+        demoRecordCount: workspace?.recordCount ?? null,
+        toggleDemo,
+        cancelDemoLoad,
+        version,
+        invalidate,
+        request,
+        getDemoEntries,
+      }}
+    >
       {children}
     </Context.Provider>
   );

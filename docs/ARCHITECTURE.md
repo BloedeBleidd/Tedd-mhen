@@ -46,18 +46,19 @@ Each daily JSON request is limited to 256 KiB, each narrative to 50,000 characte
 
 ## API
 
-| Method and path                        | Behavior                                                                     |
-| -------------------------------------- | ---------------------------------------------------------------------------- |
-| `GET /api/health`                      | Public liveness only; does not claim database readiness                      |
-| `GET /api/session`                     | Verified ID, email, local-mode and administrator status                      |
-| `GET /api/entries`                     | Owner-scoped summaries, total, date cursor; default 30, maximum 100 rows     |
-| `GET /api/entries/:date`               | One complete daily record, or 404                                            |
-| `PUT /api/entries/:date`               | `{ entry, revision }`; revision 0 creates, current revision updates          |
-| `DELETE /api/entries/:date?revision=N` | Delete only when the revision matches                                        |
-| `GET /api/series?from=...&to=...`      | Lightweight observations; range span at most 1,830 days                      |
-| `GET /api/series?all=true`             | All owner observations, at most 10,000 days; larger requests fail explicitly |
-| `GET /api/admin/overview`              | Aggregate operational statistics, explicit administrator role required       |
-| `GET /api/export`                      | Stream selected records as JSON, NDJSON, CSV, or Markdown                    |
+| Method and path                        | Behavior                                                                         |
+| -------------------------------------- | -------------------------------------------------------------------------------- |
+| `GET /api/health`                      | Public liveness only; does not claim database readiness                          |
+| `GET /api/session`                     | Verified ID, email, local-mode and administrator status                          |
+| `GET /api/demo`                        | Authenticated read of the fixed synthetic dataset; no owner or filter parameters |
+| `GET /api/entries`                     | Owner-scoped summaries, total, date cursor; default 30, maximum 100 rows         |
+| `GET /api/entries/:date`               | One complete daily record, or 404                                                |
+| `PUT /api/entries/:date`               | `{ entry, revision }`; revision 0 creates, current revision updates              |
+| `DELETE /api/entries/:date?revision=N` | Delete only when the revision matches                                            |
+| `GET /api/series?from=...&to=...`      | Lightweight observations; range span at most 1,830 days                          |
+| `GET /api/series?all=true`             | All owner observations, at most 10,000 days; larger requests fail explicitly     |
+| `GET /api/admin/overview`              | Aggregate operational statistics, explicit administrator role required           |
+| `GET /api/export`                      | Stream selected records as JSON, NDJSON, CSV, or Markdown                        |
 
 List, series, and export filters accept `from`, `to`, `q`, `type`, and `illness`. `illness=no` includes only explicitly zero severity; unknown is not treated as well. `illness=yes` includes positive severity or recorded symptoms. UI journal exposes all filters; analysis exposes dates/all history, illness, source, HRV method, training status and labels; export exposes date and field selection.
 
@@ -77,7 +78,7 @@ Imports parse and validate files locally before confirmation. They reuse the own
 
 Mutation conflicts return 409 and keep the user’s current form visible. Validation errors return 400, oversized bodies 413, and non-JSON writes 415. Unknown routes return 404 JSON instead of the SPA shell. Unexpected errors return a generic 500; server logs exclude payloads and query strings. API responses use `private, no-store`.
 
-Public accounts are isolated. Explicit administrator grants provide aggregate operational statistics. Invitations, email delivery, MFA, and shared records are not implemented. The demo is explicit, synthetic, and held in memory; leaving or reloading discards it.
+Public accounts are isolated. Explicit administrator grants provide aggregate operational statistics. Invitations, email delivery, MFA, and sharing personal journals are not implemented. The only shared journal is the synthetic dataset under a credential-free technical owner. Its dedicated endpoint fixes the owner server-side; personal endpoints continue to use the verified session owner. A browser copy supports temporary experiments; leaving or reloading discards it. See [Demo workspace](DEMO.md).
 
 ## Authentication and migration
 

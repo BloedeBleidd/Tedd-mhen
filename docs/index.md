@@ -13,6 +13,7 @@ Tedd’mhen collects structured training, sleep and wellbeing observations, expl
 | Roles and aggregate statistics                            | [Administration](ADMINISTRATION.md)   |
 | Components and API contracts                              | [Architecture](ARCHITECTURE.md)       |
 | Themes, animation and accessibility                       | [Interface](INTERFACE.md)             |
+| Shared examples and isolated experiments                  | [Demo workspace](DEMO.md)             |
 | Cloudflare configuration, capacity and recovery           | [Deployment](DEPLOYMENT.md)           |
 | Release packages and documentation publishing             | [Releases](RELEASES.md)               |
 | Algorithm and browser verification                        | [Testing](TESTING.md)                 |

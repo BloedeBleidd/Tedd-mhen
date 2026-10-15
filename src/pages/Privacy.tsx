@@ -165,8 +165,11 @@ export function Privacy() {
         <p>
           Exports are downloaded to a destination you choose. Deleting data here does not remove
           downloaded files or copies shared elsewhere. No LLM is connected to Tedd’mhen; uploading
-          an export to another service is your separate action. Demo records are synthetic and stay
-          in memory.
+          an export to another service is your separate action. Shared synthetic demo records are
+          stored in D1 under a technical owner without sign-in credentials. Every signed-in user can
+          load them. Your demo edits and imports stay only in this tab’s memory and disappear when
+          you leave demo mode or reload; they never update your personal journal or the shared
+          examples.
         </p>
       </Panel>
       <Panel title="Hosting and pilot limits" className="prose-panel">

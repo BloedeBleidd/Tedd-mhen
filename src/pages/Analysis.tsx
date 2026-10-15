@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { ArrowDownRight, ArrowUpRight, Download, Info } from 'lucide-react';
-import { useLoad, download } from '../lib/api';
+import { useApi, useLoad, download } from '../lib/api';
 import { dayNumber, localDate, shiftDate, type EntrySummary } from '../../shared/schema';
 import { metrics, type MetricKey } from '../../shared/metrics';
 import { fitTrend, MIN_OBSERVATIONS, observationsFor, type Prior } from '../../shared/bayes';
@@ -17,6 +17,7 @@ import {
   prettyDate,
 } from '../components/ui';
 export function Analysis() {
+  const { demo } = useApi();
   const [from, setFrom] = useState(shiftDate(localDate(), -27)),
     [to, setTo] = useState(localDate()),
     [metric, setMetric] = useState<MetricKey>('wellbeing'),
@@ -309,6 +310,7 @@ export function Analysis() {
                       download(
                         JSON.stringify(
                           {
+                            synthetic: demo,
                             settings: { metric, from, to, prior, horizon, illness, method, source },
                             observations,
                             model,

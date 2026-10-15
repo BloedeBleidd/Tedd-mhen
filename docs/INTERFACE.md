@@ -8,6 +8,8 @@ Analysis views appear before the page heading in a distinct bordered panel. Each
 
 ## Motion contract
 
+The My data / Demo data control stays at the bottom of every authenticated workspace page. Pressed states identify the active source, and the demo banner labels synthetic results. Layout reserves space for the control and keeps sticky save actions above it, including on mobile. Decorative sparkle and flask icons animate twice over four seconds; click targets remain stationary. Reduced-motion preferences disable the pulse. Loading, cancellation and retry are explicit; switching resets page-specific forms and import previews. See [Demo workspace](DEMO.md).
+
 Motion communicates appearance, selection and feedback. It never changes a measurement, uncertainty bound, prediction, ranking value or downloaded record.
 
 - Panels reveal once when they enter the viewport, using a fade over 360 ms that keeps controls stationary. Focusing a control settles its panel immediately.

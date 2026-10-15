@@ -13,6 +13,7 @@ type Overview = {
   };
   sessions: { signedInAccounts: number };
   signups: { date: string; accounts: number }[];
+  demo: { entries: number; payloadBytes: number };
 };
 export function Admin() {
   const { data, loading, error } = useLoad<Overview>('/api/admin/overview');
@@ -53,6 +54,13 @@ export function Admin() {
               </p>
             </div>
           </div>
+          <Panel title="Shared demo journal">
+            <p>
+              {number(data.demo.entries, 0)} synthetic days ·{' '}
+              {number(data.demo.payloadBytes / 1024, 1)} KiB of JSON. These examples are excluded
+              from personal journal totals and registered account counts.
+            </p>
+          </Panel>
           <Panel title="Activity and coverage">
             <dl className="method-glossary">
               <dt>Accounts with an unexpired session</dt>

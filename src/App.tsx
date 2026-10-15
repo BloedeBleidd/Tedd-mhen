@@ -19,6 +19,7 @@ import { useApi, useLoad } from './lib/api';
 import { EmptyState, Loading } from './components/ui';
 import { AppearanceControl } from './components/AppearanceControl';
 import { PrivacyNotice } from './components/PrivacyNotice';
+import { DemoSwitcher } from './components/DemoSwitcher';
 import { AuthPage } from './pages/Auth';
 import { Privacy } from './pages/Privacy';
 import { About } from './pages/About';
@@ -130,10 +131,6 @@ export function App() {
           <NavLink to="/help" onClick={() => setMenuOpen(false)}>
             <BookOpen size={17} /> Guide & methodology <ArrowUpRight size={14} />
           </NavLink>
-          <button className="demo-toggle" onClick={toggleDemo}>
-            <FlaskConical size={17} />
-            {demo ? 'Leave demo workspace' : 'Explore a demo'}
-          </button>
           <div className="profile">
             <span className="avatar">{demo ? 'D' : 'Y'}</span>
             <div>
@@ -210,7 +207,7 @@ export function App() {
           </div>
         )}
         <main id="main" tabIndex={-1}>
-          <Suspense fallback={<Loading />}>
+          <Suspense key={demo ? 'demo' : 'personal'} fallback={<Loading />}>
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/check-in" element={<CheckIn />} />
@@ -244,6 +241,7 @@ export function App() {
             <NavLink to="/about">About the author</NavLink>
           </footer>
         </main>
+        <DemoSwitcher />
       </div>
     </div>
   );

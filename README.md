@@ -8,6 +8,7 @@ A personal training, sleep and wellbeing journal with structured measurements, e
 - Filtered journals, selective JSON/NDJSON/CSV/Markdown exports, and reviewed JSON/NDJSON/CSV imports.
 - Same-day and lagged relationships, trend-adjusted correlations, multiple-input Bayesian models, uncertainty and chronological forecast evaluation.
 - Private email/password accounts with recovery codes; aggregate administration; light/dark appearance with opt-in sunrise/sunset switching.
+- A shared synthetic demo journal with a switch back to your own data and temporary edits for exploring every journal and analysis view.
 
 Email identifiers are unverified; save your recovery code. Records are private, while source is public. No AI provider or analytics tracker is connected. Analyses are observational, not causal or clinical conclusions. Registration has no application fee or user-count cap; Cloudflare quotas apply.
 
@@ -42,6 +43,7 @@ npm run test:e2e
 | Account roles and aggregate statistics          | [Administration](docs/ADMINISTRATION.md)                  |
 | Components and API contracts                    | [Architecture](docs/ARCHITECTURE.md)                      |
 | Appearance, motion and accessibility            | [Interface](docs/INTERFACE.md)                            |
+| Shared examples and isolated demo experiments   | [Demo workspace](docs/DEMO.md)                            |
 | Cloudflare deployment, quotas and recovery      | [Operations](docs/DEPLOYMENT.md)                          |
 | Minimal release packages and GitHub Pages       | [Releases](docs/RELEASES.md)                              |
 | Algorithm verification and test boundaries      | [Testing](docs/TESTING.md)                                |
