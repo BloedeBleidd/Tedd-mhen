@@ -3424,3 +3424,15 @@ input[type='radio'] {
     }
   }
 }
+
+.auth-form [aria-invalid='true'] {
+  border-color: var(--danger);
+  outline-color: var(--danger);
+}
+.auth-form .field-error {
+  display: block;
+  color: var(--danger);
+  font-size: 12px;
+  line-height: 1.5;
+  margin-top: 5px;
+}

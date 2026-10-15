@@ -1,4 +1,5 @@
-import { useState, type FormEvent } from 'react';
+import { useId, useRef, useState, type FormEvent } from 'react';
+import { validateAuthForm, type AuthField } from '../../shared/credentials';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useApi } from '../lib/api';
 import { ErrorBox, Field } from '../components/ui';
@@ -64,17 +65,51 @@ export function AuthPage() {
   const [secret, setSecret] = useState(''),
     [error, setError] = useState(''),
     [busy, setBusy] = useState(false);
+  const [privacy, setPrivacy] = useState(false);
+  const [attempted, setAttempted] = useState(false);
+  const [touched, setTouched] = useState<Partial<Record<AuthField, boolean>>>({});
+  const errorRef = useRef<HTMLDivElement>(null);
+  const id = useId();
+  const issues = validateAuthForm(mode, { email, password, confirm, code, privacy });
+  const visibleIssue = (field: AuthField) =>
+    attempted || touched[field] ? issues[field] : undefined;
+  const attributes = (field: AuthField, label: string) => ({
+    name: field,
+    'aria-label': label,
+    'aria-invalid': Boolean(visibleIssue(field)),
+    'aria-describedby':
+      [
+        field === 'password' && mode !== 'login' ? `${id}-password-hint` : '',
+        visibleIssue(field) ? `${id}-${field}-error` : '',
+      ]
+        .filter(Boolean)
+        .join(' ') || undefined,
+    onBlur: () => setTouched((previous) => ({ ...previous, [field]: true })),
+  });
+  const feedback = (field: AuthField) =>
+    visibleIssue(field) ? (
+      <small id={`${id}-${field}-error`} className="field-error">
+        {visibleIssue(field)}
+      </small>
+    ) : null;
   const finish = () => {
     setSecret('');
     setPassword('');
     invalidate();
     navigate('/');
   };
-  async function submit(event: FormEvent) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (busy) return;
     setError('');
-    if (mode !== 'login' && password !== confirm) {
-      setError('Passwords do not match.');
+    setAttempted(true);
+    const first = Object.keys(issues)[0];
+    if (first) {
+      const input = event.currentTarget.elements.namedItem(first) as HTMLInputElement | null;
+      requestAnimationFrame(() => {
+        input?.focus();
+        input?.scrollIntoView({ block: 'center', behavior: 'instant' });
+      });
       return;
     }
     setBusy(true);
@@ -96,6 +131,10 @@ export function AuthPage() {
       else finish();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Unable to complete this request.');
+      requestAnimationFrame(() => {
+        errorRef.current?.focus();
+        errorRef.current?.scrollIntoView({ block: 'center', behavior: 'instant' });
+      });
     } finally {
       setBusy(false);
     }
@@ -122,10 +161,11 @@ export function AuthPage() {
               ? 'Use your email and saved recovery code to set a new password. The old code and all previous sessions will stop working.'
               : 'Sign in with your email and password.'}
       </p>
-      <form onSubmit={submit} className="auth-form">
+      <form noValidate onSubmit={submit} className="auth-form" aria-busy={busy}>
         {mode !== 'claim' && (
           <Field label="Email">
             <input
+              {...attributes('email', 'Email')}
               type="email"
               autoComplete="username"
               value={email}
@@ -133,11 +173,13 @@ export function AuthPage() {
               required
               maxLength={254}
             />
+            {feedback('email')}
           </Field>
         )}
         {mode === 'recover' && (
           <Field label="Recovery code">
             <input
+              {...attributes('code', 'Recovery code')}
               autoComplete="off"
               spellCheck={false}
               value={code}
@@ -146,17 +188,12 @@ export function AuthPage() {
               placeholder="TMH-…"
               maxLength={100}
             />
+            {feedback('code')}
           </Field>
         )}
-        <Field
-          label={mode === 'login' ? 'Password' : 'New password'}
-          hint={
-            mode !== 'login'
-              ? '12–128 characters. A long, unique passphrase works well.'
-              : undefined
-          }
-        >
+        <Field label={mode === 'login' ? 'Password' : 'New password'}>
           <input
+            {...attributes('password', mode === 'login' ? 'Password' : 'New password')}
             type="password"
             autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
             value={password}
@@ -165,10 +202,19 @@ export function AuthPage() {
             minLength={mode === 'login' ? 1 : 12}
             maxLength={128}
           />
+          {mode !== 'login' && (
+            <small id={`${id}-password-hint`}>
+              12–128 characters. A long, unique passphrase works well.{' '}
+              {password.length > 0 &&
+                `${password.length} entered${password.length < 12 ? ` · ${12 - password.length} more needed` : ''}.`}
+            </small>
+          )}
+          {feedback('password')}
         </Field>
         {mode !== 'login' && (
           <Field label="Confirm password">
             <input
+              {...attributes('confirm', 'Confirm password')}
               type="password"
               autoComplete="new-password"
               value={confirm}
@@ -177,18 +223,37 @@ export function AuthPage() {
               minLength={12}
               maxLength={128}
             />
+            {feedback('confirm')}
           </Field>
         )}
         {mode === 'register' && (
-          <label className="check-label">
-            <input type="checkbox" required />{' '}
-            <span>
-              I have read <Link to="/privacy">Privacy & data</Link>. I understand that email
-              addresses are not verified and account recovery requires my saved code.
-            </span>
-          </label>
+          <div>
+            <label className="check-label">
+              <input
+                name="privacy"
+                type="checkbox"
+                required
+                checked={privacy}
+                onChange={(event) => setPrivacy(event.target.checked)}
+                aria-invalid={Boolean(visibleIssue('privacy'))}
+                aria-describedby={visibleIssue('privacy') ? `${id}-privacy-error` : undefined}
+              />{' '}
+              <span>
+                I have read <Link to="/privacy">Privacy & data</Link>. I understand that email
+                addresses are not verified and account recovery requires my saved code.
+              </span>
+            </label>
+            {feedback('privacy')}
+          </div>
         )}
-        <ErrorBox message={error || null} />
+        {attempted && Object.keys(issues).length > 0 && (
+          <div className="notice error" role="alert">
+            Check the highlighted fields. {Object.values(issues)[0]}
+          </div>
+        )}
+        <div ref={errorRef} tabIndex={-1}>
+          <ErrorBox message={error || null} />
+        </div>
         <button className="button primary" disabled={busy}>
           {busy
             ? 'Please wait…'

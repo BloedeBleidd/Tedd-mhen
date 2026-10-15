@@ -2,6 +2,12 @@
 
 The English interface uses shared color tokens for light/dark appearance, explicit form labels, anchored numeric scales, and visible keyboard focus. Main content has a skip link. Dialogs use native modal focus management. See [Data dictionary](DATA_DICTIONARY.md) for field semantics and [Data lifecycle](DATA_STORAGE.md) for local appearance preferences.
 
+## Account form feedback
+
+Registration, sign-in, recovery and legacy-owner setup validate fields in the application, using the same email, password and recovery-code schemas as the server. Browser validation popovers are not required. Invalid fields show an associated explanation after blur or submission, expose `aria-invalid`, and are rechecked as the user edits. Submitting invalid values focuses and scrolls to the first invalid field and displays an alert above the submit button. No credential request is sent until local validation passes.
+
+New passwords require 12–128 characters; a visible count reports progress toward the minimum. Sign-in preserves the existing-password rules. Confirmation and the registration privacy acknowledgement have their own messages. Server errors, including unavailable email identifiers and throttling, are brought into view without clearing entered values. Pending requests display “Please wait…” and disable repeat submission.
+
 ## Analysis navigation
 
 Analysis views appear before the page heading in a distinct bordered panel. Each view has an icon, a descriptive label and a large clickable card. The active card uses a contrasting fill and check mark, with `aria-current="page"`; keyboard focus remains visible. Supporting descriptions are associated with their links for assistive technology. Narrow layouts show all four choices in two columns without horizontal scrolling.

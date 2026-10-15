@@ -82,6 +82,8 @@ Public accounts are isolated. Explicit administrator grants provide aggregate op
 
 ## Authentication and migration
 
+`shared/credentials.ts` defines the email, new-password, existing-password and recovery-code schemas used by both the account service and browser form feedback. Client checks identify fields and prevent avoidable requests; every API operation still validates its own input.
+
 `auth_accounts` stores unique normalized email identifiers, versioned scrypt hashes, hashed recovery codes, and a credential version. `auth_sessions` stores only SHA-256 digests of 256-bit random session tokens, expiry timestamps, and the account version. Reads join on the current version and expiry; recovery/password changes invalidate every previous session atomically. Production cookies are `__Host-teddmhen_session; Secure; HttpOnly; SameSite=Lax; Path=/`, with a seven-day lifetime. Session rows expire independently of browser cookies.
 
 Credential work runs in one `AuthService` SQLite Durable Object, whose CPU allowance supports scrypt N=32768, r=8, p=3, with a 128-bit random salt and 64-byte derived hash. Journal reads and writes stay in the Worker/D1 path. The object maintains persistent ten-minute attempt counters (30 per IP, 10 per normalized email for login/recovery). It stores digests rather than clear-text limiter identifiers, cleans expired counters on subsequent requests, and never logs credentials. This single-object design is appropriate to the pilot; measure throughput before scaling it.

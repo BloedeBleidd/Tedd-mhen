@@ -25,3 +25,5 @@ CI builds a clean committed checkout and runs the browser suite against the extr
 Browser fixtures use isolated `.wrangler/e2e*` directories that are reset at startup. Real development or production databases are not test fixtures. Screenshots/traces are ignored and are not uploaded to public CI. Production verification uses short-lived synthetic accounts and removes their data afterward.
 
 Tests demonstrate implementation properties, not clinical validity. Synthetic prediction accuracy does not establish real-user accuracy. Changes to model semantics require a model-version change and updated mathematical documentation; deployed SQL migrations are append-only.
+
+Account-form regression tests reproduce a mobile short-password submission, assert field errors and focus without an API request, and verify correction, mismatched passwords, privacy acknowledgement, recovery-code format, duplicate-email responses, loading state and throttling messages. Shared credential tests cover exact length boundaries and normalization without changing passwords.

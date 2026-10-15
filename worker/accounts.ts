@@ -1,4 +1,10 @@
 import { z } from 'zod';
+import {
+  emailSchema,
+  passwordSchema,
+  loginPassword,
+  recoveryCodeSchema,
+} from '../shared/credentials';
 import { checkPassword, hashPassword, recoveryCode } from './passwords';
 import {
   cookieHeader,
@@ -17,12 +23,6 @@ type Account = {
   recovery_hash: string;
   version: number;
 };
-const emailSchema = z.string().trim().toLowerCase().email().max(254);
-const passwordSchema = z
-  .string()
-  .min(12, 'Use at least 12 characters.')
-  .max(128, 'Use at most 128 characters.');
-const loginPassword = z.string().min(1).max(128);
 const credentials = z.object({ email: emailSchema, password: passwordSchema }).strict();
 const json = (body: unknown, status = 200, headers: Record<string, string> = {}) =>
   Response.json(body, { status, headers: { 'Cache-Control': 'private, no-store', ...headers } });
@@ -169,11 +169,7 @@ export async function handleAccount(
               .object({
                 email: emailSchema,
                 password: passwordSchema,
-                code: z
-                  .string()
-                  .trim()
-                  .toUpperCase()
-                  .regex(/^TMH-(?:[A-F0-9]{8}-){7}[A-F0-9]{8}$/),
+                code: recoveryCodeSchema,
               })
               .strict()
               .parse(body);
