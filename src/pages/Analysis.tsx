@@ -1,3 +1,4 @@
+import { MethodSources } from '../components/MethodSources';
 import { MessageValue } from '../components/MessageValue';
 import { useTranslation, Trans } from 'react-i18next';
 import { enumLabel, localize, t as tr } from '../i18n';
@@ -87,6 +88,11 @@ export function Analysis() {
               <option value="0">{tr('analysis:noForecast')}</option>
               <option value="3">{tr('analysis:3Days')}</option>
               <option value="7">{tr('analysis:7Days')}</option>
+              {[14, 28].map((n) => (
+                <option key={n} value={n}>
+                  {tr('prediction:calendarDayAhead', { count: n })}
+                </option>
+              ))}
             </select>
           </Field>
         </div>
@@ -240,6 +246,7 @@ export function Analysis() {
                     subtitle={`${prettyDate(model.firstDate)} – ${prettyDate(model.lastDate)} · ${horizon ? tr('analysis:dayExtrapolationFromTheLastObservation', { value0: horizon }) : tr('analysis:observedPeriodOnly')}`}
                     action={<span className="tag">{tr('analysis:bayesianLinearTrend')}</span>}
                   >
+                    {horizon > 7 && <p className="notice">{tr('analysisTools:longHorizon')}</p>}
                     <TrendChart
                       data={model.curve}
                       forecastStart={horizon ? model.lastDate : undefined}
@@ -272,6 +279,7 @@ export function Analysis() {
                       </span>
                     </div>
                   </Panel>
+                  <MethodSources ids={['bayes', 'forecasting']} />
                   <div className="analysis-explanation">
                     <Panel title={tr('analysis:whatThisSuggests')}>
                       <p className="finding">

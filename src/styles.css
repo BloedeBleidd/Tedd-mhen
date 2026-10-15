@@ -2931,21 +2931,23 @@ input[type='radio'] {
 }
 @media (max-width: 600px) {
   .analysis-navigation {
-    padding: 12px;
-    margin-bottom: 24px;
+    padding: 10px;
+    margin-bottom: 16px;
   }
   .analysis-tabs {
     gap: 8px;
   }
   .analysis-tabs a {
-    grid-template-columns: minmax(0, 1fr) 16px;
-    min-height: 88px;
-    padding: 12px;
+    grid-template-columns: 18px minmax(0, 1fr);
+    min-height: 56px;
+    padding: 8px;
+    gap: 6px;
   }
   .analysis-nav-title {
-    grid-row: 2;
-    grid-column: 1 / -1;
-    font-size: 13px;
+    font-size: 12px;
+  }
+  .analysis-nav-indicator {
+    display: none;
   }
   .analysis-nav-description {
     display: none;
@@ -3601,4 +3603,87 @@ select {
   min-height: 0;
   padding: 0;
   border: 0;
+}
+
+.chart-frame {
+  min-width: 0;
+}
+.chart-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-bottom: 4px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.chart-controls select {
+  width: auto;
+  max-width: 60%;
+  min-height: 44px;
+  padding: 8px 30px 8px 10px;
+}
+.chart-size-compact .chart {
+  height: 220px;
+}
+.chart-size-large .chart {
+  height: 480px;
+}
+.method-sources {
+  border-left: 3px solid var(--accent-strong);
+  padding: 12px 16px;
+  margin: 0 0 22px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+.method-sources ul {
+  margin: 8px 0;
+  padding-left: 18px;
+}
+.method-sources p {
+  margin-bottom: 6px;
+}
+.evaluation-metrics {
+  margin: 16px 0;
+  font-size: 13px;
+}
+.evaluation-metrics > div {
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+.evaluation-metrics dt {
+  color: var(--text-secondary);
+}
+.evaluation-metrics dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.analysis-chart-grid {
+  min-width: 0;
+}
+@media (min-width: 1400px) {
+  .analysis-chart-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    align-items: start;
+  }
+}
+@media (max-width: 720px) {
+  .chart-size-auto .chart {
+    height: 240px;
+  }
+  .analysis-stats > div {
+    padding: 12px 14px;
+    gap: 4px;
+  }
+  .analysis-stats strong {
+    font-size: 22px;
+  }
 }

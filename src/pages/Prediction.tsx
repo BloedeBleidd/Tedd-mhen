@@ -1,3 +1,5 @@
+import { MethodSources } from '../components/MethodSources';
+import { numberRange } from '../components/ui';
 import { MessageValue } from '../components/MessageValue';
 import { useTranslation, Trans } from 'react-i18next';
 import { localize, t as tr } from '../i18n';
@@ -41,13 +43,22 @@ export function Prediction() {
   const analysis = useAnalysis<ReturnType<typeof fitMultivariable>>(job),
     result = analysis.result,
     model = result?.ready ? result : null,
-    spec = metrics[target];
+    spec = metrics[target],
+    errorUnit =
+      spec.unit === '/ 10' || spec.unit === '/ 100' ? localize('points') : localize(spec.unit);
   return (
     <>
       <PageHeading
         eyebrow={tr('prediction:manySignalsOneOutcome')}
         title={tr('prediction:putYourObservationsTogether')}
         description={tr('prediction:aBayesianModelUsingMultipleMeasuredSeriesAndRecorded')}
+        action={
+          result ? (
+            <a className="button secondary" href="#analysis-results">
+              {tr('analysisTools:viewResults')}
+            </a>
+          ) : undefined
+        }
       />
       {data.controls}
       <Panel>
@@ -64,7 +75,7 @@ export function Prediction() {
           <Field label={tr('prediction:predictionTiming')}>
             <select value={horizon} onChange={(e) => setHorizon(Number(e.target.value))}>
               <option value={0}>{tr('prediction:sameDayConditionalEstimate')}</option>
-              {[1, 3, 7].map((n) => (
+              {[1, 3, 7, 14, 28].map((n) => (
                 <option key={n} value={n}>
                   {tr('prediction:calendarDayAhead', { count: n })}
                 </option>
@@ -121,6 +132,7 @@ export function Prediction() {
           />
         </p>
       </Panel>
+      {horizon > 7 && <p className="notice">{tr('analysisTools:longHorizon')}</p>}
       {!data.loading &&
         features.some((id) => id !== target && !data.catalog.some((f) => f.id === id)) && (
           <p role="status">{tr('prediction:someSelectedInputsHaveNoMatchingObservationsAndAre')}</p>
@@ -148,7 +160,7 @@ export function Prediction() {
       )}
       {result && (
         <>
-          <div className="analysis-stats">
+          <div className="analysis-stats" id="analysis-results" tabIndex={-1}>
             <div>
               <span className="stat-label">{tr('prediction:completeModelRows')}</span>
               <strong>
@@ -229,13 +241,7 @@ export function Prediction() {
                       i18nKey="prediction:95PredictiveInterval"
                       components={{
                         slot0: <b />,
-                        slot1: (
-                          <MessageValue
-                            value={model.future.predictive
-                              .map((v) => number(v, 2))
-                              .join(tr('prediction:to'))}
-                          />
-                        ),
+                        slot1: <MessageValue value={numberRange(model.future.predictive)} />,
                         slot2: <MessageValue value={localize(spec.unit)} />,
                       }}
                     />
@@ -275,22 +281,41 @@ export function Prediction() {
               />
             </p>
           </Panel>
-          <Panel
-            title={tr('prediction:modelFitAndUncertainty')}
-            subtitle={tr('prediction:descriptiveFitOnAllCompleteSelectedRowsForecastPerformance')}
-          >
-            <TrendChart
-              data={[...model.curve, ...(model.future?.forecast ? [model.future] : [])]}
-              unit={localize(spec.unit)}
-              forecastStart={model.future?.forecast ? model.curve.at(-1)?.date : undefined}
-            />
-            <div className="chart-legend">
-              <span>{tr('prediction:pointsObserved')}</span>
-              <span>{tr('prediction:linePosteriorMean')}</span>
-              <span>{tr('prediction:darkBand95CredibleInterval')}</span>
-              <span>{tr('prediction:lightBand95PredictiveInterval')}</span>
-            </div>
-          </Panel>
+          <div className="analysis-chart-grid">
+            <Panel
+              title={tr('prediction:modelFitAndUncertainty')}
+              subtitle={tr('prediction:descriptiveFitOnAllCompleteSelectedRowsForecastPerformance')}
+            >
+              <TrendChart
+                data={[...model.curve, ...(model.future?.forecast ? [model.future] : [])]}
+                unit={localize(spec.unit)}
+                forecastStart={model.future?.forecast ? model.curve.at(-1)?.date : undefined}
+              />
+              <div className="chart-legend">
+                <span>{tr('prediction:pointsObserved')}</span>
+                <span>{tr('prediction:linePosteriorMean')}</span>
+                <span>{tr('prediction:darkBand95CredibleInterval')}</span>
+                <span>{tr('prediction:lightBand95PredictiveInterval')}</span>
+              </div>
+            </Panel>
+            <Panel
+              title={tr('analysisTools:holdoutTitle')}
+              subtitle={tr('prediction:last20OfOutcomeDatesHeldOutTrainingOutcomes')}
+            >
+              {model.validation ? (
+                <>
+                  <TrendChart
+                    data={model.validation.predictions}
+                    unit={localize(spec.unit)}
+                    validation
+                  />
+                  <p className="small muted">{tr('analysisTools:validationLegend')}</p>
+                </>
+              ) : (
+                <p>{localize(model.validationUnavailableReason)}</p>
+              )}
+            </Panel>
+          </div>
           <Panel
             title={tr('prediction:doesItPredictLaterObservations')}
             subtitle={tr('prediction:last20OfOutcomeDatesHeldOutTrainingOutcomes')}
@@ -348,6 +373,28 @@ export function Prediction() {
                     }}
                   />
                 </p>
+                <dl className="evaluation-metrics">
+                  <div>
+                    <dt>{tr('analysisTools:intervalScore')}</dt>
+                    <dd>
+                      {number(model.validation.evaluation.intervalScore, 2)} {errorUnit}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>{tr('analysisTools:meanWidth')}</dt>
+                    <dd>
+                      {number(model.validation.evaluation.meanWidth, 2)} {errorUnit}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>{tr('analysisTools:bias')}</dt>
+                    <dd>
+                      {number(model.validation.evaluation.bias, 2)} {errorUnit}
+                    </dd>
+                  </div>
+                </dl>
+                <p className="small muted">{tr('analysisTools:scoreExplanation')}</p>
+                <p className="small muted">{tr('analysisTools:biasExplanation')}</p>
                 <details>
                   <summary>{tr('prediction:heldOutPredictions')}</summary>
                   <div className="table-scroll">
@@ -366,9 +413,7 @@ export function Prediction() {
                             <td>{p.date}</td>
                             <td>{number(p.observed, 2)}</td>
                             <td>{number(p.mean, 2)}</td>
-                            <td>
-                              {p.predictive.map((v) => number(v, 2)).join(tr('prediction:to'))}
-                            </td>
+                            <td>{numberRange(p.predictive)}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -383,6 +428,7 @@ export function Prediction() {
               {tr('prediction:repeatedlyChoosingInputsAfterViewingThisScoreTunesTo')}
             </p>
           </Panel>
+          <MethodSources ids={['bayes', 'intervalScore', 'validation']} />
           <Panel
             title={tr('prediction:conditionalAssociations')}
             subtitle={tr('prediction:sortedByAbsolutePredictedChangeForOneObservedStandard')}
@@ -404,7 +450,7 @@ export function Prediction() {
                       <td>{localize(c.label)}</td>
                       <td>{number(c.typicalChange, 2)}</td>
                       <td>{number(c.value, 2)}</td>
-                      <td>{c.interval.map((v) => number(v, 2)).join(tr('prediction:to'))}</td>
+                      <td>{numberRange(c.interval)}</td>
                       <td>{number(c.probabilityPositive * 100)}%</td>
                     </tr>
                   ))}

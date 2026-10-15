@@ -21,6 +21,18 @@ export function MetricsGuide() {
           'metricsGuide:recordedMeasurementsTransparentTransformationsAndTheMathematicsBehindEach',
         )}
       />
+      <Panel title={tr('metricsGuide:scopeOfTheEvidence')}>
+        <p>{tr('metricsGuide:publishedMethodsExplainTheMathematicsAndMeasurementConceptsThey')}</p>
+        <ul>
+          {Object.values(references).map((r) => (
+            <li key={r.url}>
+              <a className="text-link" href={r.url} target="_blank" rel="noreferrer">
+                {localize(r.title)}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </Panel>
       <Panel title={tr('metricsGuide:readingARelationship')}>
         <dl className="method-glossary">
           <dt>{tr('metricsGuide:pearsonR')}</dt>
@@ -43,6 +55,10 @@ export function MetricsGuide() {
           </dd>
           <dt>{tr('metricsGuide:bayesianConditionalCoefficient')}</dt>
           <dd>{tr('metricsGuide:theModeledOutcomeDifferenceForAOneUnitInput')}</dd>
+          <dt>{tr('analysisTools:intervalScore')}</dt>
+          <dd>{tr('analysisTools:scoreExplanation')}</dd>
+          <dt>{tr('analysisTools:bias')}</dt>
+          <dd>{tr('analysisTools:biasExplanation')}</dd>
           <dt>{tr('metricsGuide:maeRmseAndIntervalCoverage')}</dt>
           <dd>{tr('metricsGuide:meanAbsolutePredictionErrorSquareRootOfMeanSquared')}</dd>
         </dl>
@@ -81,18 +97,6 @@ export function MetricsGuide() {
             </article>
           ))}
         </div>
-      </Panel>
-      <Panel title={tr('metricsGuide:scopeOfTheEvidence')}>
-        <p>{tr('metricsGuide:publishedMethodsExplainTheMathematicsAndMeasurementConceptsThey')}</p>
-        <ul>
-          {Object.values(references).map((r) => (
-            <li key={r.url}>
-              <a className="text-link" href={r.url} target="_blank" rel="noreferrer">
-                {localize(r.title)}
-              </a>
-            </li>
-          ))}
-        </ul>
       </Panel>
     </>
   );

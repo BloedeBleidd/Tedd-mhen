@@ -1,0 +1,23 @@
+{
+  "chartSize": "Taille du graphique",
+  "automatic": "Automatique",
+  "compact": "Compact",
+  "large": "Grand",
+  "sources": "Sources des méthodes",
+  "readMethods": "Définitions, mathématiques et limites",
+  "evidenceScope": "Ces sources décrivent des méthodes. Elles ne prouvent pas que cette application puisse diagnostiquer des maladies ou établir des causes.",
+  "longHorizon": "14–28 jours constituent un horizon exploratoire. La tendance suppose que sa pente actuelle se maintient ; le modèle à plusieurs entrées est ajusté directement à l’horizon choisi. Un horizon plus long laisse moins de paires d’apprentissage et peut manquer des changements de routine. Vérifiez les erreurs sur les données ultérieures pour cet horizon ; un intervalle étroit ne prouve pas à lui seul la précision.",
+  "validationChart": "Prédictions comparées aux observations de test et intervalles prédictifs à 95 %",
+  "predicted": "Prédiction",
+  "validationLegend": "Points : observations ultérieures. Ligne : prédictions du modèle entraîné. Bande : intervalle prédictif à 95 %. Ces observations n’ont pas servi à ajuster ce modèle.",
+  "intervalScore": "Score d’intervalle à 95 % · plus faible est meilleur",
+  "meanWidth": "Largeur moyenne de l’intervalle",
+  "bias": "Erreur moyenne · observation − prédiction",
+  "scoreExplanation": "Le score combine la largeur avec une pénalité quand une observation sort de l’intervalle à 95 % : largeur + 40 × distance à la borne la plus proche. Il est moyenné sur les dates de test, dans l’unité du résultat. Comparez uniquement le même résultat, les mêmes dates et le même horizon ; élargir tous les intervalles ne garantit pas un meilleur score.",
+  "biasExplanation": "Une erreur moyenne positive indique une sous-estimation ; une valeur négative, une surestimation. Les erreurs opposées peuvent se compenser ; consultez aussi la MAE.",
+  "viewResults": "Voir les résultats ↓",
+  "bayesCitation": "Murphy, K. P. (2007). Conjugate Bayesian analysis of the Gaussian distribution.",
+  "bootstrapCitation": "Politis, D. N. & Romano, J. P. (1992). A Circular Block-Resampling Procedure for Stationary Data.",
+  "intervalCitation": "Gneiting, T. & Raftery, A. E. (2007). Strictly Proper Scoring Rules, Prediction, and Estimation. JASA 102(477), 359–378.",
+  "holdoutTitle": "Prédictions sur les données ultérieures"
+}

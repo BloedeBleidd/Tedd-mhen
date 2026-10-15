@@ -1,3 +1,4 @@
+import { numberRange } from '../src/components/ui';
 import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 import i18n, { languages, loadLanguage, localize, locale, t, hasSourceMessage } from '../src/i18n';
 import { featureCatalog, references } from '../shared/features';
@@ -136,4 +137,16 @@ describe('Localized presentation and canonical records', () => {
     expect(errorText('checkIn:chooseAValidJournalDate')).not.toContain('checkIn:');
     expect(() => parseImport('{bad}', 'json')).toThrow('Invalid JSON.');
   });
+});
+
+it('formats numeric intervals with explicit spacing in every supported language', async () => {
+  for (const language of languages) {
+    await i18n.changeLanguage(language);
+    const range = numberRange([0.46, 0.7]);
+    expect(range).toContain(' – ');
+    expect(range).not.toMatch(/\d(?:to|do|bis|a|à)\d/);
+    expect(numberRange([-0.4, 0])).toContain(' – 0');
+  }
+  await i18n.changeLanguage('pl');
+  expect(numberRange([0.46, 0.7])).toBe('0,46 – 0,7');
 });

@@ -51,7 +51,6 @@
   "anInputBecomesConstantAfterIncompleteRowsAreRemoved": "An input becomes constant after incomplete rows are removed. Select fewer inputs or a wider period.",
   "temporalValidationNeedsCompleteTrainingRowsAnd7Later": "Temporal validation needs {{value0}} complete training rows and 7 later rows, with a {{value1}}-day separation. Current: {{value2}} training / {{value3}} later rows.",
   "oneObservationPerCalendarDayIsRequired": "One observation per calendar day is required.",
-  "forecastHorizonMustBe07Days": "Forecast horizon must be 0–7 days.",
   "lagMustBe028CalendarDays": "Lag must be 0–28 calendar days.",
   "invalidBlockLength": "Invalid block length.",
   "selectRecordedSupportedVariables": "Select recorded, supported variables.",
@@ -123,5 +122,6 @@
   "request_failed": "Request failed.",
   "analysis_could_not_run_try_fewer_inputs_a_shorter": "Analysis could not run. Try fewer inputs, a shorter date range, or reload the page.",
   "analysis_could_not_be_completed": "Analysis could not be completed.",
-  "completeRows": "{{value0}} complete observations; at least {{value1}} required for {{value2}} coefficients. This is a display threshold, not a guarantee of reliability."
+  "completeRows": "{{value0}} complete observations; at least {{value1}} required for {{value2}} coefficients. This is a display threshold, not a guarantee of reliability.",
+  "forecastHorizonMustBe028Days": "Forecast horizon must be 0–28 days."
 }

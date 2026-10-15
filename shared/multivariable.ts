@@ -1,3 +1,4 @@
+import { evaluateForecasts } from './forecast-evaluation';
 import { jStat } from 'jstat';
 import { metrics, type MetricKey } from './metrics';
 import { dayNumber, type EntrySummary } from './schema';
@@ -80,7 +81,7 @@ export function posteriorPrediction(
   };
 }
 export function modelRows(entries: EntrySummary[], settings: ModelSettings) {
-  if (![0, 1, 3, 7].includes(settings.horizon) || ![1, 7, 28].includes(settings.window))
+  if (![0, 1, 3, 7, 14, 28].includes(settings.horizon) || ![1, 7, 28].includes(settings.window))
     throw new Error('Unsupported horizon or history window.');
   if (new Set(entries.map((e) => e.date)).size !== entries.length)
     throw new Error('Duplicate journal dates.');
@@ -229,6 +230,7 @@ export function fitMultivariable(entries: EntrySummary[], settings: ModelSetting
       ? observed.filter((r) => r.origin >= validationOrigin && complete(r))
       : [];
   let validation: null | {
+    evaluation: NonNullable<ReturnType<typeof evaluateForecasts>>;
     trainN: number;
     n: number;
     excluded: number;
@@ -260,6 +262,7 @@ export function fitMultivariable(entries: EntrySummary[], settings: ModelSetting
       constant = mean(train.map((r) => r.y!)),
       baselineRows = test.filter((r) => r.baseline !== null);
     validation = {
+      evaluation: evaluateForecasts(predictions)!,
       trainN: train.length,
       n: test.length,
       excluded: observed.filter((r) => r.origin >= validationOrigin!).length - test.length,

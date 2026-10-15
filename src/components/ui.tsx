@@ -12,6 +12,8 @@ export const prettyDate = (date: string, options?: Intl.DateTimeFormatOptions) =
   );
 export const number = (value: number | null | undefined, digits = 1) =>
   value == null ? '—' : value.toLocaleString(locale(), { maximumFractionDigits: digits });
+export const numberRange = (values: readonly [number, number], digits = 2) =>
+  `${number(values[0], digits)} – ${number(values[1], digits)}`;
 export function PageHeading({
   eyebrow,
   title,

@@ -1,0 +1,23 @@
+{
+  "chartSize": "Diagrammgröße",
+  "automatic": "Automatisch",
+  "compact": "Kompakt",
+  "large": "Groß",
+  "sources": "Quellen der Methoden",
+  "readMethods": "Definitionen, Mathematik und Grenzen",
+  "evidenceScope": "Diese Quellen beschreiben Methoden. Sie belegen nicht, dass diese App Krankheiten diagnostizieren oder Ursachen nachweisen kann.",
+  "longHorizon": "14–28 Tage sind ein explorativer Horizont. Der Trend setzt eine gleichbleibende Steigung voraus; das Modell mit mehreren Eingaben wird direkt für den gewählten Horizont angepasst. Längere Horizonte ergeben weniger Trainingspaare und können Änderungen im Alltag verfehlen. Prüfe die Fehler auf späteren Daten für diesen Horizont; ein enges Intervall allein belegt keine Genauigkeit.",
+  "validationChart": "Vorhersagen im Vergleich zu Testbeobachtungen mit 95-%-Vorhersageintervallen",
+  "predicted": "Vorhergesagt",
+  "validationLegend": "Punkte: spätere Beobachtungen. Linie: Vorhersagen des Trainingsmodells. Band: 95-%-Vorhersageintervall. Diese Beobachtungen wurden nicht zur Anpassung dieses Modells verwendet.",
+  "intervalScore": "95-%-Intervallscore · niedriger ist besser",
+  "meanWidth": "Mittlere Intervallbreite",
+  "bias": "Mittlerer Fehler · beobachtet − vorhergesagt",
+  "scoreExplanation": "Der Intervallscore verbindet die Breite mit einer Strafe für Beobachtungen außerhalb des 95-%-Intervalls: Breite + 40 × Abstand zur nächsten Grenze. Gemittelt über die Testdaten, in Einheiten der Zielgröße. Vergleiche nur dieselbe Zielgröße, dieselben Daten und denselben Horizont; breitere Intervalle garantieren keinen besseren Score.",
+  "biasExplanation": "Ein positiver mittlerer Fehler bedeutet Unterschätzung, ein negativer Überschätzung. Gegenläufige Fehler können sich aufheben; beachte deshalb auch den MAE.",
+  "viewResults": "Ergebnisse ansehen ↓",
+  "bayesCitation": "Murphy, K. P. (2007). Conjugate Bayesian analysis of the Gaussian distribution.",
+  "bootstrapCitation": "Politis, D. N. & Romano, J. P. (1992). A Circular Block-Resampling Procedure for Stationary Data.",
+  "intervalCitation": "Gneiting, T. & Raftery, A. E. (2007). Strictly Proper Scoring Rules, Prediction, and Estimation. JASA 102(477), 359–378.",
+  "holdoutTitle": "Vorhersagen für spätere Daten"
+}

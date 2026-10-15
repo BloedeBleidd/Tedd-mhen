@@ -1,0 +1,23 @@
+{
+  "chartSize": "Rozmiar wykresu",
+  "automatic": "Automatyczny",
+  "compact": "Mały",
+  "large": "Duży",
+  "sources": "Źródła metod",
+  "readMethods": "Definicje, matematyka i ograniczenia",
+  "evidenceScope": "Źródła opisują metody. Nie dowodzą, że aplikacja może diagnozować choroby lub ustalać przyczyny.",
+  "longHorizon": "14–28 dni to horyzont eksploracyjny. Trend zakłada utrzymanie obecnego nachylenia; model wielu zmiennych dopasowuje bezpośrednio wybrany horyzont. Dłuższy horyzont oznacza mniej par uczących i może nie uwzględnić zmian rutyny. Sprawdź błędy na późniejszych danych dla tego horyzontu; sam wąski przedział nie dowodzi trafności.",
+  "validationChart": "Prognozy porównane z pomiarami ze zbioru testowego i przedziałami predykcyjnymi 95%",
+  "predicted": "Prognoza",
+  "validationLegend": "Punkty: późniejsze pomiary. Linia: prognozy modelu uczącego. Pasmo: przedział predykcyjny 95%. Te pomiary nie służyły do dopasowania tego modelu.",
+  "intervalScore": "Ocena przedziału 95% · mniej znaczy lepiej",
+  "meanWidth": "Średnia szerokość przedziału",
+  "bias": "Średni błąd · pomiar − prognoza",
+  "scoreExplanation": "Ocena przedziału łączy jego szerokość z karą za pomiar poza przedziałem 95%: szerokość + 40 × odległość od najbliższej granicy. To średnia dla dat testowych, w jednostkach wyniku. Porównuj tylko ten sam wynik, daty i horyzont; poszerzanie wszystkich przedziałów nie gwarantuje lepszej oceny.",
+  "biasExplanation": "Dodatni średni błąd oznacza zaniżanie prognoz, ujemny — zawyżanie. Przeciwne błędy mogą się znosić, dlatego sprawdzaj też MAE.",
+  "viewResults": "Przejdź do wyników ↓",
+  "bayesCitation": "Murphy, K. P. (2007). Conjugate Bayesian analysis of the Gaussian distribution.",
+  "bootstrapCitation": "Politis, D. N. & Romano, J. P. (1992). A Circular Block-Resampling Procedure for Stationary Data.",
+  "intervalCitation": "Gneiting, T. & Raftery, A. E. (2007). Strictly Proper Scoring Rules, Prediction, and Estimation. JASA 102(477), 359–378.",
+  "holdoutTitle": "Prognozy na późniejszych danych"
+}

@@ -51,7 +51,6 @@
   "anInputBecomesConstantAfterIncompleteRowsAreRemoved": "Uma variável fica constante ao remover linhas incompletas. Escolhe menos variáveis ou um período maior.",
   "temporalValidationNeedsCompleteTrainingRowsAnd7Later": "A validação temporal exige {{value0}} linhas completas de treino e 7 posteriores, separadas por {{value1}} dias. Atualmente: {{value2}} de treino / {{value3}} posteriores.",
   "oneObservationPerCalendarDayIsRequired": "É necessária uma observação por dia de calendário.",
-  "forecastHorizonMustBe07Days": "O horizonte deve ser de 0 a 7 dias.",
   "lagMustBe028CalendarDays": "O desfasamento deve ser de 0 a 28 dias de calendário.",
   "invalidBlockLength": "Comprimento de bloco inválido.",
   "selectRecordedSupportedVariables": "Escolhe variáveis registadas e suportadas.",
@@ -123,5 +122,6 @@
   "request_failed": "O pedido falhou.",
   "analysis_could_not_run_try_fewer_inputs_a_shorter": "Não foi possível executar a análise. Tente menos variáveis, um período mais curto ou recarregue a página.",
   "analysis_could_not_be_completed": "Não foi possível concluir a análise.",
-  "completeRows": "Observações completas: {{value0}}; são necessárias pelo menos {{value1}} para {{value2}} coeficientes. É um limiar de apresentação, não garantia de fiabilidade."
+  "completeRows": "Observações completas: {{value0}}; são necessárias pelo menos {{value1}} para {{value2}} coeficientes. É um limiar de apresentação, não garantia de fiabilidade.",
+  "forecastHorizonMustBe028Days": "O horizonte deve ser de 0 a 28 dias."
 }

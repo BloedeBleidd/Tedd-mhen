@@ -51,7 +51,6 @@
   "anInputBecomesConstantAfterIncompleteRowsAreRemoved": "Po usunięciu niepełnych wierszy predyktor jest stały. Wybierz mniej predyktorów lub szerszy okres.",
   "temporalValidationNeedsCompleteTrainingRowsAnd7Later": "Walidacja czasowa wymaga {{value0}} pełnych wierszy uczących i 7 późniejszych, z odstępem {{value1}} dni. Obecnie: {{value2}} uczących / {{value3}} późniejszych.",
   "oneObservationPerCalendarDayIsRequired": "Wymagana jest jedna obserwacja na dzień kalendarzowy.",
-  "forecastHorizonMustBe07Days": "Horyzont predykcji musi wynosić 0–7 dni.",
   "lagMustBe028CalendarDays": "Opóźnienie musi wynosić 0–28 dni kalendarzowych.",
   "invalidBlockLength": "Nieprawidłowa długość bloku.",
   "selectRecordedSupportedVariables": "Wybierz zapisane, obsługiwane zmienne.",
@@ -123,5 +122,6 @@
   "request_failed": "Żądanie nie powiodło się.",
   "analysis_could_not_run_try_fewer_inputs_a_shorter": "Nie udało się uruchomić analizy. Wybierz mniej zmiennych, krótszy zakres dat lub odśwież stronę.",
   "analysis_could_not_be_completed": "Nie udało się ukończyć analizy.",
-  "completeRows": "Kompletne obserwacje: {{value0}}; wymagane co najmniej {{value1}} dla {{value2}} współczynników. To próg wyświetlania, nie gwarancja wiarygodności."
+  "completeRows": "Kompletne obserwacje: {{value0}}; wymagane co najmniej {{value1}} dla {{value2}} współczynników. To próg wyświetlania, nie gwarancja wiarygodności.",
+  "forecastHorizonMustBe028Days": "Horyzont predykcji musi wynosić 0–28 dni."
 }

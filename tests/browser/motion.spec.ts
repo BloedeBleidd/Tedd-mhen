@@ -107,7 +107,7 @@ test('correlation points and scrolled panels animate once, and new settings reve
   await expect(
     page.getByRole('heading', { name: 'Strongest observed associations' }),
   ).toBeVisible();
-  await page.locator('.chart').scrollIntoViewIfNeeded();
+  await page.locator('.chart').first().scrollIntoViewIfNeeded();
   await expect.poll(() => revealCount(page, '.recharts-scatter.chart-points')).toBe(2);
   const frames = await page.evaluate(() =>
     (
@@ -136,7 +136,7 @@ test('a reduced-motion preference applies from the first render, including chart
   await page.getByRole('link', { name: 'Trends & predictions', exact: true }).click();
   await page.getByRole('link', { name: 'Multivariable model', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Conditional associations' })).toBeVisible();
-  await page.locator('.chart').scrollIntoViewIfNeeded();
+  await page.locator('.chart').first().scrollIntoViewIfNeeded();
   expect(await revealCount(page, '*')).toBe(0);
   expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
   await page.screenshot({ path: 'test-results/motion-reduced.png', fullPage: true });

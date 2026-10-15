@@ -68,15 +68,15 @@ These distributions assume linearity, constant residual variance and independent
 
 Model identifier: `normal-inverse-gamma-linear-v1`.
 
-The design is `[1, (day − midpoint)/7]`, with the midpoint between the first and last observed selected dates. Fourteen observations are required. The slope and its credible interval describe outcome units per week. Extrapolation extends 0–7 calendar days after the last observation, including when that observation is old. The chart separates observations, posterior mean, mean uncertainty, and individual-observation uncertainty.
+The design is `[1, (day − midpoint)/7]`, with the midpoint between the first and last observed selected dates. Fourteen observations are required. The slope and its credible interval describe outcome units per week. Extrapolation extends 0–28 calendar days after the last observation, including when that observation is old. The chart separates observations, posterior mean, mean uncertainty, and individual-observation uncertainty. The 14/28-day choices are exploratory extrapolations under the same linear model, not validated longer-range health forecasts. Extending the horizon changes the prediction coordinates, not the fitted posterior. Uncertainty grows with distance from the observed midpoint, but does not include future regime changes.
 
 ## Multiple-input direct prediction
 
 Model identifier: `normal-inverse-gamma-multivariable-direct-v1`.
 
-One selected numerical outcome is predicted from multiple numerical series, category indicators and context labels. It is a multivariable regression, not a joint multi-output causal system. For horizon `h ∈ {0,1,3,7}`, each row uses inputs available through origin day `d` to predict outcome on `d+h`. Numeric inputs can be that day’s value or a complete trailing 7/28-day mean. Clock-time sine/cosine pairs represent periodicity; weekday indicators use Monday as reference. Other category reference levels and missing semantics are in the dictionary.
+One selected numerical outcome is predicted from multiple numerical series, category indicators and context labels. It is a multivariable regression, not a joint multi-output causal system. For horizon `h ∈ {0,1,3,7,14,28}`, each row uses inputs available through origin day `d` to predict outcome on `d+h`. Numeric inputs can be that day’s value or a complete trailing 7/28-day mean. Clock-time sine/cosine pairs represent periodicity; weekday indicators use Monday as reference. Other category reference levels and missing semantics are in the dictionary.
 
-The target metric is excluded from ordinary predictors. Optional outcome history uses `y(d)` for a future horizon and `y(d−1)` for same-day estimation. Optional linear calendar time adjusts for co-trending. A same-day fit requires that day’s other observations; it is not an advance forecast. No unknown future predictor is filled in or silently forecast.
+The target metric is excluded from ordinary predictors. Optional outcome history uses `y(d)` for a future horizon and `y(d−1)` for same-day estimation. Optional linear calendar time adjusts for co-trending. A same-day fit requires that day’s other observations; it is not an advance forecast. No unknown future predictor is filled in or silently forecast. Each horizon is fitted directly from calendar-aligned origin/target pairs, rather than recursively feeding predictions back as observations. Longer horizons leave fewer observed pairs and require a longer separation for holdout evaluation. Interval widths across separately fitted horizons need not increase monotonically.
 
 ### Screening and scaling
 
@@ -103,6 +103,30 @@ RMSE = sqrt(mean((observed − predicted)²))
 ```
 
 Baselines predict either the training mean or the outcome known at the forecast origin (preceding day for same-day estimation). Persistence can have fewer eligible rows; both its count and model MAE on those same rows are shown. A small holdout’s coverage is descriptive, not validated calibration. Changing settings after seeing holdout results tunes to that holdout; confirm the chosen model on newly collected observations. See [regression forecasting](https://otexts.com/fpp3/regression.html) and [temporal evaluation](https://otexts.com/fpp3/toolbox.html).
+
+### Predictive interval score and signed error
+
+Evaluation identifier: `held-out-interval-score-v1`. The chronological holdout also reports mean signed error `mean(observed − predicted)`, mean predictive interval width and mean interval score. Positive signed error indicates underprediction; opposing errors can cancel, so it is shown alongside MAE.
+
+For an equal-tailed `(1 − α)` interval `[l,u]` and observed value `y`:
+
+```text
+ISα(l,u;y) = (u − l) + (2/α)(l − y)1[y < l] + (2/α)(y − u)1[y > u]
+α = 0.05; 2/α = 40
+```
+
+Lower is better. A wide interval incurs a width cost; an observation outside it incurs an additional distance penalty. Scores are averaged over the same held-out observations and remain in outcome units. Compare only matching outcomes, dates, horizons and interval levels. The finite holdout does not establish calibration or distinguish models reliably by itself. Missing dates are not filled and empty evaluations return no score. See Gneiting & Raftery (2007), equation 43, and the Winkler-score section of Hyndman & Athanasopoulos. Model reports include the evaluation version and `alpha`.
+
+The held-out chart shows observations, training-model predictions and their predictive intervals. Its points were not used to fit that training model. The adjacent descriptive chart uses the refit on all selected complete rows and is labeled separately.
+
+## Named methodological sources
+
+- Kevin P. Murphy (2007), [Conjugate Bayesian analysis of the Gaussian distribution](https://www.cs.ubc.ca/~murphyk/Papers/bayesGauss.pdf). Conjugate Gaussian distribution family; the exact regression design and priors implemented here are specified above.
+- Dimitris N. Politis and Joseph P. Romano (1992), _A Circular Block-Resampling Procedure for Stationary Data_, in _Exploring the Limits of Bootstrap_, pp. 263–270; [author publication list](https://mathweb.ucsd.edu/~politis/DPpublication.html). Basis for circular blocks; this application's handling of missing calendar slots and fixed block choices is an exploratory adaptation.
+- Tilmann Gneiting and Adrian E. Raftery (2007), [Strictly Proper Scoring Rules, Prediction, and Estimation](https://doi.org/10.1198/016214506000001437), _Journal of the American Statistical Association_ 102(477), 359–378. Interval score, equation 43.
+- Rob J. Hyndman and George Athanasopoulos, [Forecasting: Principles and Practice, third edition, chapter 5](https://otexts.com/fpp3/toolbox.html). Forecast errors, intervals, baselines and temporal evaluation. This application implements a fixed chronological holdout, not rolling-origin cross-validation.
+
+These publications support mathematical methods, not the medical validity of this application, its self-report scales or its individual forecasts. Original publication titles remain in their source language; explanatory interface text is translated.
 
 ## Diagnostics, evidence and reproduction
 

@@ -156,3 +156,32 @@ describe('Multivariable Normal–Inverse-Gamma model', () => {
     expect(fit.validation.persistenceN).toBeLessThan(fit.validation.n);
   });
 });
+
+it.each([14, 28])('uses an embargo and calendar targets at the %i-day horizon', (horizon) => {
+  const entries = fixture(240);
+  const long = { ...settings, horizon };
+  const fit = fitMultivariable(entries, long);
+  if (!fit.ready || !fit.validation) throw new Error('Expected long-horizon holdout');
+  expect(fit.validation.lastTrainingOutcome < fit.validation.firstValidationOrigin).toBe(true);
+  expect(fit.future!.date).toBe(shiftDate(entries.at(-1)!.date, horizon));
+  expect(fit.validation.evaluation.n).toBe(fit.validation.n);
+  expect(fit.validation.evaluation.intervalScore).toBeGreaterThanOrEqual(
+    fit.validation.evaluation.meanWidth,
+  );
+  const changed = entries.map((e) =>
+    e.date >= fit.validation!.firstValidationOrigin ? { ...e, wellbeing: 100 } : e,
+  );
+  const second = fitMultivariable(changed, long);
+  if (!second.ready || !second.validation) throw new Error('Expected holdout');
+  expect(second.validation.predictions.map((p) => p.mean)).toEqual(
+    fit.validation.predictions.map((p) => p.mean),
+  );
+  expect(second.validation.evaluation.intervalScore).toBeGreaterThan(
+    fit.validation.evaluation.intervalScore,
+  );
+  const sparse = modelRows(
+    entries.filter((_, i) => i !== horizon),
+    long,
+  );
+  expect(sparse.rows[0].y).toBeNull();
+});

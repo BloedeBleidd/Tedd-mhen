@@ -7,6 +7,16 @@ import {
   type EntrySummary,
 } from './schema';
 export const references = {
+  intervalScore: {
+    title:
+      'Gneiting, T. & Raftery, A. E. (2007). Strictly Proper Scoring Rules, Prediction, and Estimation. JASA 102(477), 359–378.',
+    url: 'https://doi.org/10.1198/016214506000001437',
+  },
+  circularBootstrap: {
+    title:
+      'Politis, D. N. & Romano, J. P. (1992). A Circular Block-Resampling Procedure for Stationary Data.',
+    url: 'https://mathweb.ucsd.edu/~politis/DPpublication.html',
+  },
   correlation: {
     title: 'SciPy: Pearson correlation',
     url: 'https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.pearsonr.html',
@@ -20,7 +30,7 @@ export const references = {
     url: 'https://stat.ethz.ch/R-manual/R-devel/library/boot/html/tsboot.html',
   },
   bayes: {
-    title: 'Murphy (2007): conjugate Gaussian analysis',
+    title: 'Murphy, K. P. (2007). Conjugate Bayesian analysis of the Gaussian distribution.',
     url: 'https://www.cs.ubc.ca/~murphyk/Papers/bayesGauss.pdf',
   },
   forecasting: {

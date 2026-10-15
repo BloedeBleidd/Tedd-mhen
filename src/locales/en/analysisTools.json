@@ -1,0 +1,23 @@
+{
+  "chartSize": "Chart size",
+  "automatic": "Automatic",
+  "compact": "Compact",
+  "large": "Large",
+  "sources": "Method sources",
+  "readMethods": "Definitions, mathematics & limitations",
+  "evidenceScope": "These sources describe methods, not evidence that this app can diagnose conditions or establish causes.",
+  "longHorizon": "14–28 days is an exploratory horizon. The trend assumes its current slope continues; the multiple-input model fits the selected horizon directly. Longer horizons leave fewer training pairs and can miss changes in routine. Check later-data errors for that horizon; a narrow interval alone is not evidence of accuracy.",
+  "validationChart": "Predictions compared with held-out observations and 95% predictive intervals",
+  "predicted": "Predicted",
+  "validationLegend": "Points: later observations. Line: predictions from the training model. Band: 95% predictive interval. These observations were not used to fit that model.",
+  "intervalScore": "95% interval score · lower is better",
+  "meanWidth": "Mean interval width",
+  "bias": "Mean error · observed − predicted",
+  "scoreExplanation": "The interval score combines width with a penalty when an observation falls outside the 95% interval: width + 40 × distance beyond the nearest bound. Averaged over held-out dates, in outcome units. Compare only the same outcome, dates and horizon; widening every interval does not guarantee a better score.",
+  "biasExplanation": "A positive mean error means underprediction; a negative value means overprediction. Opposing errors can cancel, so read this alongside MAE.",
+  "viewResults": "View results ↓",
+  "bayesCitation": "Murphy, K. P. (2007). Conjugate Bayesian analysis of the Gaussian distribution.",
+  "bootstrapCitation": "Politis, D. N. & Romano, J. P. (1992). A Circular Block-Resampling Procedure for Stationary Data.",
+  "intervalCitation": "Gneiting, T. & Raftery, A. E. (2007). Strictly Proper Scoring Rules, Prediction, and Estimation. JASA 102(477), 359–378.",
+  "holdoutTitle": "Predictions on later data"
+}

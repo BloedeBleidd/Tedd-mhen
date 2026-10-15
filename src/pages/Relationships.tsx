@@ -1,3 +1,5 @@
+import { MethodSources } from '../components/MethodSources';
+import { numberRange } from '../components/ui';
 import { MessageValue } from '../components/MessageValue';
 import { useTranslation, Trans } from 'react-i18next';
 import { featureDescription } from '../lib/feature-labels';
@@ -63,6 +65,13 @@ export function Relationships() {
         eyebrow={tr('relationships:findConnections')}
         title={tr('relationships:whatMovesTogether')}
         description={tr('relationships:compareMeasurementsAndContextAcrossDaysAndLongerPatterns')}
+        action={
+          result ? (
+            <a className="button secondary" href="#analysis-results">
+              {tr('analysisTools:viewResults')}
+            </a>
+          ) : undefined
+        }
       />
       {data.controls}
       <Panel>
@@ -164,7 +173,7 @@ export function Relationships() {
       )}
       {result && (
         <>
-          <div className="analysis-stats">
+          <div className="analysis-stats" id="analysis-results" tabIndex={-1}>
             <div>
               <span className="stat-label">
                 {method === 'spearman'
@@ -185,7 +194,7 @@ export function Relationships() {
               </span>
               <strong className="compact-stat">
                 {result.interval
-                  ? result.interval.interval.map((v) => number(v, 2)).join(tr('relationships:to'))
+                  ? numberRange(result.interval.interval)
                   : tr('relationships:notAvailable')}
               </strong>
               <p>
@@ -224,6 +233,7 @@ export function Relationships() {
               {tr('relationships:anArrowSpecifiesTimeAlignmentNotCausalInfluencePoints')}
             </p>
           </Panel>
+          <MethodSources ids={['correlation', 'ranks', 'circularBootstrap']} />
           <div className="analysis-explanation">
             <Panel
               title={tr('relationships:strongestObservedAssociations')}

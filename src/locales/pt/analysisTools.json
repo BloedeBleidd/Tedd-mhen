@@ -1,0 +1,23 @@
+{
+  "chartSize": "Tamanho do gráfico",
+  "automatic": "Automático",
+  "compact": "Compacto",
+  "large": "Grande",
+  "sources": "Fontes dos métodos",
+  "readMethods": "Definições, matemática e limitações",
+  "evidenceScope": "Estas fontes descrevem métodos. Não demonstram que esta aplicação possa diagnosticar doenças ou determinar causas.",
+  "longHorizon": "14–28 dias é um horizonte exploratório. A tendência pressupõe que o declive atual se mantém; o modelo com várias entradas é ajustado diretamente ao horizonte escolhido. Horizontes mais longos deixam menos pares de treino e podem não captar mudanças de rotina. Verifique os erros nos dados posteriores para esse horizonte; um intervalo estreito, por si só, não demonstra precisão.",
+  "validationChart": "Previsões comparadas com observações de teste e intervalos preditivos de 95%",
+  "predicted": "Previsão",
+  "validationLegend": "Pontos: observações posteriores. Linha: previsões do modelo treinado. Faixa: intervalo preditivo de 95%. Estas observações não foram usadas para ajustar esse modelo.",
+  "intervalScore": "Pontuação do intervalo de 95% · menor é melhor",
+  "meanWidth": "Largura média do intervalo",
+  "bias": "Erro médio · observado − previsto",
+  "scoreExplanation": "A pontuação combina a largura com uma penalização quando uma observação fica fora do intervalo de 95%: largura + 40 × distância ao limite mais próximo. É a média nas datas de teste, nas unidades do resultado. Compare apenas o mesmo resultado, datas e horizonte; alargar todos os intervalos não garante uma melhor pontuação.",
+  "biasExplanation": "Um erro médio positivo indica subestimação; um valor negativo, sobrestimação. Erros opostos podem anular-se; consulte também o MAE.",
+  "viewResults": "Ver resultados ↓",
+  "bayesCitation": "Murphy, K. P. (2007). Conjugate Bayesian analysis of the Gaussian distribution.",
+  "bootstrapCitation": "Politis, D. N. & Romano, J. P. (1992). A Circular Block-Resampling Procedure for Stationary Data.",
+  "intervalCitation": "Gneiting, T. & Raftery, A. E. (2007). Strictly Proper Scoring Rules, Prediction, and Estimation. JASA 102(477), 359–378.",
+  "holdoutTitle": "Previsões em dados posteriores"
+}

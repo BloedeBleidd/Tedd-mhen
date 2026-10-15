@@ -51,7 +51,6 @@
   "anInputBecomesConstantAfterIncompleteRowsAreRemoved": "Nach dem Entfernen unvollständiger Zeilen wird eine Variable konstant. Wähle weniger Variablen oder einen längeren Zeitraum.",
   "temporalValidationNeedsCompleteTrainingRowsAnd7Later": "Die zeitliche Validierung benötigt {{value0}} vollständige Trainingszeilen und 7 spätere Zeilen mit {{value1}} Tagen Abstand. Aktuell: {{value2}} Trainingszeilen / {{value3}} spätere.",
   "oneObservationPerCalendarDayIsRequired": "Eine Beobachtung pro Kalendertag ist erforderlich.",
-  "forecastHorizonMustBe07Days": "Der Vorhersagehorizont muss 0–7 Tage betragen.",
   "lagMustBe028CalendarDays": "Der Zeitversatz muss 0–28 Kalendertage betragen.",
   "invalidBlockLength": "Ungültige Blocklänge.",
   "selectRecordedSupportedVariables": "Wähle erfasste, unterstützte Variablen.",
@@ -123,5 +122,6 @@
   "request_failed": "Anfrage fehlgeschlagen.",
   "analysis_could_not_run_try_fewer_inputs_a_shorter": "Die Analyse konnte nicht starten. Weniger Eingaben oder einen kürzeren Zeitraum wählen oder die Seite neu laden.",
   "analysis_could_not_be_completed": "Die Analyse konnte nicht abgeschlossen werden.",
-  "completeRows": "Vollständige Beobachtungen: {{value0}}; mindestens {{value1}} für {{value2}} Koeffizienten erforderlich. Anzeigeschwelle, keine Verlässlichkeitsgarantie."
+  "completeRows": "Vollständige Beobachtungen: {{value0}}; mindestens {{value1}} für {{value2}} Koeffizienten erforderlich. Anzeigeschwelle, keine Verlässlichkeitsgarantie.",
+  "forecastHorizonMustBe028Days": "Der Vorhersagehorizont muss 0–28 Tage betragen."
 }

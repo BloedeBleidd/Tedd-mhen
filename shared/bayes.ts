@@ -32,8 +32,8 @@ export function fitTrend(
   if (sorted.length < MIN_OBSERVATIONS) return null;
   if (new Set(sorted.map((o) => o.date)).size !== sorted.length)
     throw new Error('One observation per calendar day is required.');
-  if (!Number.isInteger(horizon) || horizon < 0 || horizon > 7)
-    throw new Error('Forecast horizon must be 0–7 days.');
+  if (!Number.isInteger(horizon) || horizon < 0 || horizon > 28)
+    throw new Error('Forecast horizon must be 0–28 days.');
   const spec = metrics[metric];
   const firstDay = dayNumber(sorted[0].date),
     lastDay = dayNumber(sorted.at(-1)!.date);

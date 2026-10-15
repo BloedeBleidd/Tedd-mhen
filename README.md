@@ -6,7 +6,7 @@ A personal training, sleep and wellbeing journal with structured measurements, e
 
 - Daily numeric scales, sleep, physiology, 150 activities, reusable context labels and optional notes.
 - Filtered journals, selective JSON/NDJSON/CSV/Markdown exports, and reviewed JSON/NDJSON/CSV imports.
-- Same-day and lagged relationships, trend-adjusted correlations, multiple-input Bayesian models, uncertainty and chronological forecast evaluation.
+- Same-day and lagged relationships, trend-adjusted correlations, multiple-input Bayesian models, exploratory forecasts up to 28 days, uncertainty and chronological evaluation with cited methods.
 - Private email/password accounts with recovery codes; aggregate administration; light/dark appearance with opt-in sunrise/sunset switching.
 - Six authored interface languages; optional local country detection, with original notes preserved.
 - A public `/demo` journal with synthetic observations and temporary edits for exploring the app before registration.

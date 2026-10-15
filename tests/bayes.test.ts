@@ -77,6 +77,20 @@ describe('Exact Normal–Inverse-Gamma trend', () => {
   it('rejects duplicate dates and invalid horizons', () => {
     const data = points(14, (i) => i);
     expect(() => fitTrend([...data, data[0]], 'wellbeing')).toThrow('One observation');
-    expect(() => fitTrend(data, 'wellbeing', 'regular', 30)).toThrow('0–7');
+    expect(() => fitTrend(data, 'wellbeing', 'regular', 30)).toThrow('0–28');
   });
+});
+
+it('extends the same posterior to 28 calendar days with increasing uncertainty', () => {
+  const data = points(90, (i) => 5 + 0.01 * i + 0.1 * Math.sin(i));
+  const short = fitTrend(data, 'wellbeing', 'regular', 7)!;
+  const long = fitTrend(data, 'wellbeing', 'regular', 28)!;
+  expect(long.posterior).toEqual(short.posterior);
+  expect(long.curve.filter((p) => p.forecast)).toHaveLength(28);
+  expect(long.curve.at(-1)!.date).toBe(shiftDate(data.at(-1)!.date, 28));
+  const forecast = long.curve.filter((p) => p.forecast);
+  for (let i = 1; i < forecast.length; i++) {
+    const width = (p: (typeof forecast)[number]) => p.predictive[1] - p.predictive[0];
+    expect(width(forecast[i])).toBeGreaterThan(width(forecast[i - 1]));
+  }
 });
