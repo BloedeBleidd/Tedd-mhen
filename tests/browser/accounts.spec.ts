@@ -92,6 +92,17 @@ test('registration UI preserves recovery code until acknowledgement, sign out an
   });
   await page.getByRole('button', { name: 'Copy recovery code' }).click();
   await expect(page.getByRole('alert')).toContainText('copy it manually');
+  await page.locator('.language-trigger').click();
+  await page.locator('.language-dialog input[value="pl"]').check();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'pl');
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('alert')).not.toContainText('copy it manually');
+  await expect(page.getByLabel('Kod odzyskiwania', { exact: true })).toHaveText(code!);
+  await page.locator('.language-trigger').click();
+  await page.locator('.language-dialog input[value="en"]').check();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('alert')).toContainText('copy it manually');
   page.once('dialog', (dialog) => dialog.dismiss());
   await page.getByRole('link', { name: 'Tedd’mhen', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Save your recovery code.' })).toBeVisible();

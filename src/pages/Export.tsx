@@ -111,7 +111,7 @@ export function Export() {
         if (format === 'md')
           text =
             '# Tedd’mhen · Synthetic demonstration export\n' +
-            markdownEntry({ date: tr('export:metadata'), ...meta }) +
+            markdownEntry({ date: 'Metadata', ...meta }) +
             rows.map(markdownEntry).join('');
         if (format === 'csv') {
           const flat = rows.map((r) => flatten(r)),

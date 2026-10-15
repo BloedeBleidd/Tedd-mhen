@@ -34,7 +34,7 @@ export function PublicDemo() {
           setError(
             cause instanceof ApiError
               ? cause.message
-              : tr('publicDemo:couldNotLoadTheDemoPleaseTryAgain'),
+              : 'publicDemo:couldNotLoadTheDemoPleaseTryAgain',
           );
       }
     }

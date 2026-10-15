@@ -55,7 +55,7 @@ export function Account() {
         navigate('/sign-in');
       }
     } catch (cause) {
-      showError(cause instanceof Error ? cause.message : tr('account:unableToCompleteThisRequest'));
+      showError(cause instanceof Error ? cause.message : 'account:unableToCompleteThisRequest');
     } finally {
       pending.current = false;
       setBusy(false);

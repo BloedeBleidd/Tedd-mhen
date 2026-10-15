@@ -45,7 +45,7 @@ export function RecoverySecret({ code, onDone }: { code: string; onDone: () => v
             setCopyError('');
           } catch {
             setCopied(false);
-            setCopyError(tr('auth:copyIsUnavailableInThisBrowserSelectTheCode'));
+            setCopyError('auth:copyIsUnavailableInThisBrowserSelectTheCode');
           }
         }}
       >
@@ -161,7 +161,7 @@ export function AuthPage() {
       if (result.recoveryCode) setSecret(result.recoveryCode);
       else finish();
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : tr('auth:unableToCompleteThisRequest'));
+      setError(cause instanceof Error ? cause.message : 'auth:unableToCompleteThisRequest');
     } finally {
       pending.current = false;
       setBusy(false);

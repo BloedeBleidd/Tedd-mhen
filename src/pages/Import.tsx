@@ -72,7 +72,7 @@ export function Import() {
       );
     } catch (e) {
       if (version !== readVersion.current) return;
-      setError(e instanceof Error ? e.message : tr('import:couldNotReadThisFile'));
+      setError(e instanceof Error ? e.message : 'import:couldNotReadThisFile');
     }
   }
   async function run() {
