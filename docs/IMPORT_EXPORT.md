@@ -32,3 +32,9 @@ For a new day, omitted fields remain unknown or empty narrative context. A suppl
 Each day is saved separately. Concurrent edits produce conflicts instead of overwrites. Network or validation errors can leave a partially completed import; the result table lists every attempted date and its status. Retrying with Skip existing days preserves completed work. Browser navigation or closing the tab can interrupt the operation. Export current data before intentionally merging replacements.
 
 Full database backups additionally preserve account identities and credential state. They are an infrastructure operation, not an application import; see [Deployment](DEPLOYMENT.md).
+
+## Complete journal copy
+
+**Select complete JSON backup** selects all seven data groups, every optional field, and JSON. It includes the journal's full recorded date range when that span fits the export limit; longer histories require separate ranges. A restorable file must also fit the import limits of 500 days and 20 MiB, so split larger histories before exporting. This copies observations, not account credentials.
+
+The exporter uses the same verified-workspace identity guard as journal reads and writes. Where a browser exposes a file picker but denies access to it, export falls back to the bounded download path. Cancelling the picker cancels the export. Selection controls remain disabled until preparation ends; success is reported only after the stream completes or the download is prepared.

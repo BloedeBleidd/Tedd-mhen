@@ -1,28 +1,56 @@
 import { useEffect, useState } from 'react';
 import type { AnalysisJob } from './analysis-worker';
 export function useAnalysis<T>(job: AnalysisJob | null) {
-  const [state, setState] = useState<{ result: T | null; error: string | null; busy: boolean }>({
+  const [state, setState] = useState<{
+    job: AnalysisJob | null;
+    result: T | null;
+    error: string | null;
+    busy: boolean;
+  }>({
+    job: null,
     result: null,
     error: null,
     busy: false,
   });
   useEffect(() => {
     if (!job) {
-      setState({ result: null, error: null, busy: false });
+      setState({ job, result: null, error: null, busy: false });
       return;
     }
-    setState({ result: null, error: null, busy: true });
-    const worker = new Worker(new URL('./analysis-worker.ts', import.meta.url), { type: 'module' });
-    worker.onmessage = (event: MessageEvent<{ result?: T; error?: string }>) =>
-      setState({ result: event.data.result ?? null, error: event.data.error ?? null, busy: false });
-    worker.onerror = () =>
-      setState({
-        result: null,
-        error: 'Analysis worker failed. Try fewer inputs or a shorter date range.',
-        busy: false,
-      });
-    worker.postMessage(job);
-    return () => worker.terminate();
+    let active = true;
+    let worker: Worker | undefined;
+    const fail = () => {
+      if (active)
+        setState({
+          job,
+          result: null,
+          error:
+            'Analysis could not run. Try fewer inputs, a shorter date range, or reload the page.',
+          busy: false,
+        });
+    };
+    setState({ job, result: null, error: null, busy: true });
+    try {
+      worker = new Worker(new URL('./analysis-worker.ts', import.meta.url), { type: 'module' });
+      worker.onmessage = (event: MessageEvent<{ result?: T; error?: string }>) => {
+        if (active)
+          setState({
+            job,
+            result: event.data.result ?? null,
+            error: event.data.error ?? null,
+            busy: false,
+          });
+      };
+      worker.onerror = fail;
+      worker.onmessageerror = fail;
+      worker.postMessage(job);
+    } catch {
+      fail();
+    }
+    return () => {
+      active = false;
+      worker?.terminate();
+    };
   }, [job]);
-  return state;
+  return state.job === job ? state : { result: null, error: null, busy: !!job };
 }

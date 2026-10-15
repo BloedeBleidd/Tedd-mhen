@@ -84,6 +84,17 @@ test('registration UI preserves recovery code until acknowledgement, sign out an
   await expect(page.getByRole('button', { name: 'Continue to my journal' })).toBeDisabled();
   const code = await page.getByLabel('Recovery code', { exact: true }).textContent();
   expect(await page.evaluate(() => JSON.stringify(localStorage))).not.toContain(code);
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText: () => Promise.reject(new Error('Clipboard denied')) },
+      configurable: true,
+    });
+  });
+  await page.getByRole('button', { name: 'Copy recovery code' }).click();
+  await expect(page.getByRole('alert')).toContainText('copy it manually');
+  page.once('dialog', (dialog) => dialog.dismiss());
+  await page.getByRole('link', { name: 'Tedd’mhen', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Save your recovery code.' })).toBeVisible();
   await page.getByRole('checkbox', { name: /I have saved/ }).check();
   await page.getByRole('button', { name: 'Continue to my journal' }).click();
   await expect(page.getByRole('heading', { name: 'Find your rhythm.' })).toBeVisible();

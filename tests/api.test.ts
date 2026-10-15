@@ -43,6 +43,28 @@ beforeEach(() => {
   actor = 'owner-a';
 });
 describe('API ownership, concurrency, filtering, and streaming exports', () => {
+  it('returns complete owner-scoped journal bounds independently of pagination', async () => {
+    for (const date of ['2005-01-01', '2005-06-01', '2006-01-01'])
+      await call(`/api/entries/${date}`, 'PUT', { entry: emptyEntry(date), revision: 0 });
+    actor = 'owner-b';
+    await call('/api/entries/2000-01-01', 'PUT', { entry: emptyEntry('2000-01-01'), revision: 0 });
+    actor = 'owner-a';
+    expect(await (await call('/api/entries?limit=1')).json()).toMatchObject({
+      total: 3,
+      firstDate: '2005-01-01',
+      lastDate: '2006-01-01',
+    });
+    expect(await (await call('/api/entries?from=2005-06-01&to=2005-12-31')).json()).toMatchObject({
+      total: 1,
+      firstDate: '2005-06-01',
+      lastDate: '2005-06-01',
+    });
+    expect(await (await call('/api/entries?from=2007-01-01')).json()).toMatchObject({
+      total: 0,
+      firstDate: null,
+      lastDate: null,
+    });
+  });
   it('replaces untrusted migration headers with the independently verified legacy identity', async () => {
     const forwarded: Request[] = [];
     env.APP_ORIGIN = 'https://journal.example';

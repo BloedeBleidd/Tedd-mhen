@@ -175,6 +175,12 @@ export class DemoWorkspace {
     return {
       entries: structuredClone(rows.slice(0, limit).map(summarize)),
       total: selected.length,
+      firstDate: selected.map((entry) => entry.date).sort()[0] ?? null,
+      lastDate:
+        selected
+          .map((entry) => entry.date)
+          .sort()
+          .at(-1) ?? null,
       nextCursor: rows.length > limit ? rows[limit - 1].date : null,
     };
   }

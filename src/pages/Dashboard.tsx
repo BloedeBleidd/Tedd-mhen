@@ -1,8 +1,20 @@
-import { ArrowRight, ArrowUpRight, Heart, Moon, Plus, Timer, Waves } from 'lucide-react';
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Heart,
+  Moon,
+  Plus,
+  Timer,
+  Waves,
+  Network,
+  SlidersHorizontal,
+  Upload,
+  Download,
+} from 'lucide-react';
 import { WorkspaceLink as Link } from '../components/WorkspaceLink';
 import { useState } from 'react';
 import { useLoad } from '../lib/api';
-import { localDate, shiftDate, type EntrySummary } from '../../shared/schema';
+import { localDate, shiftDate, type EntrySummary, type JournalPage } from '../../shared/schema';
 import { metrics, type MetricKey } from '../../shared/metrics';
 import { TrendChart } from '../components/Charts';
 import {
@@ -21,9 +33,10 @@ export function Dashboard() {
   const { data, loading, error } = useLoad<{ entries: EntrySummary[] }>(
     `/api/series?from=${shiftDate(today, -89)}&to=${today}`,
   );
+  const journal = useLoad<JournalPage>('/api/entries?limit=1');
   const allEntries = data?.entries || [],
     entries = allEntries.filter((e) => e.date >= shiftDate(today, -(days - 1))),
-    latest = allEntries.at(-1),
+    latest = journal.data?.entries[0] ?? allEntries.at(-1),
     spec = metrics[metric];
   const avg = (key: MetricKey) => {
     const values = entries.map(metrics[key].get).filter((v): v is number => v !== null);
@@ -74,6 +87,41 @@ export function Dashboard() {
           </Link>
         }
       />
+      <nav className="explore-grid" aria-label="Explore your journal">
+        {[
+          {
+            to: '/analysis/relationships',
+            title: 'Find connections',
+            text: 'Compare sleep, training, mood and context labels.',
+            icon: Network,
+          },
+          {
+            to: '/analysis/prediction',
+            title: 'Predict with multiple inputs',
+            text: 'Explore Bayesian estimates and their uncertainty.',
+            icon: SlidersHorizontal,
+          },
+          {
+            to: '/import',
+            title: 'Bring your history',
+            text: 'Preview and import an existing journal export.',
+            icon: Upload,
+          },
+          {
+            to: '/export',
+            title: 'Export or back up',
+            text: 'Choose measurements for analysis or keep a full copy.',
+            icon: Download,
+          },
+        ].map(({ to, title, text, icon: Icon }) => (
+          <Link key={to} to={to}>
+            <Icon size={21} />
+            <strong>{title}</strong>
+            <span>{text}</span>
+            <ArrowUpRight size={16} />
+          </Link>
+        ))}
+      </nav>
       <div className="overview-bar">
         <div className="section-label">
           <span className="live-dot" />
@@ -95,7 +143,8 @@ export function Dashboard() {
           <div className="stat-grid">
             {cards.map(({ label, value, unit, icon: Icon, key }, i) => (
               <button
-                className={`stat-card ${i === 0 ? 'featured' : ''}`}
+                className={`stat-card ${i === 0 ? 'featured' : ''} ${metric === key ? 'selected' : ''}`}
+                aria-pressed={metric === key}
                 key={label}
                 onClick={() => setMetric(key as MetricKey)}
               >
@@ -107,14 +156,43 @@ export function Dashboard() {
                   {number(value)} <span>{unit}</span>
                 </div>
                 <div className="stat-foot">
-                  {i === 3 ? 'Recorded total' : 'Recorded average'} <span>over {days} days</span>
+                  {i === 3 ? 'Recorded total' : 'Recorded average'}{' '}
+                  <span>
+                    {
+                      entries.filter((entry) => metrics[key as MetricKey].get(entry) !== null)
+                        .length
+                    }{' '}
+                    observations / {days} days
+                  </span>
                 </div>
               </button>
             ))}
           </div>
           {entries.length === 0 && !error ? (
             <Panel>
-              <EmptyState />
+              {journal.data?.total ? (
+                <>
+                  <h2>No entries in the last {days} days.</h2>
+                  <p>
+                    Your journal contains {journal.data.total} recorded days. Choose a wider
+                    overview period or open your journal to browse all dates.
+                  </p>
+                  <Link className="button primary" to="/journal">
+                    Browse all recorded days
+                  </Link>
+                </>
+              ) : journal.loading ? (
+                <Loading />
+              ) : journal.error ? (
+                <ErrorBox message={journal.error} />
+              ) : (
+                <>
+                  <EmptyState />
+                  <Link className="button secondary" to="/import">
+                    Already have data? Import your journal
+                  </Link>
+                </>
+              )}
             </Panel>
           ) : (
             <>

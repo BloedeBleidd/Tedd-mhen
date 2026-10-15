@@ -80,7 +80,9 @@ async function createSession(
         Date.now() + SESSION_SECONDS * 1000,
       ),
   ]);
-  return json({ ok: true, ...extra }, 200, { 'Set-Cookie': cookieHeader(request, token) });
+  return json({ ok: true, userId: account.user_id, ...extra }, 200, {
+    'Set-Cookie': cookieHeader(request, token),
+  });
 }
 
 export async function handleAccount(
@@ -104,6 +106,10 @@ export async function handleAccount(
     const body = await readInput(request);
     const action = url.pathname.split('/').pop();
     if (action === 'logout') {
+      const current = await readSession(request, env.DB);
+      const expected = request.headers.get('X-Teddmhen-Expected-User');
+      if (current && expected && current.id !== expected)
+        fail('Your signed-in account changed. Reload before continuing.', 403);
       const token = sessionToken(request);
       if (token)
         await env.DB.prepare('DELETE FROM auth_sessions WHERE token_hash = ?')
@@ -212,6 +218,9 @@ export async function handleAccount(
     if (action === 'change-password' || action === 'delete-account') {
       const user = await readSession(request, env.DB);
       if (!user) fail('Sign in to continue.', 401);
+      const expected = request.headers.get('X-Teddmhen-Expected-User');
+      if (expected && expected !== user!.id)
+        fail('Your signed-in account changed. Reload before continuing.', 403);
       const input: { currentPassword: string; password?: string } =
         action === 'change-password'
           ? z

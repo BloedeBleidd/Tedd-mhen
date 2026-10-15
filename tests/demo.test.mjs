@@ -189,6 +189,23 @@ describe('Isolated browser demo workspace', () => {
     ).toThrow('date and URL');
     expect(b.snapshot()).toHaveLength(236);
   });
+  it('reports complete filtered date bounds independently of the current page', () => {
+    const demo = workspace();
+    const rows = demo.snapshot().sort((a, b) => a.date.localeCompare(b.date));
+    const page = demo.request('/api/entries?limit=1');
+    expect(page).toMatchObject({
+      total: rows.length,
+      firstDate: rows[0].date,
+      lastDate: rows.at(-1).date,
+    });
+    const second = demo.request(`/api/entries?limit=1&cursor=${page.nextCursor}`);
+    expect(second).toMatchObject({ firstDate: page.firstDate, lastDate: page.lastDate });
+    expect(demo.request('/api/entries?from=1900-01-01&to=1901-01-01')).toMatchObject({
+      total: 0,
+      firstDate: null,
+      lastDate: null,
+    });
+  });
   it('paginates without duplicates, searches literally, filters illness and training, and strips notes from summaries', () => {
     const a = workspace();
     const page1 = a.request('/api/entries?limit=100');

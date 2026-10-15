@@ -49,6 +49,27 @@ const claim = () =>
 const session = (cookie: string) =>
   readSession(new Request('https://test.example', { headers: { Cookie: cookie } }), db);
 describe('Credential transactions and legacy migration', () => {
+  it('rejects stale workspace credentials for password changes, logout and deletion', async () => {
+    const response = await claim();
+    const cookie = response.headers.get('set-cookie')!;
+    expect(await response.json()).toMatchObject({ userId: 'legacy-owner' });
+    for (const action of ['change-password', 'logout', 'delete-account']) {
+      const body =
+        action === 'change-password'
+          ? { currentPassword: password, password: password + 'new' }
+          : action === 'delete-account'
+            ? { currentPassword: password }
+            : {};
+      expect(
+        (await call(action, body, cookie, { 'X-Teddmhen-Expected-User': 'another-owner' })).status,
+      ).toBe(403);
+      expect(await session(cookie)).toMatchObject({ id: 'legacy-owner' });
+    }
+    expect(
+      (await call('logout', {}, cookie, { 'X-Teddmhen-Expected-User': 'legacy-owner' })).status,
+    ).toBe(200);
+    expect(await session(cookie)).toBeNull();
+  });
   it('reserves legacy email and claims the exact existing journal without copying records', async () => {
     expect((await call('register', { email, password })).status).toBe(409);
     expect(

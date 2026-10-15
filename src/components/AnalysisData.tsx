@@ -32,7 +32,14 @@ export function useAnalysisData() {
       ),
     [data.data, illness, source, method, training, label],
   );
-  const catalog = useMemo(() => featureCatalog(data.data?.entries), [data.data]);
+  const catalog = useMemo(() => featureCatalog(entries), [entries]);
+  const labelOptions = useMemo(
+    () => featureCatalog(data.data?.entries).filter((f) => f.id.startsWith('label:')),
+    [data.data],
+  );
+  const activeFilters = [illness, source, method, label, training].filter(
+    (value) => value !== 'all',
+  ).length;
   const settings = {
     all,
     from: all ? null : from,
@@ -66,7 +73,21 @@ export function useAnalysisData() {
         </Field>
       </div>
       <details className="analysis-options">
-        <summary>Filter observations</summary>
+        <summary>
+          Filter observations · {activeFilters ? `${activeFilters} active` : 'all included'}
+        </summary>
+        <button
+          className="button secondary"
+          onClick={() => {
+            setIllness('all');
+            setSource('all');
+            setMethod('all');
+            setLabel('all');
+            setTraining('all');
+          }}
+        >
+          Clear observation filters
+        </button>
         <div className="fields-grid three">
           <Field label="Illness selection">
             <select value={illness} onChange={(e) => setIllness(e.target.value)}>
@@ -102,13 +123,14 @@ export function useAnalysisData() {
           <Field label="Required context label">
             <select value={label} onChange={(e) => setLabel(e.target.value)}>
               <option value="all">All contexts</option>
-              {catalog
-                .filter((f) => f.id.startsWith('label:'))
-                .map((f) => (
-                  <option key={f.id} value={f.id.slice(6)}>
-                    {f.id.slice(6)}
-                  </option>
-                ))}
+              {label !== 'all' && !labelOptions.some((f) => f.id === `label:${label}`) && (
+                <option value={label}>{label} (unavailable in this date range)</option>
+              )}
+              {labelOptions.map((f) => (
+                <option key={f.id} value={f.id.slice(6)}>
+                  {f.id.slice(6)}
+                </option>
+              ))}
             </select>
           </Field>
         </div>
@@ -147,13 +169,24 @@ export function FeaturePicker({
       .slice(0, 100);
   return (
     <details className="panel feature-picker">
-      <summary>Choose inputs · {selected.filter((id) => id !== target).length} selected</summary>
+      <summary>
+        Choose inputs: metrics & labels ·{' '}
+        {selected.filter((id) => id !== target && available.some((f) => f.id === id)).length} active
+      </summary>
+      <p className="small muted">
+        Selected inputs:{' '}
+        {selected
+          .filter((id) => id !== target)
+          .map((id) => available.find((f) => f.id === id)?.label || `${id} (unavailable; excluded)`)
+          .join(', ') || 'None'}
+        . Up to 180 inputs per analysis.
+      </p>
       <div className="picker-actions">
         <button
           className="button secondary small-button"
-          onClick={() => onChange(available.map((f) => f.id))}
+          onClick={() => onChange(available.slice(0, 180).map((f) => f.id))}
         >
-          Select all inputs
+          {available.length > 180 ? 'Select first 180 inputs' : 'Select all inputs'}
         </button>
         <button
           className="button secondary small-button"
@@ -177,6 +210,7 @@ export function FeaturePicker({
             <input
               type="checkbox"
               checked={selected.includes(f.id)}
+              disabled={!selected.includes(f.id) && selected.length >= 180}
               onChange={(e) =>
                 onChange(
                   e.target.checked ? [...selected, f.id] : selected.filter((id) => id !== f.id),

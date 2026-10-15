@@ -37,16 +37,18 @@ export function Panel({
   action,
   children,
   className = '',
+  id,
 }: {
   title?: string;
   subtitle?: string;
   action?: ReactNode;
   children: ReactNode;
   className?: string;
+  id?: string;
 }) {
   const reveal = useReveal<HTMLElement>();
   return (
-    <section ref={reveal} className={`panel ${className}`}>
+    <section id={id} ref={reveal} className={`panel ${className}`}>
       {title && (
         <div className="panel-heading">
           <div>

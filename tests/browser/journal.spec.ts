@@ -51,7 +51,7 @@ test('demo charts, settings, export, mobile navigation and no runtime errors', a
   await page.getByRole('link', { name: 'Trends & predictions', exact: true }).click();
   await expect(page.getByText('Probability of an increasing trend')).toBeVisible();
   await page.getByLabel('What would you like to understand?').selectOption('hrv');
-  await page.getByText('Model settings & data selection', { exact: true }).click();
+  await page.getByText(/^Model settings & data selection/).click();
   await page.getByLabel('HRV method').selectOption('rmssd');
   await page.getByLabel('Prior on the weekly slope').selectOption('strong');
   await expect(page.getByLabel('HRV method')).toHaveValue('rmssd');

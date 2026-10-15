@@ -351,13 +351,17 @@ export async function handleApi(request: Request, env: Env): Promise<Response> {
       env.DB.prepare(
         `${summarySelect} WHERE ${f.where} AND date < ? ORDER BY date DESC LIMIT ?`,
       ).bind(...f.params, cursor, limit + 1),
-      env.DB.prepare(`SELECT COUNT(*) AS count FROM entries WHERE ${f.where}`).bind(...f.params),
+      env.DB.prepare(
+        `SELECT COUNT(*) AS count, MIN(date) AS firstDate, MAX(date) AS lastDate FROM entries WHERE ${f.where}`,
+      ).bind(...f.params),
     ]);
     const rows = records.results as unknown as SummaryRow[];
     return json({
       entries: rows.slice(0, limit).map(summary),
       nextCursor: rows.length > limit ? rows[limit - 1].date : null,
       total: (count.results[0] as { count: number }).count,
+      firstDate: (count.results[0] as { firstDate: string | null }).firstDate,
+      lastDate: (count.results[0] as { lastDate: string | null }).lastDate,
     });
   }
   const match = url.pathname.match(/^\/api\/entries\/(\d{4}-\d{2}-\d{2})$/);

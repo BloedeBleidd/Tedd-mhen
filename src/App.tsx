@@ -16,10 +16,10 @@ import {
 import { Link, Route, Routes, useLocation } from 'react-router-dom';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { useApi, useLoad } from './lib/api';
-import { EmptyState, Loading } from './components/ui';
+import { EmptyState, ErrorBox, Loading } from './components/ui';
 import { AppearanceControl } from './components/AppearanceControl';
 import { PrivacyNotice } from './components/PrivacyNotice';
-import { WorkspaceNavLink as NavLink } from './components/WorkspaceLink';
+import { WorkspaceNavLink as NavLink, WorkspaceLink } from './components/WorkspaceLink';
 import { Welcome } from './pages/Welcome';
 import { AuthPage } from './pages/Auth';
 import { Privacy } from './pages/Privacy';
@@ -113,6 +113,16 @@ export function App() {
             <Privacy />
           ) : !authRoute && session.loading ? (
             <Loading />
+          ) : !authRoute && session.error && session.status !== 401 ? (
+            <section className="auth-card panel">
+              <h1>Could not open your journal.</h1>
+              <ErrorBox message={session.error} />
+              <button className="button primary" onClick={session.retry}>
+                Try again
+              </button>
+              <p>Your saved data is still in your account.</p>
+              <Link to="/sign-in">Go to sign in</Link>
+            </section>
           ) : location.pathname === '/' ? (
             <Welcome />
           ) : (
@@ -216,6 +226,7 @@ export function App() {
               onClick={() => setMenuOpen(!menuOpen)}
             >
               {menuOpen ? <X size={20} /> : <Menu size={20} />}
+              <span className="menu-label">Menu</span>
             </button>
             <span>Workspace</span>
             <span className="slash">/</span>
@@ -264,7 +275,10 @@ export function App() {
           <div className="setup-banner">
             <ShieldCheck size={17} />
             <span>{session.error}</span>
-            <NavLink to="/help">Setup guide</NavLink>
+            <button className="button secondary" onClick={session.retry}>
+              Retry connection
+            </button>
+            <Link to="/sign-in">Sign in again</Link>
           </div>
         )}
         <main id="main" tabIndex={-1}>
@@ -284,11 +298,16 @@ export function App() {
               <Route
                 path="*"
                 element={
-                  <EmptyState
-                    title="This page has wandered off."
-                    description="Use the navigation to return to your journal."
-                    action={false}
-                  />
+                  <section className="panel">
+                    <EmptyState
+                      title="This page could not be found."
+                      description="Return to your overview and choose a page from the menu."
+                      action={false}
+                    />
+                    <WorkspaceLink className="button primary" to="/">
+                      Back to overview
+                    </WorkspaceLink>
+                  </section>
                 }
               />
             </Routes>

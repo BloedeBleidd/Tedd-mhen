@@ -6,7 +6,7 @@ The English interface uses shared color tokens for light/dark appearance, explic
 
 Registration, sign-in, recovery and legacy-owner setup validate fields in the application, using the same email, password and recovery-code schemas as the server. Browser validation popovers are not required. Invalid fields show an associated explanation after blur or submission, expose `aria-invalid`, and are rechecked as the user edits. Submitting invalid values focuses and scrolls to the first invalid field and displays an alert above the submit button. No credential request is sent until local validation passes.
 
-New passwords require 12–128 characters; a visible count reports progress toward the minimum. Sign-in preserves the existing-password rules. Confirmation and the registration privacy acknowledgement have their own messages. Server errors, including unavailable email identifiers and throttling, are brought into view without clearing entered values. Pending requests display “Please wait…” and disable repeat submission.
+New passwords require 12–128 characters; a visible count reports progress toward the minimum. Sign-in preserves the existing-password rules. Confirmation and the registration privacy acknowledgement have their own messages. Server errors, including unavailable email identifiers and throttling, are brought into view without clearing entered values. Pending requests display “Please wait…”, lock account fields and navigation, and prompt before closing the tab. Navigation is released when the request finishes so a successful registration or recovery can show its one-time code.
 
 ## Analysis navigation
 
@@ -37,3 +37,13 @@ The system’s `prefers-reduced-motion: reduce` setting disables decorative CSS 
 Content is visible by default. Without the Web Animations API, panels and charts remain static while supported CSS interactions remain available; without IntersectionObserver, supported animations run when content is ready. Background documents skip reveals. Printing settles active reveals and disables CSS motion. No animation gates access to data or a form action.
 
 Browser contracts: [reduced motion](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@media/prefers-reduced-motion), [IntersectionObserver](https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserver), and [Element.animate](https://developer.mozilla.org/en-US/docs/Web/API/Element/animate). Lifecycle tests cover delayed SVG creation, one-time reveals, cancellation and fallbacks; browser tests check real SVG geometry, live preference changes, scrolling and reduced-motion first render.
+
+## Discovery and recovery
+
+Overview links directly to relationships, the multivariable model, import and export in both workspaces. Its date-window empty state checks the complete journal before suggesting a first entry; historical records remain accessible through Journal. Mobile navigation has a visible Menu label. Check-in section links lead to ratings, sleep, body signals and training without covering the form.
+
+A failed initial session request displays an error with Retry; only an unauthorized response opens the public entry flow. A failed background session refresh preserves the open workspace and unsaved form. Check-in dates and page navigation are locked during a save, and tab closing prompts while edits or saves are pending. Invalid numerical fields and schema errors produce visible, focused alerts without relying on browser popovers. Failed loads can be retried without reloading the application.
+
+Password changes validate length and confirmation explicitly. Recovery-code screens explain clipboard failures and guard navigation until acknowledgement; the user can explicitly confirm leaving without saving. Imports confirm leaving while requests are pending and report completed rows separately. Export controls stay fixed during preparation, and unavailable downloads explain the missing selection or date range.
+
+Analysis filters report their active count and can be cleared together. Input selection names metrics and labels, caps selection at 180, and reports unavailable selected labels as excluded. Missing label observations are not converted to absence. Correlation comparison excludes the identical same-day outcome; lagged self-comparison remains available. Worker failures show a recoverable error, and new analysis settings immediately remove obsolete results.

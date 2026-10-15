@@ -1,3 +1,5 @@
+import { localDate } from '../../shared/schema';
+import { WorkspaceLink as Link } from '../components/WorkspaceLink';
 import { useMemo, useState } from 'react';
 import { metrics, type MetricKey } from '../../shared/metrics';
 import { fitMultivariable, type ModelSettings } from '../../shared/multivariable';
@@ -17,9 +19,13 @@ export function Prediction() {
     [prior, setPrior] = useState<Prior>('regular'),
     [history, setHistory] = useState(true),
     [time, setTime] = useState(true);
+  const activeInputs = useMemo(
+    () => features.filter((id) => id !== target && data.catalog.some((f) => f.id === id)),
+    [features, target, data.catalog],
+  );
   const settings = useMemo<ModelSettings>(
-    () => ({ target, features, horizon, window, prior, history, time }),
-    [target, features, horizon, window, prior, history, time],
+    () => ({ target, features: activeInputs, horizon, window, prior, history, time }),
+    [target, activeInputs, horizon, window, prior, history, time],
   );
   const job = useMemo(
     () =>
@@ -95,6 +101,13 @@ export function Prediction() {
           preceding day.
         </p>
       </Panel>
+      {!data.loading &&
+        features.some((id) => id !== target && !data.catalog.some((f) => f.id === id)) && (
+          <p role="status">
+            Some selected inputs have no matching observations and are excluded. Open Choose inputs
+            to review them.
+          </p>
+        )}
       <FeaturePicker
         catalog={data.catalog}
         selected={features}
@@ -107,7 +120,16 @@ export function Prediction() {
       )}
       {!data.loading && !data.entries.length && (
         <Panel>
-          <p>No recorded observations. Add check-ins or explore the synthetic demo.</p>
+          <p>
+            No observations match this selection. Try All recorded dates, clear observation filters,
+            or add a check-in.
+          </p>
+          <Link className="button secondary" to="/check-in">
+            Add a check-in
+          </Link>{' '}
+          <Link className="text-link" to="/import">
+            Import journal data
+          </Link>
         </Panel>
       )}
       {result && (
@@ -202,7 +224,7 @@ export function Prediction() {
             <p className="small muted">
               Prediction conditions on recorded inputs; their measurement error is not modeled. It
               does not simulate interventions or guarantee accuracy.{' '}
-              {model.future && model.future.origin < new Date().toISOString().slice(0, 10)
+              {model.future && model.future.origin < localDate()
                 ? `The latest predictor date is ${model.future.origin}; this is not a forecast from today.`
                 : ''}
             </p>

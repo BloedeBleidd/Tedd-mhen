@@ -1,12 +1,31 @@
-import { useId, useRef, useState, type FormEvent } from 'react';
+import { PendingAccountGuard } from '../components/PendingAccountGuard';
+import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import { validateAuthForm, type AuthField } from '../../shared/credentials';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useBlocker, useLocation, useNavigate } from 'react-router-dom';
 import { useApi } from '../lib/api';
 import { ErrorBox, Field } from '../components/ui';
 
 export function RecoverySecret({ code, onDone }: { code: string; onDone: () => void }) {
   const [saved, setSaved] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState('');
+  const blocker = useBlocker(!saved);
+  useEffect(() => {
+    if (blocker.state === 'blocked') {
+      if (window.confirm('Have you saved your recovery code? Leaving hides it permanently.'))
+        blocker.proceed();
+      else blocker.reset();
+    }
+  }, [blocker]);
+  useEffect(() => {
+    if (saved) return;
+    const protect = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', protect);
+    return () => window.removeEventListener('beforeunload', protect);
+  }, [saved]);
   return (
     <section className="auth-card panel">
       <h1>Save your recovery code.</h1>
@@ -23,13 +42,18 @@ export function RecoverySecret({ code, onDone }: { code: string; onDone: () => v
           try {
             await navigator.clipboard.writeText(code);
             setCopied(true);
+            setCopyError('');
           } catch {
             setCopied(false);
+            setCopyError(
+              'Copy is unavailable in this browser. Select the code above and copy it manually before continuing.',
+            );
           }
         }}
       >
         {copied ? 'Copied' : 'Copy recovery code'}
       </button>
+      <ErrorBox message={copyError || null} />
       <p>
         The code is single-use. Recovery or a password change replaces it and signs out older
         sessions. We do not send reset emails. Without your password or this code, access cannot be
@@ -48,6 +72,7 @@ export function RecoverySecret({ code, onDone }: { code: string; onDone: () => v
 
 export function AuthPage() {
   const { request, invalidate } = useApi();
+  const pending = useRef(false);
   const location = useLocation(),
     navigate = useNavigate();
   const mode =
@@ -112,6 +137,7 @@ export function AuthPage() {
       });
       return;
     }
+    pending.current = true;
     setBusy(true);
     try {
       const body =
@@ -124,6 +150,7 @@ export function AuthPage() {
         method: 'POST',
         body: JSON.stringify(body),
       });
+      pending.current = false;
       setPassword('');
       setConfirm('');
       setCode('');
@@ -136,6 +163,7 @@ export function AuthPage() {
         errorRef.current?.scrollIntoView({ block: 'center', behavior: 'instant' });
       });
     } finally {
+      pending.current = false;
       setBusy(false);
     }
   }
@@ -166,110 +194,113 @@ export function AuthPage() {
           Try demo — no account needed
         </Link>
       )}
+      <PendingAccountGuard pending={pending} />
       <form noValidate onSubmit={submit} className="auth-form" aria-busy={busy}>
-        {mode !== 'claim' && (
-          <Field label="Email">
-            <input
-              {...attributes('email', 'Email')}
-              type="email"
-              autoComplete="username"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              maxLength={254}
-            />
-            {feedback('email')}
-          </Field>
-        )}
-        {mode === 'recover' && (
-          <Field label="Recovery code">
-            <input
-              {...attributes('code', 'Recovery code')}
-              autoComplete="off"
-              spellCheck={false}
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              required
-              placeholder="TMH-…"
-              maxLength={100}
-            />
-            {feedback('code')}
-          </Field>
-        )}
-        <Field label={mode === 'login' ? 'Password' : 'New password'}>
-          <input
-            {...attributes('password', mode === 'login' ? 'Password' : 'New password')}
-            type="password"
-            autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={mode === 'login' ? 1 : 12}
-            maxLength={128}
-          />
-          {mode !== 'login' && (
-            <small id={`${id}-password-hint`}>
-              12–128 characters. A long, unique passphrase works well.{' '}
-              {password.length > 0 &&
-                `${password.length} entered${password.length < 12 ? ` · ${12 - password.length} more needed` : ''}.`}
-            </small>
+        <fieldset className="form-fieldset auth-form" disabled={busy}>
+          {mode !== 'claim' && (
+            <Field label="Email">
+              <input
+                {...attributes('email', 'Email')}
+                type="email"
+                autoComplete="username"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                maxLength={254}
+              />
+              {feedback('email')}
+            </Field>
           )}
-          {feedback('password')}
-        </Field>
-        {mode !== 'login' && (
-          <Field label="Confirm password">
+          {mode === 'recover' && (
+            <Field label="Recovery code">
+              <input
+                {...attributes('code', 'Recovery code')}
+                autoComplete="off"
+                spellCheck={false}
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                required
+                placeholder="TMH-…"
+                maxLength={100}
+              />
+              {feedback('code')}
+            </Field>
+          )}
+          <Field label={mode === 'login' ? 'Password' : 'New password'}>
             <input
-              {...attributes('confirm', 'Confirm password')}
+              {...attributes('password', mode === 'login' ? 'Password' : 'New password')}
               type="password"
-              autoComplete="new-password"
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
+              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
-              minLength={12}
+              minLength={mode === 'login' ? 1 : 12}
               maxLength={128}
             />
-            {feedback('confirm')}
+            {mode !== 'login' && (
+              <small id={`${id}-password-hint`}>
+                12–128 characters. A long, unique passphrase works well.{' '}
+                {password.length > 0 &&
+                  `${password.length} entered${password.length < 12 ? ` · ${12 - password.length} more needed` : ''}.`}
+              </small>
+            )}
+            {feedback('password')}
           </Field>
-        )}
-        {mode === 'register' && (
-          <div>
-            <label className="check-label">
+          {mode !== 'login' && (
+            <Field label="Confirm password">
               <input
-                name="privacy"
-                type="checkbox"
+                {...attributes('confirm', 'Confirm password')}
+                type="password"
+                autoComplete="new-password"
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
                 required
-                checked={privacy}
-                onChange={(event) => setPrivacy(event.target.checked)}
-                aria-invalid={Boolean(visibleIssue('privacy'))}
-                aria-describedby={visibleIssue('privacy') ? `${id}-privacy-error` : undefined}
-              />{' '}
-              <span>
-                I have read <Link to="/privacy">Privacy & data</Link>. I understand that email
-                addresses are not verified and account recovery requires my saved code.
-              </span>
-            </label>
-            {feedback('privacy')}
+                minLength={12}
+                maxLength={128}
+              />
+              {feedback('confirm')}
+            </Field>
+          )}
+          {mode === 'register' && (
+            <div>
+              <label className="check-label">
+                <input
+                  name="privacy"
+                  type="checkbox"
+                  required
+                  checked={privacy}
+                  onChange={(event) => setPrivacy(event.target.checked)}
+                  aria-invalid={Boolean(visibleIssue('privacy'))}
+                  aria-describedby={visibleIssue('privacy') ? `${id}-privacy-error` : undefined}
+                />{' '}
+                <span>
+                  I have read <Link to="/privacy">Privacy & data</Link>. I understand that email
+                  addresses are not verified and account recovery requires my saved code.
+                </span>
+              </label>
+              {feedback('privacy')}
+            </div>
+          )}
+          {attempted && Object.keys(issues).length > 0 && (
+            <div className="notice error" role="alert">
+              Check the highlighted fields. {Object.values(issues)[0]}
+            </div>
+          )}
+          <div ref={errorRef} tabIndex={-1}>
+            <ErrorBox message={error || null} />
           </div>
-        )}
-        {attempted && Object.keys(issues).length > 0 && (
-          <div className="notice error" role="alert">
-            Check the highlighted fields. {Object.values(issues)[0]}
-          </div>
-        )}
-        <div ref={errorRef} tabIndex={-1}>
-          <ErrorBox message={error || null} />
-        </div>
-        <button className="button primary" disabled={busy}>
-          {busy
-            ? 'Please wait…'
-            : mode === 'register'
-              ? 'Create account'
-              : mode === 'recover'
-                ? 'Reset password'
-                : mode === 'claim'
-                  ? 'Create password & keep my journal'
-                  : 'Sign in'}
-        </button>
+          <button className="button primary" disabled={busy}>
+            {busy
+              ? 'Please wait…'
+              : mode === 'register'
+                ? 'Create account'
+                : mode === 'recover'
+                  ? 'Reset password'
+                  : mode === 'claim'
+                    ? 'Create password & keep my journal'
+                    : 'Sign in'}
+          </button>
+        </fieldset>
       </form>
       <div className="auth-links">
         <Link to="/sign-in">Sign in</Link>

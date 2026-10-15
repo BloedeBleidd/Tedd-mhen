@@ -1,3 +1,4 @@
+import { invalidField } from '../lib/form-feedback';
 import { LabelsEditor } from '../components/LabelsEditor';
 import { useEffect, useRef, useState } from 'react';
 import { useBlocker, useSearchParams } from 'react-router-dom';
@@ -6,6 +7,7 @@ import { ApiError, useApi } from '../lib/api';
 import {
   emptyEntry,
   entrySchema,
+  dateSchema,
   localDate,
   scaleDefinitions,
   symptomTypes,
@@ -21,6 +23,9 @@ const humanize = (value: string) =>
 export function CheckIn() {
   const [params, setParams] = useSearchParams(),
     date = params.get('date') || localDate();
+  const validDate = dateSchema.safeParse(date).success;
+  const errorRef = useRef<HTMLDivElement>(null);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const { request, invalidate, demo } = useApi();
   const [entry, setEntry] = useState<Entry>(() => emptyEntry(date)),
     [revision, setRevision] = useState(0);
@@ -34,15 +39,20 @@ export function CheckIn() {
   requestRef.current = request;
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
-      dirty &&
+      (dirty || saving) &&
       currentLocation.pathname + currentLocation.search !==
         nextLocation.pathname + nextLocation.search,
   );
   useEffect(() => {
     if (blocker.state !== 'blocked') return;
+    if (saving) {
+      setError('Wait for the current save to finish before changing pages.');
+      blocker.reset();
+      return;
+    }
     if (window.confirm('Discard your unsaved check-in?')) blocker.proceed();
     else blocker.reset();
-  }, [blocker]);
+  }, [blocker, saving]);
   useEffect(() => {
     let active = true;
     setLoading(true);
@@ -50,6 +60,12 @@ export function CheckIn() {
     setError(null);
     setDirty(false);
     setLoadFailed(false);
+    if (!validDate) {
+      setLoading(false);
+      setLoadFailed(true);
+      setError('Choose a valid journal date.');
+      return;
+    }
     requestRef
       .current<StoredEntry>(`/api/entries/${date}`)
       .then((data) => {
@@ -73,9 +89,9 @@ export function CheckIn() {
     return () => {
       active = false;
     };
-  }, [date, demo]);
+  }, [date, demo, validDate, loadAttempt]);
   useEffect(() => {
-    if (!dirty) return;
+    if (!dirty && !saving) return;
     const unload = (e: BeforeUnloadEvent) => {
       e.preventDefault();
       e.returnValue = '';
@@ -84,7 +100,7 @@ export function CheckIn() {
     return () => {
       window.removeEventListener('beforeunload', unload);
     };
-  }, [dirty]);
+  }, [dirty, saving]);
   function update<K extends keyof Entry>(key: K, value: Entry[K]) {
     setEntry((e) => ({ ...e, [key]: value }));
     setDirty(true);
@@ -123,13 +139,27 @@ export function CheckIn() {
     setDirty(true);
     setSaved(false);
   }
-  async function save(e: React.FormEvent) {
+  async function save(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (saving || loadFailed) return;
+    const invalid = invalidField(e.currentTarget);
+    if (invalid) {
+      setError(invalid);
+      requestAnimationFrame(() => {
+        errorRef.current?.focus();
+        errorRef.current?.scrollIntoView({ block: 'center', behavior: 'instant' });
+      });
+      return;
+    }
     setError(null);
     setSaved(false);
     const parsed = entrySchema.safeParse(entry);
     if (!parsed.success) {
       setError(parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; '));
+      requestAnimationFrame(() => {
+        errorRef.current?.focus();
+        errorRef.current?.scrollIntoView({ block: 'center' });
+      });
       return;
     }
     setSaving(true);
@@ -141,6 +171,7 @@ export function CheckIn() {
       setRevision(result.revision);
       setDirty(false);
       setSaved(true);
+      setError(null);
       invalidate();
     } catch (e) {
       setError((e as Error).message);
@@ -149,6 +180,7 @@ export function CheckIn() {
     }
   }
   async function remove() {
+    if (saving || loadFailed) return;
     if (
       !window.confirm(`Permanently delete the entry for ${date}? This cannot be undone in the app.`)
     )
@@ -179,7 +211,8 @@ export function CheckIn() {
             <input
               aria-label="Journal date"
               type="date"
-              value={date}
+              disabled={saving}
+              value={validDate ? date : ''}
               onChange={(e) => {
                 if (e.target.value) setParams({ date: e.target.value });
               }}
@@ -187,14 +220,21 @@ export function CheckIn() {
           </Field>
         }
       />
+      <nav className="checkin-sections" aria-label="Check-in sections">
+        <a href="#daily-ratings">Daily ratings</a>
+        <a href="#sleep">Sleep</a>
+        <a href="#body-signals">Body signals & symptoms</a>
+        <a href="#training">Training</a>
+      </nav>
       {loading ? (
         <Loading />
       ) : (
-        <form onSubmit={save}>
+        <form noValidate onSubmit={save}>
           <fieldset className="form-fieldset" disabled={saving || loadFailed}>
             <div className="checkin-layout">
               <div className="checkin-main">
                 <Panel
+                  id="daily-ratings"
                   title="01 · Your daily baseline"
                   subtitle="Check a metric to record it. Unchecked metrics remain unknown."
                 >
@@ -234,6 +274,7 @@ export function CheckIn() {
                   </details>
                 </Panel>
                 <Panel
+                  id="sleep"
                   title="02 · Last night’s sleep"
                   subtitle="Record sleep against the day you woke up."
                 >
@@ -308,6 +349,7 @@ export function CheckIn() {
                   </details>
                 </Panel>
                 <Panel
+                  id="body-signals"
                   title="03 · Body signals"
                   subtitle="Use the same device, method, and measurement routine where possible."
                 >
@@ -454,6 +496,7 @@ export function CheckIn() {
                   </details>
                 </Panel>
                 <Panel
+                  id="training"
                   title="04 · Movement & training"
                   subtitle="An explicit rest day is a useful observation, too."
                 >
@@ -700,7 +743,18 @@ export function CheckIn() {
               </button>
             </div>
           </div>
-          <ErrorBox message={error} />
+          <div ref={errorRef} tabIndex={-1}>
+            <ErrorBox message={error} />
+          </div>
+          {loadFailed && validDate && (
+            <button
+              type="button"
+              className="button secondary"
+              onClick={() => setLoadAttempt((v) => v + 1)}
+            >
+              Retry loading this day
+            </button>
+          )}
         </form>
       )}
     </>

@@ -1,3 +1,4 @@
+import { WorkspaceLink as Link } from '../components/WorkspaceLink';
 import { useMemo, useState } from 'react';
 import { ArrowDownRight, ArrowUpRight, Download, Info } from 'lucide-react';
 import { useApi, useLoad, download } from '../lib/api';
@@ -85,8 +86,38 @@ export function Analysis() {
             </select>
           </Field>
         </div>
+        <div className="quick-ranges">
+          {[28, 90, 365].map((days) => (
+            <button
+              key={days}
+              onClick={() => {
+                setFrom(shiftDate(localDate(), -(days - 1)));
+                setTo(localDate());
+              }}
+            >
+              Last {days} days
+            </button>
+          ))}
+          <button
+            onClick={() => {
+              setIllness('all');
+              setSource('all');
+              setMethod('all');
+            }}
+          >
+            Clear observation filters
+          </button>
+        </div>
         <details className="analysis-options">
-          <summary>Model settings & data selection</summary>
+          <summary>
+            Model settings & data selection ·{' '}
+            {
+              [illness, source, ...(metric === 'hrv' ? [method] : [])].filter(
+                (value) => value !== 'all',
+              ).length
+            }{' '}
+            filters active
+          </summary>
           <div className="fields-grid three">
             <Field label="Prior on the weekly slope">
               <select value={prior} onChange={(e) => setPrior(e.target.value as Prior)}>
@@ -361,6 +392,12 @@ export function Analysis() {
                   description={`${observations.length} of ${MIN_OBSERVATIONS} required observations for ${spec.label.toLowerCase()}. Record more days or widen your date range; missing values remain missing.`}
                   action={false}
                 />
+                <Link className="button secondary" to="/check-in">
+                  Add a check-in
+                </Link>{' '}
+                <Link className="text-link" to="/import">
+                  Import journal data
+                </Link>
               </Panel>
             )}
           </>

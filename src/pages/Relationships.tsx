@@ -1,3 +1,4 @@
+import { WorkspaceLink as Link } from '../components/WorkspaceLink';
 import { useMemo, useState } from 'react';
 import { metrics, type MetricKey } from '../../shared/metrics';
 import {
@@ -20,9 +21,26 @@ export function Relationships() {
     [method, setMethod] = useState<'pearson' | 'spearman'>('spearman'),
     [block, setBlock] = useState(7),
     [selected, setSelected] = useState<string[]>(Object.keys(metrics));
+  const activeInputs = useMemo(
+    () => selected.filter((id) => id !== target && data.catalog.some((f) => f.id === id)),
+    [selected, target, data.catalog],
+  );
+  const activePredictor = data.catalog.some(
+    (f) => f.id === predictor && (lag > 0 || f.id !== target),
+  )
+    ? predictor
+    : data.catalog.find((f) => f.id !== target)!.id;
   const settings = useMemo<RelationshipSettings>(
-    () => ({ target, predictor, features: selected, lag, view, method, block }),
-    [target, predictor, selected, lag, view, method, block],
+    () => ({
+      target,
+      predictor: activePredictor,
+      features: activeInputs,
+      lag,
+      view,
+      method,
+      block,
+    }),
+    [target, activePredictor, activeInputs, lag, view, method, block],
   );
   const job = useMemo(
     () =>
@@ -33,7 +51,7 @@ export function Relationships() {
   );
   const analysis = useAnalysis<ReturnType<typeof analyzeRelationships>>(job),
     result = analysis.result;
-  const chosen = data.catalog.find((f) => f.id === predictor);
+  const chosen = data.catalog.find((f) => f.id === activePredictor);
   return (
     <>
       <PageHeading
@@ -54,12 +72,14 @@ export function Relationships() {
             </select>
           </Field>
           <Field label="Compare with">
-            <select value={predictor} onChange={(e) => setPredictor(e.target.value)}>
-              {data.catalog.map((f) => (
-                <option key={f.id} value={f.id}>
-                  {f.label}
-                </option>
-              ))}
+            <select value={activePredictor} onChange={(e) => setPredictor(e.target.value)}>
+              {data.catalog
+                .filter((f) => lag > 0 || f.id !== target)
+                .map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.label}
+                  </option>
+                ))}
             </select>
           </Field>
           <Field label="Outcome occurs">
@@ -108,6 +128,13 @@ export function Relationships() {
           predictor day.
         </p>
       </Panel>
+      {!data.loading &&
+        selected.some((id) => id !== target && !data.catalog.some((f) => f.id === id)) && (
+          <p role="status">
+            Some selected inputs have no matching observations and are excluded. Open Choose inputs
+            to review them.
+          </p>
+        )}
       <FeaturePicker
         catalog={data.catalog}
         selected={selected}
@@ -119,8 +146,15 @@ export function Relationships() {
       {!data.loading && !data.entries.length && (
         <Panel>
           <p>
-            No recorded days in this selection. Record measurements or explore the synthetic demo.
+            No observations match this selection. Try All recorded dates, clear observation filters,
+            or add a check-in.
           </p>
+          <Link className="button secondary" to="/check-in">
+            Add a check-in
+          </Link>{' '}
+          <Link className="text-link" to="/import">
+            Import journal data
+          </Link>
         </Panel>
       )}
       {result && (

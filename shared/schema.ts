@@ -172,6 +172,13 @@ export type EntrySummary = Omit<
   trainingMinutes: number | null;
   trainingLoad: number | null;
 };
+export type JournalPage = {
+  entries: EntrySummary[];
+  total: number;
+  nextCursor: string | null;
+  firstDate: string | null;
+  lastDate: string | null;
+};
 export const scaleDefinitions = {
   wellbeing: { label: 'Wellbeing', min: 1, low: 'Very poor', high: 'Excellent' },
   energy: { label: 'Energy', min: 1, low: 'Depleted', high: 'Full of energy' },

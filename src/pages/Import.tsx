@@ -1,3 +1,4 @@
+import { useBlocker } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { ApiError, useApi, useLoad } from '../lib/api';
 import { parseImport, mergeImported, IMPORT_MAX_BYTES, type ImportRow } from '../../shared/import';
@@ -33,6 +34,18 @@ export function Import() {
       window.removeEventListener('beforeunload', beforeUnload);
     };
   }, [busy]);
+  const blocker = useBlocker(busy);
+  useEffect(() => {
+    if (blocker.state !== 'blocked') return;
+    if (
+      window.confirm(
+        'Stop importing and leave? Completed saves remain; a request already sent may still finish.',
+      )
+    ) {
+      stopped.current = true;
+      blocker.proceed();
+    } else blocker.reset();
+  }, [blocker]);
   async function read(file: File | undefined) {
     const version = ++readVersion.current;
     setError('');
@@ -55,12 +68,14 @@ export function Import() {
         ),
       );
     } catch (e) {
+      if (version !== readVersion.current) return;
       setError(e instanceof Error ? e.message : 'Could not read this file.');
     }
   }
   async function run() {
-    if (!confirmed || !rows.length || !session.data) return;
+    if (busy || !confirmed || !rows.length || !session.data) return;
     setBusy(true);
+    setResults([]);
     stopped.current = false;
     setError('');
     const completed: { date: string; status: string }[] = [];

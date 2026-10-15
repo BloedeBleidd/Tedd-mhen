@@ -46,6 +46,9 @@ test('stopping an import during a read prevents sending that row and later rows'
   await page.getByRole('checkbox', { name: /I reviewed/ }).check();
   await page.getByRole('button', { name: 'Import reviewed observations' }).click();
   await arrived;
+  page.once('dialog', (dialog) => dialog.dismiss());
+  await page.getByRole('link', { name: 'Journal', exact: true }).click();
+  await expect(page).toHaveURL(/\/import$/);
   await page.getByRole('button', { name: 'Stop import', exact: true }).click();
   release();
   await expect(page.getByRole('alert')).toContainText('Import stopped');

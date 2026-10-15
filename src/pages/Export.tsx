@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Check, Download, FileJson, FileSpreadsheet, FileText, ShieldCheck } from 'lucide-react';
 import { useApi, useLoad, download } from '../lib/api';
-import { dayNumber, localDate, shiftDate } from '../../shared/schema';
+import { dateSchema, dayNumber, localDate, shiftDate, type JournalPage } from '../../shared/schema';
 import {
   allowedExportFields,
   csvCell,
@@ -44,7 +44,7 @@ const groupInfo: Record<ExportGroup, { title: string; description: string }> = {
   },
 };
 export function Export() {
-  const { demo, getDemoEntries } = useApi();
+  const { demo, getDemoEntries, response: getResponse } = useApi();
   const [from, setFrom] = useState(shiftDate(localDate(), -89)),
     [to, setTo] = useState(localDate()),
     [groups, setGroups] = useState<ExportGroup[]>([
@@ -58,7 +58,12 @@ export function Export() {
     [busy, setBusy] = useState(false),
     [error, setError] = useState<string | null>(null),
     [success, setSuccess] = useState(false);
-  const valid = !!from && !!to && from <= to && dayNumber(to) - dayNumber(from) <= 1830;
+  const valid =
+    dateSchema.safeParse(from).success &&
+    dateSchema.safeParse(to).success &&
+    from <= to &&
+    dayNumber(to) - dayNumber(from) <= 1830;
+  const journal = useLoad<JournalPage>('/api/entries?limit=1');
   const [fields, setFields] = useState<string[]>(allowedExportFields);
   const selectedFields = fields.filter((field) =>
     groups.some((group) => exportFieldOptions[group].some((option) => option.path === field)),
@@ -71,6 +76,7 @@ export function Export() {
     setSuccess(false);
   }
   async function runExport() {
+    if (busy || !valid || !count.data?.total || !selectedFields.length) return;
     setBusy(true);
     setError(null);
     setSuccess(false);
@@ -126,7 +132,18 @@ export function Export() {
             }) => Promise<FileSystemFileHandle>;
           }
         ).showSaveFilePicker;
-        const handle = picker ? await picker({ suggestedName: filename }) : null;
+        let handle: FileSystemFileHandle | null = null;
+        if (picker) {
+          try {
+            handle = await picker({ suggestedName: filename });
+          } catch (cause) {
+            if (
+              !(cause instanceof DOMException) ||
+              !['SecurityError', 'NotAllowedError'].includes(cause.name)
+            )
+              throw cause;
+          }
+        }
         const query = new URLSearchParams({
           from,
           to,
@@ -134,11 +151,7 @@ export function Export() {
           groups: groups.join(','),
           fields: selectedFields.join(','),
         });
-        const response = await fetch(`/api/export?${query}`);
-        if (!response.ok) {
-          const body = (await response.json()) as { error?: string };
-          throw new Error(body.error || 'Export failed.');
-        }
+        const response = await getResponse(`/api/export?${query}`);
         if (!response.body) throw new Error('The export response was empty.');
         if (handle) {
           const writable = await handle.createWritable();
@@ -181,228 +194,279 @@ export function Export() {
         title="Take the full picture with you."
         description="Build a focused dataset for your own analysis, a spreadsheet, or an external LLM."
       />
-      <div className="export-layout">
-        <div>
-          <Panel title="01 · Choose a time window" subtitle="Export up to five years at a time.">
-            <div className="fields-grid">
-              <Field label="From">
-                <input
-                  type="date"
-                  value={from}
-                  onChange={(e) => {
-                    setFrom(e.target.value);
-                    setSuccess(false);
-                  }}
-                />
-              </Field>
-              <Field label="To">
-                <input
-                  type="date"
-                  value={to}
-                  onChange={(e) => {
-                    setTo(e.target.value);
-                    setSuccess(false);
-                  }}
-                />
-              </Field>
-            </div>
-            <div className="quick-ranges">
-              {[7, 28, 90, 365].map((days) => (
-                <button
-                  key={days}
-                  onClick={() => {
-                    setFrom(shiftDate(localDate(), -(days - 1)));
-                    setTo(localDate());
-                    setSuccess(false);
-                  }}
-                >
-                  Last {days} days
-                </button>
-              ))}
-            </div>
-          </Panel>
-          <Panel
-            title="02 · Select what to include"
-            subtitle="Dates, time zones, schema version, and record timestamps are always included."
-            action={
-              <button
-                className="text-link"
-                onClick={() => setGroups(groups.length === 6 ? [] : [...exportGroups])}
-              >
-                {groups.length === 6 ? 'Clear all' : 'Select all'}
-              </button>
-            }
+      <fieldset className="form-fieldset" disabled={busy}>
+        <Panel title="Keep a complete copy">
+          <p>
+            Choose all measurements, labels and notes in JSON for a restorable journal export. The
+            preset includes all recorded dates when they fit within five years; otherwise export
+            your history in separate date ranges. Imports accept up to 500 days per file.
+          </p>
+          <button
+            className="button secondary"
+            onClick={() => {
+              setGroups([...exportGroups]);
+              setFields([...allowedExportFields]);
+              setFormat('json');
+              setSuccess(false);
+              const { firstDate, lastDate } = journal.data || {};
+              if (firstDate && lastDate && dayNumber(lastDate) - dayNumber(firstDate) <= 1830) {
+                setFrom(firstDate);
+                setTo(lastDate);
+              }
+            }}
           >
-            <div className="export-groups">
-              {exportGroups.map((group) => (
-                <label
-                  key={group}
-                  className={`export-group ${groups.includes(group) ? 'selected' : ''}`}
-                >
+            Select complete JSON backup
+          </button>
+        </Panel>
+        <div className="export-layout">
+          <div>
+            <Panel title="01 · Choose a time window" subtitle="Export up to five years at a time.">
+              <div className="fields-grid">
+                <Field label="From">
                   <input
-                    type="checkbox"
-                    checked={groups.includes(group)}
-                    onChange={() => toggle(group)}
-                  />
-                  <span>
-                    <strong>{groupInfo[group].title}</strong>
-                    <small>{groupInfo[group].description}</small>
-                  </span>
-                  {groups.includes(group) && <Check size={17} />}
-                </label>
-              ))}
-            </div>
-            <details className="export-field-details">
-              <summary>Choose individual measurements</summary>
-              <p className="muted small">
-                Keep source and HRV method selected when exporting HRV so the measurement remains
-                interpretable.
-              </p>
-              {groups.map((group) => (
-                <div className="export-field-group" key={group}>
-                  <strong>{groupInfo[group].title}</strong>
-                  <div className="export-field-options">
-                    {exportFieldOptions[group].map((field) => (
-                      <label key={field.path}>
-                        <input
-                          type="checkbox"
-                          checked={fields.includes(field.path)}
-                          onChange={() => {
-                            setFields((current) =>
-                              current.includes(field.path)
-                                ? current.filter((path) => path !== field.path)
-                                : [...current, field.path],
-                            );
-                            setSuccess(false);
-                          }}
-                        />
-                        {field.label}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </details>
-          </Panel>
-          <Panel title="03 · Choose a format">
-            <div className="format-grid">
-              {(
-                [
-                  {
-                    key: 'json',
-                    title: 'JSON',
-                    detail: 'Complete, structured context',
-                    icon: FileJson,
-                  },
-                  {
-                    key: 'md',
-                    title: 'Markdown',
-                    detail: 'Easy to read and share with an LLM',
-                    icon: FileText,
-                  },
-                  {
-                    key: 'csv',
-                    title: 'CSV',
-                    detail: 'Spreadsheet-friendly columns',
-                    icon: FileSpreadsheet,
-                  },
-                  { key: 'ndjson', title: 'NDJSON', detail: 'One record per line', icon: FileJson },
-                ] as const
-              ).map(({ key, title, detail, icon: Icon }) => (
-                <label className={`format-option ${format === key ? 'selected' : ''}`} key={key}>
-                  <input
-                    type="radio"
-                    name="format"
-                    value={key}
-                    checked={format === key}
-                    onChange={() => {
-                      setFormat(key);
+                    type="date"
+                    value={from}
+                    onChange={(e) => {
+                      setFrom(e.target.value);
                       setSuccess(false);
                     }}
                   />
-                  <Icon size={22} />
-                  <strong>{title}</strong>
-                  <span>{detail}</span>
-                </label>
-              ))}
-            </div>
-            {format === 'csv' && (
-              <p className="muted small">
-                Nested objects use dotted columns; workouts and symptoms remain JSON arrays in
-                cells. CSV omits the data dictionary. Formula-like text is prefixed with an
-                apostrophe for spreadsheet safety.
-              </p>
-            )}
-          </Panel>
-        </div>
-        <aside>
-          <Panel className="export-summary">
-            <span className="eyebrow">READY TO TRAVEL</span>
-            <div className="export-file-icon">
-              <Download size={28} strokeWidth={1.3} />
-            </div>
-            <h2>
-              Your journal,
-              <br />
-              in your hands.
-            </h2>
-            <dl>
-              <div>
-                <dt>Recorded days</dt>
-                <dd>{count.loading ? '…' : (count.data?.total ?? '—')}</dd>
+                </Field>
+                <Field label="To">
+                  <input
+                    type="date"
+                    value={to}
+                    onChange={(e) => {
+                      setTo(e.target.value);
+                      setSuccess(false);
+                    }}
+                  />
+                </Field>
               </div>
-              <div>
-                <dt>Data groups</dt>
-                <dd>{groups.length} of 6</dd>
+              <div className="quick-ranges">
+                {[7, 28, 90, 365].map((days) => (
+                  <button
+                    key={days}
+                    onClick={() => {
+                      setFrom(shiftDate(localDate(), -(days - 1)));
+                      setTo(localDate());
+                      setSuccess(false);
+                    }}
+                  >
+                    Last {days} days
+                  </button>
+                ))}
               </div>
-              <div>
-                <dt>Format</dt>
-                <dd>{format.toUpperCase()}</dd>
-              </div>
-              <div>
-                <dt>Written notes</dt>
-                <dd>{groups.includes('notes') ? 'Included' : 'Excluded'}</dd>
-              </div>
-            </dl>
-            <button
-              className="button primary"
-              disabled={
-                !valid ||
-                !groups.length ||
-                !selectedFields.length ||
-                busy ||
-                !count.data?.total ||
-                !!count.error
+            </Panel>
+            <Panel
+              title="02 · Select what to include"
+              subtitle="Dates, time zones, schema version, and record timestamps are always included."
+              action={
+                <button
+                  className="text-link"
+                  onClick={() =>
+                    setGroups(groups.length === exportGroups.length ? [] : [...exportGroups])
+                  }
+                >
+                  {groups.length === exportGroups.length ? 'Clear all' : 'Select all'}
+                </button>
               }
-              onClick={runExport}
             >
-              <Download size={17} />
-              {busy ? 'Preparing export…' : 'Download export'}
-            </button>
-            <div aria-live="polite">
-              {success && (
-                <p className="saved-state">
-                  <Check size={16} /> Export prepared. Check your downloads.
+              <div className="export-groups">
+                {exportGroups.map((group) => (
+                  <label
+                    key={group}
+                    className={`export-group ${groups.includes(group) ? 'selected' : ''}`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={groups.includes(group)}
+                      onChange={() => toggle(group)}
+                    />
+                    <span>
+                      <strong>{groupInfo[group].title}</strong>
+                      <small>{groupInfo[group].description}</small>
+                    </span>
+                    {groups.includes(group) && <Check size={17} />}
+                  </label>
+                ))}
+              </div>
+              <details className="export-field-details">
+                <summary>Choose individual measurements</summary>
+                <p className="muted small">
+                  Keep source and HRV method selected when exporting HRV so the measurement remains
+                  interpretable.
+                </p>
+                {groups.map((group) => (
+                  <div className="export-field-group" key={group}>
+                    <strong>{groupInfo[group].title}</strong>
+                    <div className="export-field-options">
+                      {exportFieldOptions[group].map((field) => (
+                        <label key={field.path}>
+                          <input
+                            type="checkbox"
+                            checked={fields.includes(field.path)}
+                            onChange={() => {
+                              setFields((current) =>
+                                current.includes(field.path)
+                                  ? current.filter((path) => path !== field.path)
+                                  : [...current, field.path],
+                              );
+                              setSuccess(false);
+                            }}
+                          />
+                          {field.label}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </details>
+            </Panel>
+            <Panel title="03 · Choose a format">
+              <div className="format-grid">
+                {(
+                  [
+                    {
+                      key: 'json',
+                      title: 'JSON',
+                      detail: 'Complete, structured context',
+                      icon: FileJson,
+                    },
+                    {
+                      key: 'md',
+                      title: 'Markdown',
+                      detail: 'Easy to read and share with an LLM',
+                      icon: FileText,
+                    },
+                    {
+                      key: 'csv',
+                      title: 'CSV',
+                      detail: 'Spreadsheet-friendly columns',
+                      icon: FileSpreadsheet,
+                    },
+                    {
+                      key: 'ndjson',
+                      title: 'NDJSON',
+                      detail: 'One record per line',
+                      icon: FileJson,
+                    },
+                  ] as const
+                ).map(({ key, title, detail, icon: Icon }) => (
+                  <label className={`format-option ${format === key ? 'selected' : ''}`} key={key}>
+                    <input
+                      type="radio"
+                      name="format"
+                      value={key}
+                      checked={format === key}
+                      onChange={() => {
+                        setFormat(key);
+                        setSuccess(false);
+                      }}
+                    />
+                    <Icon size={22} />
+                    <strong>{title}</strong>
+                    <span>{detail}</span>
+                  </label>
+                ))}
+              </div>
+              {format === 'csv' && (
+                <p className="muted small">
+                  Nested objects use dotted columns; workouts and symptoms remain JSON arrays in
+                  cells. CSV omits the data dictionary. Formula-like text is prefixed with an
+                  apostrophe for spreadsheet safety.
                 </p>
               )}
-            </div>
-            <p className="export-privacy">
-              <ShieldCheck size={15} />
-              The app never sends this export to an AI provider. You choose where it goes next.
-            </p>
-          </Panel>
-          <div className="export-tip">
-            <strong>A useful prompt starts with context.</strong>
-            <p>
-              Tell your LLM your goal, the measurement routine, and any changes in equipment. Ask it
-              to distinguish observations from hypotheses and account for missing data.
-            </p>
+            </Panel>
           </div>
-        </aside>
-      </div>
-      <ErrorBox
-        message={!valid ? 'Select a valid range of up to five years.' : error || count.error}
-      />
+          <aside>
+            <Panel className="export-summary">
+              <span className="eyebrow">READY TO TRAVEL</span>
+              <div className="export-file-icon">
+                <Download size={28} strokeWidth={1.3} />
+              </div>
+              <h2>
+                Your journal,
+                <br />
+                in your hands.
+              </h2>
+              <dl>
+                <div>
+                  <dt>Recorded days</dt>
+                  <dd>{count.loading ? '…' : (count.data?.total ?? '—')}</dd>
+                </div>
+                <div>
+                  <dt>Data groups</dt>
+                  <dd>
+                    {groups.length} of {exportGroups.length}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Format</dt>
+                  <dd>{format.toUpperCase()}</dd>
+                </div>
+                <div>
+                  <dt>Written notes</dt>
+                  <dd>{groups.includes('notes') ? 'Included' : 'Excluded'}</dd>
+                </div>
+              </dl>
+              <button
+                className="button primary"
+                disabled={
+                  !valid ||
+                  !groups.length ||
+                  !selectedFields.length ||
+                  busy ||
+                  !count.data?.total ||
+                  !!count.error
+                }
+                onClick={runExport}
+              >
+                <Download size={17} />
+                {busy ? 'Preparing export…' : 'Download export'}
+              </button>
+              <ErrorBox
+                message={
+                  !valid ? 'Select a valid range of up to five years.' : error || count.error
+                }
+              />
+              {!count.loading && valid && !count.error && !count.data?.total && (
+                <p role="status">
+                  No recorded days in this range. Choose dates containing your observations.
+                </p>
+              )}
+              {(!groups.length || !selectedFields.length) && (
+                <p role="status">Select at least one measurement to export.</p>
+              )}
+              {(count.data?.total ?? 0) > 500 && (
+                <p className="small">
+                  This export exceeds the 500-day import limit. For files you can restore directly,
+                  choose ranges containing at most 500 recorded days and keep each file below 20
+                  MiB.
+                </p>
+              )}
+              <div aria-live="polite">
+                {success && (
+                  <p className="saved-state">
+                    <Check size={16} /> Export prepared. Check your downloads.
+                  </p>
+                )}
+              </div>
+              <p className="export-privacy">
+                <ShieldCheck size={15} />
+                The app never sends this export to an AI provider. You choose where it goes next.
+              </p>
+            </Panel>
+            <div className="export-tip">
+              <strong>A useful prompt starts with context.</strong>
+              <p>
+                Tell your LLM your goal, the measurement routine, and any changes in equipment. Ask
+                it to distinguish observations from hypotheses and account for missing data.
+              </p>
+            </div>
+          </aside>
+        </div>
+      </fieldset>
     </>
   );
 }

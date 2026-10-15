@@ -1,4 +1,4 @@
-import { WorkspaceNavLink as NavLink } from '../components/WorkspaceLink';
+import { WorkspaceNavLink as NavLink, WorkspaceLink as Link } from '../components/WorkspaceLink';
 import { Route, Routes } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import {
@@ -88,6 +88,17 @@ export function AnalysisHub() {
           <Route path="relationships" element={<Relationships />} />
           <Route path="prediction" element={<Prediction />} />
           <Route path="metrics" element={<MetricsGuide />} />
+          <Route
+            path="*"
+            element={
+              <section className="panel">
+                <h1>Analysis page not found.</h1>
+                <Link className="button primary" to="/analysis">
+                  Open single-metric trends
+                </Link>
+              </section>
+            }
+          />
         </Routes>
       </Suspense>
     </>

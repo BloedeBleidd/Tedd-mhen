@@ -111,6 +111,10 @@ test('recovery explains an incomplete code and valid login reports loading and s
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
   await arrived;
   await expect(page.getByRole('button', { name: 'Please wait…', exact: true })).toBeDisabled();
+  await expect(page.getByLabel('Email', { exact: true })).toBeDisabled();
+  await page.getByRole('link', { name: 'Create an account', exact: true }).click();
+  await expect(page).toHaveURL(/\/sign-in$/);
+  await expect(page.getByRole('status')).toContainText('Keep this page open');
   release();
   await expect(page.getByRole('alert')).toContainText('Too many attempts.');
   await expect(page.getByRole('alert').locator('..')).toBeFocused();
