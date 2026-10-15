@@ -2,11 +2,15 @@
 
 ## Recording
 
-Daily check-in → **Habits & activities** records behaviors independently of training sessions. Forty localized presets cover reading, screen routines, daylight, cold showers, sauna, relaxation, social activities, substance use, sexual activity and repetitive behaviors. Their presence is a recording option, not a recommendation or a claim of longevity benefit.
+Daily check-in records behaviors independently of training sessions in **Habits & daily routines** and **My custom activities**. Forty localized presets cover reading, screen routines, daylight, cold showers, sauna, relaxation, social activities, substance use, sexual activity and repetitive behaviors. Their presence is a recording option, not a recommendation or a claim of longevity benefit.
 
 Users can create a named category in their private library and reuse it on other dates. Define one event consistently: for example, one cigarette, one nail-biting episode, or one reading session. Each daily category records a count, optional local event times, optional total minutes, and original notes. A blank count/duration means unknown; an explicit zero means none. An absent category is unrecorded, never an inferred zero. Overlapping behaviors are allowed; total minutes across different categories are not added into training load.
 
 Times belong to the entry's calendar date and timezone, including events after midnight. They describe clock times, not UTC instants or daylight-saving offsets. A user can record only some remembered times: the count must be at least the number of times if known. Repeated times are allowed. Deleting an event time does not reduce the daily total; removing a category from a day makes that day's observation unknown.
+
+## Reusable daily routines
+
+Adding a category remembers its identity immediately in account preferences while routine capacity is available, and creates blank fields on new, unrecorded days. Measurements, notes and times are not carried forward. The routine checkbox can stop future repetition while keeping today's observation. Removing the daily row also disables repetition; archiving a custom definition retains historical records but excludes it from new templates. See [Personalization](PERSONALIZATION.md) for capacity, field visibility and selection ordering.
 
 ## Identity and privacy
 
@@ -39,7 +43,3 @@ The `habits` export group includes keys, original custom names, counts, local ti
 The schema allows 100 categories/day, 500 times/category/day, count 0–100,000, total duration 0–1,440 minutes, names up to 120 characters and notes up to 50,000 characters. The whole write still must fit 256 KiB. The library listing rejects more than 10,000 definitions instead of silently truncating. These are engineering bounds, not plausible or healthy behavioral limits.
 
 The public demo includes synthetic examples, a custom category and missing/zero observations. Its library changes and check-ins remain in browser memory and disappear on reload. See [Demo workspace](DEMO.md).
-
-## Reusable daily routines
-
-Check-in separates preset habits from **My custom activities**. Adding a category remembers its identity immediately in account preferences and creates blank fields on new, unrecorded days. Measurements, notes and times are not carried forward. The routine checkbox can stop future repetition while keeping today's observation. Removing the daily row also disables repetition; archiving a custom definition retains historical records but excludes it from new templates. See [Personalization](PERSONALIZATION.md).

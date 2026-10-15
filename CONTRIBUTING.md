@@ -6,7 +6,7 @@ Tedd’mhen is maintained as a production application, with English source and d
 2. Keep a change focused and describe the user-visible behavior it affects.
 3. Run `npm run format`, `npm run typecheck`, `npm test`, `npm run build`, and `npm run test:e2e`.
 4. Every algorithm must have meaningful tests: reference calculations, boundary conditions, missingness and invalid-input behavior. Statistical validation must also test time alignment and prevention of future-data leakage. Use synthetic records only.
-5. Update the data dictionary and methodology whenever a field, unit, anchor, or model changes. Version the schema or model when its interpretation changes.
+5. Keep documentation consistent with the implementation in the same change. The concise README describes the product and links to focused topic documents covering current behavior, contracts, mathematics, operations and limitations. Integrate explanations into their topic; do not append progress reports, update narratives or development-stage notes. Update the data dictionary and methodology whenever a field, unit, anchor, or model changes, and version the schema or model when its interpretation changes.
 6. Database migrations are append-only once deployed. Do not edit a migration already applied to a production database.
 
 Keep missing observations distinct from zero. Do not make narrative interpretation an invisible part of the statistical model. Do not introduce clinical, causal, or calibrated forecasting claims without the validation needed to support them.

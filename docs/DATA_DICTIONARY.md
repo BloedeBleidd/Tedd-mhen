@@ -47,6 +47,8 @@ Bedtime is generally the preceding evening; daytime sleep is permitted. These cl
 
 HRV methods, recording duration, posture and devices affect comparability. Record the same routine and filter to a consistent method/source for analysis. These bounds accommodate data entry; they do not define safe or healthy values.
 
+Sleep and physiological recovery measurements share the **Sleep & recovery** check-in section; canonical `sleep` and `physiology` storage groups and interchange paths remain separate. Presentation does not imply every physiological measurement was taken during sleep.
+
 ## Training
 
 `trainingStatus` is `unrecorded`, `rest`, or `trained`. A trained day requires at least one workout; rest and unrecorded days cannot contain workouts.
@@ -65,6 +67,8 @@ HRV methods, recording duration, posture and devices affect comparability. Recor
 | `notes`                              | optional narrative, up to 50,000 characters                      |
 
 Derived training time sums duration only for explicitly recorded training/rest days. Derived daily load is `Σ(durationMinutes × effort)` in arbitrary units. Missing effort in any session makes the daily load unknown. Rest is zero. This is a descriptive project heuristic, not a validated readiness score or cross-sport equivalence.
+
+The activity registry defines which sports normally show distance and which show resistance sets. Common duration, effort, pain and average heart rate remain available. Existing non-null distance and nonempty sets remain editable after changing sport; switching type does not delete values. Distance remains in kilometers in storage and interchange files. See [Personalization](PERSONALIZATION.md).
 
 ## Habits and custom activities
 
@@ -98,14 +102,10 @@ Account data is separate from the journal export schema. `auth_accounts` contain
 
 `administrators` stores an explicit internal user ID and grant timestamp; account deletion cascades to this role. Administration exposes aggregate counts and JSON byte volume, not user identities or journal bodies.
 
+`user_preferences` stores field visibility, recurring habit identities and reusable-choice history as `(owner_id, key, payload, uses, last_used)`. Keys and payloads use canonical identifiers; custom labels retain their original text. Usage is a successful selection-request count, not a behavioral measurement. Preferences are excluded from journal interchange and analysis; account deletion cascades to these rows. Existing observations override hidden-field preferences when editing their date. See [Personalization](PERSONALIZATION.md) for operation semantics and blank routine construction.
+
 `demo_datasets` identifies the versioned synthetic journal, technical owner, title, fixed anchor date and expected record count. Demo entries use the same schema and scales as personal records. Their dates and timestamps shift together in the browser; their values are constructed examples, not measurements. See [Demo workspace](DEMO.md).
 
 The AuthService Durable Object stores hashed IP/email limiter keys, attempt counts and expiry instants for ten-minute windows. Expired keys are removed on later authentication requests. These are operational abuse controls and are never part of journal exports.
 
-Appearance mode and optional approximate device coordinates (two decimal places, with a capture timestamp) are browser-local preferences, not health observations. The notice acknowledgement is also browser-local. Neither enters D1, analysis, or exports. See the application's Privacy & data page for cookie lifetimes and retention.
-
-## Form preferences and presentation
-
-Sleep and physiological recovery measurements share the **Sleep & recovery** check-in section; canonical `sleep` and `physiology` storage groups and interchange paths remain unchanged. Presentation does not imply every physiological measurement was taken during sleep. Users select fields through their account's layout preferences; missing observations remain null. Prior measurements remain visible when editing a day regardless of a later layout preference.
-
-The activity registry defines which sports normally show distance and which show resistance sets. Common duration, effort, pain and average heart rate remain available. Existing non-null distance and nonempty sets remain editable after changing sport; switching type does not delete values. Distance remains in kilometers in storage and interchange files. See [Personalization](PERSONALIZATION.md).
+Appearance mode, language selection and optional approximate device coordinates (two decimal places, with a capture timestamp) are browser-local preferences, not health observations. The notice acknowledgement is also browser-local. None enters D1, analysis, or exports. See the application's Privacy & data page for cookie lifetimes and retention.

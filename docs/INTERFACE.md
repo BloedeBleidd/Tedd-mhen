@@ -8,6 +8,12 @@ The animated globe sits beside Appearance and opens manual language selection or
 
 Activity selection has an accent-insensitive search and grouped choices. The current choice stays visible while searching, so typing does not silently change a recorded activity. Strength disciplines expose exercise sets. Analysis pickers omit activity indicators absent from the selected observations.
 
+## Personal check-in
+
+A visible **Customize my check-in** control configures field visibility without writing a daily observation. Existing values override hidden-field preferences when editing their date. Clearing an enabled rating also hides its blank field on future days; the customization control restores it. Sleep and recovery share one section. Preset habits and the custom library have separate sections below movement and training.
+
+Routine checkboxes remember activity identities while leaving future counts, times, durations and notes empty. Recent selections appear before unused choices; sport options retain their broader categories after a recent-choice group. Semantic choice lists use account usage history, while numeric horizons, scales and dates retain meaningful natural order. No choice order implies statistical or medical importance. See [Personalization](PERSONALIZATION.md) for persistence, field visibility and routines.
+
 ## Account form feedback
 
 Registration, sign-in, recovery and legacy-owner setup validate fields in the application, using the same email, password and recovery-code schemas as the server. Browser validation popovers are not required. Invalid fields show an associated explanation after blur or submission, expose `aria-invalid`, and are rechecked as the user edits. Submitting invalid values focuses and scrolls to the first invalid field and displays an alert above the submit button. No credential request is sent until local validation passes.
@@ -59,11 +65,5 @@ Analysis filters report their active count and can be cleared together. Input se
 The mobile analysis navigation keeps four destinations visible in a compact two-column grid. Relationship and multivariable pages provide a direct link to results above the filters. Statistics retain their explanatory text. Chart-size selectors offer responsive Auto (240 px on mobile), Compact (220 px), and Large (480 px); resizing changes presentation only, preserving all observations and model selections. Time axes keep real calendar spacing. Numeric intervals use an explicitly spaced dash in all languages.
 
 On wide screens the descriptive model fit and chronological holdout evaluation appear side by side; on phones they stack. The holdout chart distinguishes later observations, training-model predictions and 95% predictive intervals. Interval score, mean width and signed error supplement MAE, RMSE, coverage and baselines. Source links sit beside analysis results, with worked mathematical explanations and a bibliography in Definitions & methods, including authors, publication titles and scope limitations. Forecasts extend to 28 days with an explicit exploratory-horizon explanation; see [Methodology](METHODOLOGY.md).
-
-## Personal check-in and compact definitions
-
-A visible **Customize my check-in** control configures field visibility without writing a daily observation. Existing values override hidden-field preferences when editing their date. Clearing an enabled rating also hides its blank field on future days; the customization control restores it. Sleep and recovery share one section. Preset habits and the custom library have separate sections below movement and training.
-
-Routine checkboxes remember activity identities while leaving future counts, times, durations and notes empty. Recent selections appear before unused choices; sport options retain their broader categories after a recent-choice group. Semantic choice lists use account usage history, while numeric horizons, scales and dates retain meaningful natural order. No choice order implies statistical or medical importance.
 
 Definitions are collapsed by domain, with sports additionally grouped by the activity registry. Searching opens matching groups. Mathematics topics expose formulas, symbol definitions, examples and source links on demand rather than presenting an unbroken catalog. All explanatory copy is authored in six source catalogs.

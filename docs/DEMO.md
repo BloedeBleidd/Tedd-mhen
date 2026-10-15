@@ -6,6 +6,8 @@
 
 The shared example journal contains 236 observations over 240 calendar days. It includes running, strength sets, cycling, swimming, walking, mobility, rest, unrecorded training, incomplete measurements, symptoms and context labels. Synthetic stress, sleep, recovery and training patterns make charts and uncertainty visible without needing months of personal observations. These constructed relationships are interface examples, not health evidence or validation of forecasting accuracy.
 
+Habit observations include reading, caffeine, daylight, cold showers, nail biting and a custom Phone-free dinner category, with missing days, explicit zeros and partial event times. The examples use the same recording and analytical rules as personal observations.
+
 The browser shifts dates and creation/update timestamps by the same whole-day offset so the final example is dated today. Relative gaps, values, measurement methods and workout identifiers remain intact. The offset is fixed when entering demo mode; no generated observation is presented as the user's own measurement.
 
 ## Storage and access boundary
@@ -14,7 +16,7 @@ Migration `0004_demo_journal.sql` stores the examples in `entries` under `system
 
 `GET /api/demo` is public and read-only. The server selects the fixed synthetic dataset and owner, accepts no query parameters and returns at most 500 complete records with dataset metadata. The response contains no viewer identity or private records. Missing or inconsistent metadata fails explicitly. Responses are private and not cached. This endpoint is the sole public journal-data exception: ordinary entry, series, export and account endpoints remain scoped to the verified personal owner. Client-supplied owner fields cannot redirect any query.
 
-The deterministic fixture source is `scripts/demo-fixture.mjs`; tests compare its generated SQL byte-for-byte with the migration and validate every record against the application schema. A future dataset change requires a new migration and versioned fixture; do not rewrite an applied migration. Seed generation is an offline release-maintenance operation, not a request-time dependency.
+The deterministic fixture sources are `scripts/demo-fixture.mjs` and `scripts/habits-fixture.mjs`, corresponding to migrations 0004 and 0006. Tests compare generated SQL byte-for-byte with these migrations and validate every record against the application schema. The habit fixture preserves the training/sleep values, 236-observation count and baseline guards. Dataset changes require a new migration and versioned fixture; do not rewrite an applied migration. Seed generation is an offline release-maintenance operation, not a request-time dependency.
 
 ## Temporary experiments
 
@@ -27,7 +29,3 @@ Demo exports use a `teddmhen-demo-` filename. JSON, NDJSON and Markdown identify
 ## Operations
 
 The baseline occupies one D1 dataset rather than one copy per account. Each activation reads it once; local edits and analyses do not write back. Cloudflare storage, reads and request quotas still apply. Administrator reports show demo entry count and JSON bytes separately from personal journal totals and registered account counts. Database backups include the baseline and its guards. Follow [Deployment](DEPLOYMENT.md) for private backup and separate-database restore procedures.
-
-## Synthetic habits
-
-Migration 0006 adds reproducible preset and custom habit observations from `scripts/habits-fixture.mjs` without changing original training/sleep values or the 236-day count. It includes missing days, explicit zeros, partial event times, reading, caffeine, daylight, cold showers, nail biting and a custom Phone-free dinner category. Its apparent relationships are constructed, not evidence about real people. The migration preserves all baseline guards. Demo library and daily changes use browser memory only, and never write the shared D1 records.

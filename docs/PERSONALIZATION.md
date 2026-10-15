@@ -2,7 +2,7 @@
 
 ## Account and demo scope
 
-The check-in customization control selects visible fields for subsequent visits and dates. Changes save immediately through authenticated `GET /api/preferences` and `PATCH /api/preferences`; daily measurements still require **Save check-in**. Settings belong to the verified account, not an email string submitted by the browser. No setting carries over into another account. A demo workspace uses the same API contract in memory and discards settings on reload or exit.
+The check-in customization control selects visible fields for subsequent visits and dates. Authenticated `GET /api/preferences` loads settings; changes save immediately through `PATCH /api/preferences`. Daily measurements require **Save check-in**. Settings belong to the verified account, not an email string submitted by the browser. No setting carries over into another account. A demo workspace uses the same API contract in memory and discards settings on reload or exit.
 
 `user_preferences` stores `(owner_id, key, payload, uses, last_used)`. Canonical field paths, activity keys and choice-list identifiers stay language-independent. Custom activity names and context labels retain their original text. One row per setting supports independent concurrent changes; the last committed update wins for the same field. Selection-use counts are convenience metadata rather than behavioral observations. They count successful selection requests (including a retry if the earlier response was lost), not days the behavior occurred. Last-use timestamps are server-generated and monotonic per choice.
 
@@ -16,7 +16,7 @@ A recorded value overrides a hidden preference while editing that date, includin
 
 ## Recurring habits and custom activities
 
-Adding a preset or custom activity enables its **Include on new days, with blank values** checkbox. Custom creation also saves the definition immediately. A new, unrecorded day gets the selected identities with `count: null`, `durationMinutes: null`, `times: []` and `notes: ''`. Existing saved days are loaded as recorded and are not backfilled. Archiving a definition excludes it from new templates but retains historical observations.
+Adding a preset or custom activity enables its **Include on new days, with blank values** checkbox while fewer than 100 routine identities are selected. At capacity, the daily row can still be added within the daily limit, but the interface explains that another routine must be deselected to enable repetition. Custom creation saves the definition immediately. A new, unrecorded day gets the selected identities with `count: null`, `durationMinutes: null`, `times: []` and `notes: ''`. Existing saved days are loaded as recorded and are not backfilled. Archiving a definition excludes it from new templates but retains historical observations.
 
 Removing a daily row also disables its routine membership. To retain today's measurement while stopping future repetition, uncheck the routine checkbox without removing the row. The daily record supports up to 100 activities; routine construction uses the first 100 eligible identities in usage order. Restore or add another activity through its section when required. Templates do not copy daily ratings, training/rest status, notes, counts, durations or event times.
 

@@ -27,6 +27,8 @@ The application is a React SPA served with Cloudflare Workers Static Assets. `/a
 | `shared/features.ts`, `shared/relationships.ts`, `shared/statistics.ts` | Feature encoding, calendar alignment, correlations, bootstrap and linear algebra    |
 | `shared/import.ts`                                                      | Bounded JSON/NDJSON/CSV parsing, selective merge and validation                     |
 | `shared/export.ts`                                                      | Field selection, dictionary, CSV escaping, Markdown formatting                      |
+| `shared/preferences.ts`                                                 | Strict preference operations, choice ordering and blank routine construction        |
+| `src/lib/preferences-context.tsx`                                       | Owner-bound settings load, immediate write queue, optimistic state and retry        |
 | `worker/auth.ts`                                                        | Application session verification, legacy Access JWT verification, local mode        |
 | `worker/index.ts`                                                       | Ownership, API, validation, queries, streaming exports                              |
 | `worker/admin.ts`                                                       | Explicit role checks and aggregate administration queries                           |
@@ -50,25 +52,35 @@ Each daily JSON request is limited to 256 KiB, each narrative to 50,000 characte
 
 Custom definitions are owner-scoped in `habit_definitions`. Daily JSON contains self-contained habit keys/names. After-insert/update triggers remember new custom keys only when a journal write succeeds. Library operations use the same session, origin and expected-owner checks as journal operations. Old clients omitting `habits` receive 409 when editing a day with existing observations, preventing accidental erasure. See [Habits](HABITS.md).
 
+## Account personalization
+
+`shared/preferences.ts` defines strict preference operations, deterministic option ordering, field visibility checks and blank routine construction. `/api/preferences` authenticates the owner for reads and patches; `user_preferences` stores one row per setting, so independent changes from different tabs do not overwrite a complete settings document. The last committed change wins for the same field. Choice counters increment in SQL, with a monotonic server timestamp.
+
+`PreferencesProvider` lives inside the signed-in or demo shell, serializes immediate writes and overlays pending operations on confirmed state. Failed operations remain queued with visible retry; closing the tab while pending prompts the user. Initial preferences load before a new check-in template is constructed. `DemoWorkspace` implements the same operation contract in its own memory map. Preferences never enter statistical observation payloads. See [Personalization](PERSONALIZATION.md).
+
 ## API
 
-| Method and path                        | Behavior                                                                     |
-| -------------------------------------- | ---------------------------------------------------------------------------- |
-| `GET /api/habit-definitions`           | Private reusable custom categories, including archived definitions           |
-| `PUT /api/habit-definitions`           | Strict `{key,name,archived}` upsert, owner derived from session              |
-| `GET /api/health`                      | Public liveness only; does not claim database readiness                      |
-| `GET /api/session`                     | Verified ID, email, local-mode and administrator status                      |
-| `GET /api/demo`                        | Public read of the fixed synthetic dataset; no owner or filter parameters    |
-| `GET /api/entries`                     | Owner-scoped summaries, total, date cursor; default 30, maximum 100 rows     |
-| `GET /api/entries/:date`               | One complete daily record, or 404                                            |
-| `PUT /api/entries/:date`               | `{ entry, revision }`; revision 0 creates, current revision updates          |
-| `DELETE /api/entries/:date?revision=N` | Delete only when the revision matches                                        |
-| `GET /api/series?from=...&to=...`      | Lightweight observations; range span at most 1,830 days                      |
-| `GET /api/series?all=true`             | All owner observations, at most 10,000 days; larger requests fail explicitly |
-| `GET /api/admin/overview`              | Aggregate operational statistics, explicit administrator role required       |
-| `GET /api/export`                      | Stream selected records as JSON, NDJSON, CSV, or Markdown                    |
+| Method and path                        | Behavior                                                                                             |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `GET /api/habit-definitions`           | Private reusable custom categories, including archived definitions                                   |
+| `PUT /api/habit-definitions`           | Strict `{key,name,archived}` upsert, owner derived from session                                      |
+| `GET /api/health`                      | Public liveness only; does not claim database readiness                                              |
+| `GET /api/session`                     | Verified ID, email, local-mode and administrator status                                              |
+| `GET /api/preferences`                 | Private field visibility, routine identities and option-use metadata                                 |
+| `PATCH /api/preferences`               | Strict per-setting operation; owner derived from session, counters and timestamps updated atomically |
+| `GET /api/demo`                        | Public read of the fixed synthetic dataset; no owner or filter parameters                            |
+| `GET /api/entries`                     | Owner-scoped summaries, total, date cursor; default 30, maximum 100 rows                             |
+| `GET /api/entries/:date`               | One complete daily record, or 404                                                                    |
+| `PUT /api/entries/:date`               | `{ entry, revision }`; revision 0 creates, current revision updates                                  |
+| `DELETE /api/entries/:date?revision=N` | Delete only when the revision matches                                                                |
+| `GET /api/series?from=...&to=...`      | Lightweight observations; range span at most 1,830 days                                              |
+| `GET /api/series?all=true`             | All owner observations, at most 10,000 days; larger requests fail explicitly                         |
+| `GET /api/admin/overview`              | Aggregate operational statistics, explicit administrator role required                               |
+| `GET /api/export`                      | Stream selected records as JSON, NDJSON, CSV, or Markdown                                            |
 
 List, series, and export filters accept `from`, `to`, `q`, `type`, and `illness`. `illness=no` includes only explicitly zero severity; unknown is not treated as well. `illness=yes` includes positive severity or recorded symptoms. UI journal exposes all filters; analysis exposes dates/all history, illness, source, HRV method, training status and labels; export exposes date and field selection.
+
+Journal-list responses include `total`, `firstDate` and `lastDate` for the full owner-scoped filter, independently of pagination. Overview uses this metadata to distinguish an empty recent window from an empty journal; the backup preset uses it to select recorded dates. Empty selections return null date bounds.
 
 An export accepts `format`, comma-separated `groups`, and optional comma-separated `fields`. Metadata always includes date, time zone, schema version, revision and timestamps. JSON, NDJSON and Markdown additionally include a dictionary. CSV formula-like strings are apostrophe-prefixed, so CSV is not a byte-exact archival format. Prefer JSON for preservation.
 
@@ -112,14 +124,6 @@ All credential endpoints accept same-origin JSON POSTs with `X-Teddmhen-Request:
 
 ## Browser appearance and privacy
 
-The `AppearanceProvider` resolves manual Light/Dark or Auto. With saved approximate coordinates, SunCalc computes sunrise/sunset locally, including polar day/night. Auto without coordinates follows `prefers-color-scheme`. Changes apply before paint, at the next transition, and on focus/visibility changes. Browser-only preferences use `teddmhen.appearance.v1`; the necessary-cookie notice acknowledgement uses `teddmhen.privacy-notice.v1`. Storage denial leaves the application usable for the current page session. Geolocation is called only from an explicit button action; no coordinates enter API requests or D1.
+The `AppearanceProvider` resolves manual Light/Dark or Auto. With saved approximate coordinates, SunCalc computes sunrise/sunset locally, including polar day/night. Auto without coordinates uses light, regardless of the device theme. Changes apply before paint, at the next transition, and on focus/visibility changes. Browser-only preferences use `teddmhen.appearance.v1`; the necessary-cookie notice acknowledgement uses `teddmhen.privacy-notice.v1`. Storage denial leaves the application usable for the current page session. Geolocation is called only from an explicit button action; no coordinates enter API requests or D1. Language Auto also uses the consented location, with a bundled country map and English fallback. Manual language choices override Auto; see [Localization](LOCALIZATION.md).
 
 Shared interface motion uses viewport-triggered panel and SVG reveals, respects live reduced-motion preferences, and preserves statistical coordinates. See [Interface and motion](INTERFACE.md) for timing, accessibility and lifecycle contracts.
-
-Journal-list responses include `total`, `firstDate` and `lastDate` for the full owner-scoped filter, independently of pagination. Overview uses this metadata to distinguish an empty recent window from an empty journal; the backup preset uses it to select recorded dates. Empty selections return null date bounds.
-
-## Account personalization
-
-`shared/preferences.ts` defines strict preference operations, deterministic option ordering, field visibility checks and blank routine construction. `/api/preferences` authenticates the owner for reads and patches; `user_preferences` stores one row per setting, so independent changes from different tabs do not overwrite a complete settings document. The last committed change wins for the same field. Choice counters increment in SQL, with a monotonic server timestamp.
-
-`PreferencesProvider` lives inside the signed-in or demo shell, serializes immediate writes and overlays pending operations on confirmed state. Failed operations remain queued with visible retry; closing the tab while pending prompts the user. Initial preferences load before a new check-in template is constructed. `DemoWorkspace` implements the same operation contract in its own memory map. Preferences never enter statistical observation payloads. See [Personalization](PERSONALIZATION.md).
