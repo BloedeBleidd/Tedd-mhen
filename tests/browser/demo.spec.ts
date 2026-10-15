@@ -139,9 +139,9 @@ test('mobile visitors can enter before registration, explore every page and leav
       await expect(create).toBeInViewport();
       const box = await create.boundingBox();
       expect(box!.height).toBeGreaterThanOrEqual(44);
-      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
-        true,
-      );
+      await expect
+        .poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth))
+        .toBe(true);
       await page.screenshot({
         path: `test-results/public-demo-${theme}-${width}.png`,
         animations: 'disabled',
@@ -165,10 +165,11 @@ test('mobile visitors can enter before registration, explore every page and leav
     await expect(page.locator('main h1')).toBeVisible();
     await expect(page.locator('main .loading')).toHaveCount(0);
     await expect(page.getByRole('alert')).toHaveCount(0);
-    expect(
-      await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
-      path,
-    ).toBe(true);
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), {
+        message: path,
+      })
+      .toBe(true);
   }
   await page.getByRole('link', { name: 'About the author', exact: true }).click();
   await expect(page).toHaveURL('http://127.0.0.1:8789/demo/about');
