@@ -90,7 +90,7 @@ test('relationships and multivariable predictions use demo observations, expose 
   expect((await download).suggestedFilename()).toBe('teddmhen-multivariable-model.json');
   await page.getByLabel('Prediction timing').selectOption('7');
   await expect(page.getByRole('heading', { name: 'Conditional associations' })).toBeVisible();
-  await page.getByText('Choose inputs', { exact: false }).click();
+  await page.locator('.feature-picker > summary').click();
   await page.getByRole('button', { name: 'Select all inputs' }).click();
   await expect(page.getByText('Inputs not used', { exact: false })).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });

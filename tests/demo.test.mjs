@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
 import { makeDemoFixture, demoFixture, demoMigration } from '../scripts/demo-fixture.mjs';
+import { withDemoHabits, demoHabitsMigration } from '../scripts/habits-fixture.mjs';
 import { DEMO_DATASET, DEMO_OWNER } from '../shared/demo';
 import { entrySchema, summarize, emptyEntry, dayNumber } from '../shared/schema';
 import { DemoWorkspace } from '../src/lib/demo-workspace';
@@ -13,7 +14,7 @@ const snapshot = () => ({
   title: demoFixture.title,
   anchorDate: demoFixture.anchorDate,
   recordCount: 236,
-  entries: makeDemoFixture().map((e) => ({
+  entries: withDemoHabits().map((e) => ({
     ...e,
     revision: 1,
     createdAt: `${e.date}T18:00:00.000Z`,
@@ -29,8 +30,8 @@ const put = (space, entry, revision = 0) =>
 
 describe('Shared synthetic journal', () => {
   it('is deterministic, schema-valid and covers missing observations, labels, symptoms and several sports', () => {
-    const rows = makeDemoFixture();
-    expect(rows).toEqual(makeDemoFixture());
+    const rows = withDemoHabits();
+    expect(rows).toEqual(withDemoHabits());
     expect(rows).toHaveLength(236);
     expect(rows.at(-1).date).toBe(demoFixture.anchorDate);
     expect(dayNumber(rows.at(-1).date) - dayNumber(rows[0].date)).toBe(239);
@@ -81,6 +82,7 @@ describe('Shared synthetic journal', () => {
     expect(demoFixture.id).toBe(DEMO_DATASET);
     expect(demoFixture.owner).toBe(DEMO_OWNER);
     expect(readFileSync('migrations/0004_demo_journal.sql', 'utf8')).toBe(demoMigration());
+    expect(readFileSync('migrations/0006_demo_habits.sql', 'utf8')).toBe(demoHabitsMigration());
     const db = new DatabaseSync(':memory:');
     try {
       db.exec('PRAGMA foreign_keys=ON');
@@ -90,7 +92,7 @@ describe('Shared synthetic journal', () => {
       const rows = db
         .prepare('SELECT data FROM entries WHERE owner_id = ? ORDER BY date')
         .all(DEMO_OWNER);
-      expect(rows.map((row) => JSON.parse(row.data))).toEqual(makeDemoFixture());
+      expect(rows.map((row) => JSON.parse(row.data))).toEqual(withDemoHabits());
       expect(db.prepare('SELECT COUNT(*) AS n FROM auth_accounts').get().n).toBe(0);
       for (const sql of [
         `DELETE FROM entries WHERE owner_id='${DEMO_OWNER}'`,

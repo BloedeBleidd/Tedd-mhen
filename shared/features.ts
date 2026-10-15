@@ -1,3 +1,4 @@
+import { habitFeatureLabel, habitMeasures, habitValue, type HabitSummary } from './habits';
 import { metrics, type MetricKey } from './metrics';
 import {
   dayNumber,
@@ -205,7 +206,41 @@ export function featureCatalog(entries: EntrySummary[] = []): Feature[] {
         ),
       ),
   ];
-  return result;
+  const recorded = new Map<string, HabitSummary>();
+  const durationKeys = new Set<string>(),
+    timedKeys = new Set<string>();
+  for (const entry of entries.slice().sort((a, b) => a.date.localeCompare(b.date)))
+    for (const habit of entry.habits || []) {
+      recorded.set(habit.key, habit);
+      if (habit.durationMinutes !== null) durationKeys.add(habit.key);
+      if (habit.count && habit.times.length === habit.count) timedKeys.add(habit.key);
+    }
+  const habits: Feature[] = [...recorded.values()].flatMap((habit) =>
+    habitMeasures
+      .filter(
+        (measure) =>
+          measure === 'count' || (measure === 'duration' ? durationKeys : timedKeys).has(habit.key),
+      )
+      .map((measure) => ({
+        id: `habit:${habit.key}:${measure}`,
+        label: habitFeatureLabel(habit, measure),
+        unit: measure === 'count' ? 'count' : measure === 'duration' ? 'min' : 'cyclic',
+        kind: 'numeric',
+        group: 'Habits & activities',
+        description:
+          measure === 'count'
+            ? 'Daily count for this recorded habit. Missing is unknown; an explicit zero means none.'
+            : measure === 'duration'
+              ? 'Total recorded minutes for this habit. Missing duration is not zero.'
+              : 'Mean sine/cosine of local event times; available only when every counted event has a time. Select both components. Not elapsed hours.',
+        get: (entry: EntrySummary) =>
+          habitValue(
+            entry.habits?.find((h) => h.key === habit.key),
+            measure,
+          ),
+      })),
+  );
+  return [...habits, ...result];
 }
 export function featureSeries(entries: EntrySummary[], feature: Feature, window = 1) {
   const raw = new Map(entries.map((e) => [dayNumber(e.date), feature.get(e)]));

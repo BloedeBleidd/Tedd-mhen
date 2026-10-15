@@ -234,6 +234,7 @@ export function FeaturePicker({
           }}
         />
       </summary>
+      <p className="small muted">{tr('habits:analysisHelp')}</p>
       <p className="small muted">
         <Trans
           i18nKey="analysisData:selectedInputsUpTo180InputsPerAnalysis"
@@ -266,9 +267,16 @@ export function FeaturePicker({
         </button>
         <button
           className="button secondary small-button"
-          onClick={() => onChange(available.filter((f) => f.kind === 'numeric').map((f) => f.id))}
+          onClick={() =>
+            onChange(
+              available
+                .filter((f) => f.kind === 'numeric')
+                .slice(0, 180)
+                .map((f) => f.id),
+            )
+          }
         >
-          {tr('analysisData:numericOnly')}
+          {tr('habits:selectNumeric')}
         </button>
         <button className="button secondary small-button" onClick={() => onChange([])}>
           {tr('analysisData:clearInputs')}

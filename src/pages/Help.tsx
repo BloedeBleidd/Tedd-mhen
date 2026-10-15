@@ -24,6 +24,14 @@ export function Help() {
         </Link>
       </div>
       <div className="help-grid">
+        <Panel title={tr('habits:title')}>
+          <p>{tr('habits:intro')}</p>
+          <p>{tr('habits:semantics')}</p>
+          <p>{tr('habits:reviewGuide')}</p>
+          <Link className="text-link" to="/check-in#habits">
+            {tr('habits:openCheckIn')}
+          </Link>
+        </Panel>
         <Panel title={tr('help:01MakeADailyCheckIn')}>
           <p>{tr('help:pickTheLocalDateSelectTheRatingsYouActually')}</p>
           <p>

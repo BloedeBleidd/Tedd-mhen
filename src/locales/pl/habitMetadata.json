@@ -1,0 +1,15 @@
+{
+  "exportFields": "Liczniki nawyków, godziny i czas trwania",
+  "exportNotes": "Notatki o nawykach (wymagają nawyków)",
+  "exportDescription": "Dzienne liczniki, godziny zdarzeń, czas trwania i własne kategorie",
+  "countDescription": "Dzienny licznik zapisanego nawyku. Brak wartości oznacza brak informacji; jawne zero oznacza brak zdarzeń.",
+  "durationDescription": "Łączna liczba zapisanych minut tego nawyku. Brak czasu trwania nie oznacza zera.",
+  "timeDescription": "Średni sinus/cosinus lokalnych godzin zdarzeń; dostępny tylko wtedy, gdy każde policzone zdarzenie ma godzinę. Wybierz oba składniki. To nie czas trwania w godzinach.",
+  "nameError": "Własne aktywności wymagają nazwy; nazwy gotowych pozycji pochodzą z katalogu.",
+  "timeCountError": "Liczba zapisanych godzin nie może przekraczać dziennego licznika.",
+  "zeroDurationError": "Zerowy licznik nie może mieć dodatniego czasu trwania.",
+  "duplicateError": "Zapisz każdy nawyk tylko raz dziennie; połącz jego zdarzenia w tej pozycji.",
+  "libraryLimit": "Biblioteka aktywności przekracza 10 000 definicji.",
+  "legacyError": "Wpis zawiera nowe pola aktywności. Odśwież aplikację przed zapisem.",
+  "viewAll": "Pokaż wszystkie aktywności"
+}

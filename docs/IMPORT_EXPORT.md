@@ -2,7 +2,7 @@
 
 ## Export formats and selection
 
-Select a date range, data groups and individual fields. Groups include daily ratings, sleep, physiology, symptoms, workouts, context labels and optional narratives. Required metadata retains the date, timezone, schema version, revision and timestamps. JSON, NDJSON and Markdown also include an export dictionary. Notes are excluded unless selected, including nested workout notes.
+Select a date range, data groups and individual fields. Groups include daily ratings, sleep, physiology, symptoms, workouts, context labels, habits and optional narratives. Required metadata retains the date, timezone, schema version, revision and timestamps. JSON, NDJSON and Markdown also include an export dictionary. Notes are excluded unless selected, including nested workout and habit notes.
 
 | Format            | Structure                                         | Import support                       |
 | ----------------- | ------------------------------------------------- | ------------------------------------ |
@@ -35,6 +35,8 @@ Full database backups additionally preserve account identities and credential st
 
 ## Complete journal copy
 
-**Select complete JSON backup** selects all seven data groups, every optional field, and JSON. It includes the journal's full recorded date range when that span fits the export limit; longer histories require separate ranges. A restorable file must also fit the import limits of 500 days and 20 MiB, so split larger histories before exporting. This copies observations, not account credentials.
+**Select complete JSON backup** selects all eight data groups, every optional field, and JSON. It includes the journal's full recorded date range when that span fits the export limit; longer histories require separate ranges. A restorable file must also fit the import limits of 500 days and 20 MiB, so split larger histories before exporting. This copies observations, not account credentials.
 
 The exporter uses the same verified-workspace identity guard as journal reads and writes. Where a browser exposes a file picker but denies access to it, export falls back to the bounded download path. Cancelling the picker cancels the export. Selection controls remain disabled until preparation ends; success is reported only after the stream completes or the download is prepared.
+
+Custom habit keys and original names are included in the `habits` group. `habitNotes` requires `habits` and explicit selection of notes. Imported habit arrays replace the whole daily array; omitted notes are retained for matching keys. Old files without habits preserve existing observations in merge mode. Successful imports remember custom definitions in the private library. Unused/archived library definitions are not a journal export; only categories present in exported observations travel with the file. See [Habits and activities](HABITS.md).

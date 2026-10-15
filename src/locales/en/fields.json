@@ -46,5 +46,12 @@
   "symptoms.severity": "Illness severity",
   "schemaVersion": "Schema version",
   "revision": "Revision",
-  "workouts.id": "Session identifier"
+  "workouts.id": "Session identifier",
+  "habits": "Habits & activities",
+  "habits.key": "Activity identifier",
+  "habits.name": "Activity name",
+  "habits.count": "Daily count",
+  "habits.times": "Event times",
+  "habits.durationMinutes": "Activity minutes",
+  "habits.notes": "Activity notes"
 }

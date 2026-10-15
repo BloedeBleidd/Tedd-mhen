@@ -59,6 +59,17 @@ const templates = [...sourceKeys]
   });
 export function localize(message: string | null | undefined): string {
   if (!message) return message || '';
+  if (message.startsWith('Habit: ')) {
+    try {
+      const value = JSON.parse(message.slice(7));
+      const name = value.key.startsWith('preset:')
+        ? t('habitCatalog:' + value.key.slice(7))
+        : value.name;
+      return t('habits:feature_' + value.measure, { name });
+    } catch {
+      return message;
+    }
+  }
   const key = sourceKeys.get(message);
   if (key) return t(key);
   for (const [prefix, namespace, template] of [

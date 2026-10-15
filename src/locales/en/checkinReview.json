@@ -1,0 +1,16 @@
+{
+  "heading": "Check-in review · notices: {{count}}",
+  "purpose": "These observations differ from your earlier records. They may be correct. Check for typing errors, then keep the original values if they describe your day. Nothing is changed or excluded automatically.",
+  "loading": "Checking earlier observations…",
+  "unavailable": "History could not be loaded. Statistical checks are unavailable; you can still save valid observations.",
+  "history": "{{count}} earlier recorded days in the preceding 90 calendar days. The current day and later days are excluded.",
+  "insufficient": "At least 30 comparable values are needed per check. No statistical notice does not establish that an entry is correct.",
+  "valueWarning": "Outside the historical review range {{range}}, based on {{count}} comparable values. This range is a review heuristic, not a healthy range or confidence interval.",
+  "relationshipWarning": "With {{predictor}} = {{value}} ({{timing}}), the historical regression gives a 99.5% prediction interval of {{range}}. {{count}} earlier pairs; r = {{correlation}}. This is an association, not a causal or clinical rule.",
+  "sameDay": "same journal date",
+  "previousDay": "preceding calendar day",
+  "method": "Values use a median/MAD rule with a minimum scale. Eight predefined relationships also require stable correlation in both halves of history and after detrending. Repeated checks, missing data and dependence can produce false notices. A real change is worth recording.",
+  "source": "NIST/SEMATECH: Detection of Outliers (modified Z-score)",
+  "confirm": "I checked these observations and want to keep the values as entered.",
+  "reviewButton": "Review notices ({{count}})"
+}

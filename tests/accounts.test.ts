@@ -18,6 +18,7 @@ beforeEach(() => {
     .prepare('INSERT INTO entries(owner_id,date,data) VALUES (?,?,?)')
     .run('legacy-owner', '2001-01-01', JSON.stringify(emptyEntry('2001-01-01')));
   sqlite.exec(readFileSync('migrations/0002_accounts.sql', 'utf8'));
+  sqlite.exec(readFileSync('migrations/0005_habit_definitions.sql', 'utf8'));
   db = adapter(sqlite);
 });
 afterEach(() => sqlite.close());
@@ -111,6 +112,9 @@ describe('Credential transactions and legacy migration', () => {
   it('requires the current password, rotates credentials, expires sessions and deletes only the account owner', async () => {
     const response = await claim();
     const cookie = response.headers.get('set-cookie')!;
+    sqlite.exec(
+      "INSERT INTO habit_definitions(owner_id,key,name) VALUES ('legacy-owner','custom:example','Private category')",
+    );
     expect((await call('delete-account', { currentPassword: 'incorrect' }, cookie)).status).toBe(
       401,
     );
@@ -128,6 +132,7 @@ describe('Credential transactions and legacy migration', () => {
       (await call('delete-account', { currentPassword: password + 'new' }, nextCookie)).status,
     ).toBe(200);
     expect(await session(nextCookie)).toBeNull();
+    expect(sqlite.prepare('SELECT COUNT(*) AS n FROM habit_definitions').get()?.n).toBe(0);
     expect(sqlite.prepare('SELECT count(*) AS n FROM entries').get()?.n).toBe(0);
     expect(sqlite.prepare('SELECT email FROM auth_accounts').all()).toEqual([
       { email: 'second@example.test' },

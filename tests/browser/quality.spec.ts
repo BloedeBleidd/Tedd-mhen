@@ -175,16 +175,29 @@ test('demo backup includes every data group and analysis recovers from unavailab
   });
   await page.goto('/demo/export');
   await page.getByRole('button', { name: 'Select complete JSON backup' }).click();
-  await expect(page.getByText('7 of 7', { exact: true })).toBeVisible();
+  await expect(page.getByText('8 of 8', { exact: true })).toBeVisible();
   const downloaded = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Download export' }).click();
   const file = await downloaded;
   const exported = JSON.parse(await readFile((await file.path())!, 'utf8'));
   expect(exported.count).toBe(236);
-  expect(exported.groups).toHaveLength(7);
+  expect(exported.groups).toEqual(
+    expect.arrayContaining([
+      'ratings',
+      'sleep',
+      'physiology',
+      'symptoms',
+      'workouts',
+      'notes',
+      'context',
+      'habits',
+    ]),
+  );
+  expect(exported.groups).toHaveLength(8);
   expect(
     exported.entries.every(
-      (e: { labels?: unknown; notes?: unknown }) => 'labels' in e && 'notes' in e,
+      (e: { labels?: unknown; notes?: unknown; habits?: unknown }) =>
+        'labels' in e && 'notes' in e && 'habits' in e,
     ),
   ).toBe(true);
   await page.evaluate(() => {

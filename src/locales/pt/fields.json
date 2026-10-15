@@ -46,5 +46,12 @@
   "workouts.notes": "Notas da sessão",
   "schemaVersion": "Versão do esquema",
   "revision": "Revisão",
-  "workouts.id": "Identificador de sessão"
+  "workouts.id": "Identificador de sessão",
+  "habits": "Hábitos e atividades",
+  "habits.key": "Identificador da atividade",
+  "habits.name": "Nome da atividade",
+  "habits.count": "Contagem diária",
+  "habits.times": "Horas dos eventos",
+  "habits.durationMinutes": "Minutos de atividade",
+  "habits.notes": "Notas da atividade"
 }

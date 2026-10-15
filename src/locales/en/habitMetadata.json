@@ -1,0 +1,15 @@
+{
+  "exportFields": "Habit counts, times and duration",
+  "exportNotes": "Habit notes (requires habits)",
+  "exportDescription": "Daily counts, event times, duration and your custom categories",
+  "countDescription": "Daily count for this recorded habit. Missing is unknown; an explicit zero means none.",
+  "durationDescription": "Total recorded minutes for this habit. Missing duration is not zero.",
+  "timeDescription": "Mean sine/cosine of local event times; available only when every counted event has a time. Select both components. Not elapsed hours.",
+  "nameError": "Custom activities need a name; preset names come from the catalog.",
+  "timeCountError": "Recorded times cannot exceed the daily count.",
+  "zeroDurationError": "A zero count cannot have a positive duration.",
+  "duplicateError": "Record each habit only once per day; combine its events in that row.",
+  "libraryLimit": "Activity library exceeds 10,000 definitions.",
+  "legacyError": "This entry contains newer activity fields. Reload the app before saving.",
+  "viewAll": "View all activities"
+}

@@ -4,7 +4,8 @@ A personal training, sleep and wellbeing journal with structured measurements, e
 
 **[Open Tedd’mhen](https://teddmhen.piotrzmudadev.com)** · [Try demo](https://teddmhen.piotrzmudadev.com/demo) · [Documentation](https://bloedeBleidd.github.io/Tedd-mhen/) · [Releases](https://github.com/BloedeBleidd/Tedd-mhen/releases) · by [Piotr Żmuda](https://piotrzmudadev.com)
 
-- Daily numeric scales, sleep, physiology, 150 activities, reusable context labels and optional notes.
+- Daily numeric scales, sleep, physiology, 150 sports, 40 habit presets, custom activities with counts/times, context labels and optional notes.
+- Historical check-in review with explainable notices and explicit confirmation of unusual observations.
 - Filtered journals, selective JSON/NDJSON/CSV/Markdown exports, and reviewed JSON/NDJSON/CSV imports.
 - Same-day and lagged relationships, trend-adjusted correlations, multiple-input Bayesian models, exploratory forecasts up to 28 days, uncertainty and chronological evaluation with cited methods.
 - Private email/password accounts with recovery codes; aggregate administration; light/dark appearance with opt-in sunrise/sunset switching.
@@ -35,20 +36,21 @@ npm run test:e2e
 
 ## Documentation
 
-| Topic                                                     | Reference                                                 |
-| --------------------------------------------------------- | --------------------------------------------------------- |
-| Mathematics, priors, uncertainty and evaluation           | [Methodology](docs/METHODOLOGY.md)                        |
-| Fields, units, scales and missing values                  | [Data dictionary](docs/DATA_DICTIONARY.md)                |
-| Collection, storage, privacy and retention                | [Data lifecycle](docs/DATA_STORAGE.md)                    |
-| Formats, round trips and conflict handling                | [Import and export](docs/IMPORT_EXPORT.md)                |
-| Account roles and aggregate statistics                    | [Administration](docs/ADMINISTRATION.md)                  |
-| Components and API contracts                              | [Architecture](docs/ARCHITECTURE.md)                      |
-| Appearance, motion and accessibility                      | [Interface](docs/INTERFACE.md)                            |
-| Languages, canonical identifiers and local country lookup | [Localization](docs/LOCALIZATION.md)                      |
-| Shared examples and isolated demo experiments             | [Demo workspace](docs/DEMO.md)                            |
-| Cloudflare deployment, quotas and recovery                | [Operations](docs/DEPLOYMENT.md)                          |
-| Minimal release packages and GitHub Pages                 | [Releases](docs/RELEASES.md)                              |
-| Algorithm verification and test boundaries                | [Testing](docs/TESTING.md)                                |
-| Security and contribution rules                           | [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md) |
+| Topic                                                       | Reference                                                 |
+| ----------------------------------------------------------- | --------------------------------------------------------- |
+| Mathematics, priors, uncertainty and evaluation             | [Methodology](docs/METHODOLOGY.md)                        |
+| Custom categories, event counts/times and analytical inputs | [Habits and activities](docs/HABITS.md)                   |
+| Fields, units, scales and missing values                    | [Data dictionary](docs/DATA_DICTIONARY.md)                |
+| Collection, storage, privacy and retention                  | [Data lifecycle](docs/DATA_STORAGE.md)                    |
+| Formats, round trips and conflict handling                  | [Import and export](docs/IMPORT_EXPORT.md)                |
+| Account roles and aggregate statistics                      | [Administration](docs/ADMINISTRATION.md)                  |
+| Components and API contracts                                | [Architecture](docs/ARCHITECTURE.md)                      |
+| Appearance, motion and accessibility                        | [Interface](docs/INTERFACE.md)                            |
+| Languages, canonical identifiers and local country lookup   | [Localization](docs/LOCALIZATION.md)                      |
+| Shared examples and isolated demo experiments               | [Demo workspace](docs/DEMO.md)                            |
+| Cloudflare deployment, quotas and recovery                  | [Operations](docs/DEPLOYMENT.md)                          |
+| Minimal release packages and GitHub Pages                   | [Releases](docs/RELEASES.md)                              |
+| Algorithm verification and test boundaries                  | [Testing](docs/TESTING.md)                                |
+| Security and contribution rules                             | [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md) |
 
 TypeScript, React, Vite, Cloudflare Workers/D1/Durable Objects, Recharts, Zod, Vitest and Playwright. No license has been selected; public visibility alone does not grant redistribution rights.

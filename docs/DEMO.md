@@ -27,3 +27,7 @@ Demo exports use a `teddmhen-demo-` filename. JSON, NDJSON and Markdown identify
 ## Operations
 
 The baseline occupies one D1 dataset rather than one copy per account. Each activation reads it once; local edits and analyses do not write back. Cloudflare storage, reads and request quotas still apply. Administrator reports show demo entry count and JSON bytes separately from personal journal totals and registered account counts. Database backups include the baseline and its guards. Follow [Deployment](DEPLOYMENT.md) for private backup and separate-database restore procedures.
+
+## Synthetic habits
+
+Migration 0006 adds reproducible preset and custom habit observations from `scripts/habits-fixture.mjs` without changing original training/sleep values or the 236-day count. It includes missing days, explicit zeros, partial event times, reading, caffeine, daylight, cold showers, nail biting and a custom Phone-free dinner category. Its apparent relationships are constructed, not evidence about real people. The migration preserves all baseline guards. Demo library and daily changes use browser memory only, and never write the shared D1 records.

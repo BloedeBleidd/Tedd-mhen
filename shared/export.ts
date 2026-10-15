@@ -7,6 +7,7 @@ export const exportGroups = [
   'workouts',
   'notes',
   'context',
+  'habits',
 ] as const;
 export type ExportGroup = (typeof exportGroups)[number];
 export type ExportFormat = 'json' | 'csv' | 'md' | 'ndjson';
@@ -36,11 +37,13 @@ export const exportFieldOptions: Record<ExportGroup, { path: string; label: stri
     { path: 'workouts', label: 'Structured training sessions' },
   ],
   context: [{ path: 'labels', label: 'Recorded context labels' }],
+  habits: [{ path: 'habits', label: 'Habit counts, times and duration' }],
   notes: [
     { path: 'notes', label: 'Daily notes' },
     { path: 'sleepNotes', label: 'Sleep notes' },
     { path: 'illnessNotes', label: 'Illness notes' },
     { path: 'workoutNotes', label: 'Session notes (requires sessions)' },
+    { path: 'habitNotes', label: 'Habit notes (requires habits)' },
   ],
 };
 export const allowedExportFields = Object.values(exportFieldOptions)
@@ -65,6 +68,8 @@ export const exportDictionary = {
     'durationMinutes; distanceKm; effort 1–10 (very easy to maximal, project-defined); pain 0–10 (none to extreme); weights in kg. Load = sum(duration × effort); missing if effort or training status missing. Explicit rest = zero.',
   labels:
     'Structured context labels: null/absent = not recorded; [] = explicitly no labels; otherwise presence indicators. User-defined, not validated exposures.',
+  habits:
+    'key is a preset identifier or custom UUID; custom name stays in its original language. count is a daily total, times are local HH:mm events, durationMinutes is the total duration. Absent habit or null value is unknown, explicit 0 means none. Partial event times are allowed; they do not imply a complete event history.',
   notes: 'Optional self-reported narrative; not used by the statistical model.',
 };
 export function selectFields(
@@ -95,6 +100,12 @@ export function selectFields(
         groups.includes('notes') && (!fields || fields.includes('workoutNotes'))
           ? { ...rest, notes }
           : rest,
+      );
+    } else if (group === 'habits') {
+      row.habits = (entry.habits || []).map(({ notes, ...record }) =>
+        groups.includes('notes') && (!fields || fields.includes('habitNotes'))
+          ? { ...record, notes }
+          : record,
       );
     } else row[group] = entry[group];
   }

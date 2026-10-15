@@ -1,0 +1,16 @@
+{
+  "heading": "Eintrag prüfen · Hinweise: {{count}}",
+  "purpose": "Diese Beobachtungen weichen von früheren Einträgen ab. Sie können richtig sein. Prüfe Eingabefehler und behalte die Werte, wenn sie deinen Tag beschreiben. Nichts wird automatisch geändert oder ausgeschlossen.",
+  "loading": "Frühere Beobachtungen werden geprüft…",
+  "unavailable": "Der Verlauf konnte nicht geladen werden. Statistische Prüfungen sind nicht verfügbar; gültige Beobachtungen kannst du trotzdem speichern.",
+  "history": "{{count}} erfasste Tage in den vorherigen 90 Kalendertagen. Der aktuelle Tag und spätere Tage sind ausgeschlossen.",
+  "insufficient": "Jede Prüfung benötigt mindestens 30 vergleichbare Werte. Kein statistischer Hinweis bedeutet nicht, dass der Eintrag sicher richtig ist.",
+  "valueWarning": "Außerhalb des historischen Prüfbereichs {{range}}, basierend auf {{count}} vergleichbaren Werten. Dies ist eine Heuristik, kein Gesundheitsbereich oder Konfidenzintervall.",
+  "relationshipWarning": "Bei {{predictor}} = {{value}} ({{timing}}) ergibt die historische Regression ein 99,5-%-Vorhersageintervall von {{range}}. {{count}} frühere Paare; r = {{correlation}}. Das ist ein Zusammenhang, keine kausale oder klinische Regel.",
+  "sameDay": "gleiches Eintragsdatum",
+  "previousDay": "vorheriger Kalendertag",
+  "method": "Werte werden mit einer Median/MAD-Regel und Mindeststreuung geprüft. Acht festgelegte Beziehungen benötigen stabile Korrelationen in beiden Verlaufshälften und nach Trendbereinigung. Wiederholte Prüfungen, fehlende Daten und Abhängigkeiten können Fehlhinweise erzeugen. Eine echte Veränderung ist einen Eintrag wert.",
+  "source": "NIST/SEMATECH: Erkennung von Ausreißern (modifizierter Z-Wert)",
+  "confirm": "Ich habe diese Beobachtungen geprüft und möchte die eingegebenen Werte behalten.",
+  "reviewButton": "Hinweise prüfen ({{count}})"
+}

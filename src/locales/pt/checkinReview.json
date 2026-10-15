@@ -1,0 +1,16 @@
+{
+  "heading": "Revisão do registo · avisos: {{count}}",
+  "purpose": "Estas observações diferem dos registos anteriores. Podem estar corretas. Verifique erros de digitação e mantenha os valores se descrevem o seu dia. Nada é alterado nem excluído automaticamente.",
+  "loading": "A verificar observações anteriores…",
+  "unavailable": "Não foi possível carregar o histórico. As verificações estatísticas estão indisponíveis; pode guardar observações válidas.",
+  "history": "{{count}} dias registados nos 90 dias anteriores. O dia atual e os dias posteriores são excluídos.",
+  "insufficient": "Cada verificação exige pelo menos 30 valores comparáveis. A ausência de avisos não prova que o registo esteja correto.",
+  "valueWarning": "Fora do intervalo histórico de revisão {{range}}, com base em {{count}} valores comparáveis. É uma regra orientadora, não um intervalo saudável nem de confiança.",
+  "relationshipWarning": "Com {{predictor}} = {{value}} ({{timing}}), a regressão histórica dá um intervalo preditivo de 99,5% de {{range}}. {{count}} pares anteriores; r = {{correlation}}. É uma associação, não uma regra causal nem clínica.",
+  "sameDay": "mesma data do registo",
+  "previousDay": "dia anterior",
+  "method": "Os valores usam uma regra de mediana/MAD com dispersão mínima. Oito relações predefinidas exigem correlação estável nas duas metades do histórico e após remoção da tendência. Verificações repetidas, dados em falta e dependência podem gerar falsos avisos. Uma mudança real merece ser registada.",
+  "source": "NIST/SEMATECH: Deteção de valores atípicos (Z modificado)",
+  "confirm": "Verifiquei estas observações e quero manter os valores introduzidos.",
+  "reviewButton": "Rever avisos ({{count}})"
+}

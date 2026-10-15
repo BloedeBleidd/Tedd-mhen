@@ -1,0 +1,15 @@
+{
+  "exportFields": "Contagens, horas e duração dos hábitos",
+  "exportNotes": "Notas dos hábitos (requer hábitos)",
+  "exportDescription": "Contagens diárias, horas, duração e categorias próprias",
+  "countDescription": "Contagem diária deste hábito. Ausente significa desconhecido; um zero explícito significa nenhum evento.",
+  "durationDescription": "Total de minutos registados para este hábito. A duração ausente não é zero.",
+  "timeDescription": "Média do seno/cosseno das horas locais; disponível apenas se cada evento contado tiver hora. Selecione ambas as componentes. Não são horas decorridas.",
+  "nameError": "As atividades próprias precisam de nome; os nomes predefinidos vêm do catálogo.",
+  "timeCountError": "As horas registadas não podem exceder a contagem diária.",
+  "zeroDurationError": "Uma contagem de zero não pode ter duração positiva.",
+  "duplicateError": "Registe cada hábito uma vez por dia; combine os eventos nessa linha.",
+  "libraryLimit": "A biblioteca excede 10 000 definições.",
+  "legacyError": "O registo contém novos campos de atividade. Recarregue a aplicação antes de guardar.",
+  "viewAll": "Ver todas as atividades"
+}

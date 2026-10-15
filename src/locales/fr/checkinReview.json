@@ -1,0 +1,16 @@
+{
+  "heading": "Vérification du bilan · avis : {{count}}",
+  "purpose": "Ces observations diffèrent des précédentes. Elles peuvent être exactes. Vérifiez les erreurs de saisie, puis gardez les valeurs si elles décrivent votre journée. Rien n’est modifié ni exclu automatiquement.",
+  "loading": "Vérification des observations précédentes…",
+  "unavailable": "L’historique n’a pas pu être chargé. Les vérifications statistiques sont indisponibles ; vous pouvez enregistrer les observations valides.",
+  "history": "{{count}} jours renseignés sur les 90 jours calendaires précédents. Le jour actuel et les jours suivants sont exclus.",
+  "insufficient": "Chaque vérification exige au moins 30 valeurs comparables. L’absence de remarque statistique ne prouve pas qu’un bilan est exact.",
+  "valueWarning": "Hors de la plage historique de vérification {{range}}, calculée sur {{count}} valeurs comparables. C’est une règle indicative, pas une plage de santé ni un intervalle de confiance.",
+  "relationshipWarning": "Avec {{predictor}} = {{value}} ({{timing}}), la régression historique donne un intervalle prédictif à 99,5 % de {{range}}. {{count}} paires antérieures ; r = {{correlation}}. C’est une association, pas une règle causale ou clinique.",
+  "sameDay": "même date du journal",
+  "previousDay": "jour calendaire précédent",
+  "method": "Les valeurs suivent une règle médiane/MAD avec dispersion minimale. Huit relations prédéfinies exigent aussi une corrélation stable dans les deux moitiés de l’historique et après retrait de tendance. Les vérifications répétées, données manquantes et dépendances peuvent produire de fausses alertes. Un changement réel mérite d’être enregistré.",
+  "source": "NIST/SEMATECH : Détection des valeurs atypiques (score Z modifié)",
+  "confirm": "J’ai vérifié ces observations et souhaite conserver les valeurs saisies.",
+  "reviewButton": "Vérifier les avis ({{count}})"
+}

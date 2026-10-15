@@ -1,3 +1,4 @@
+import { habitDefinitionSchema, habitKeySchema, type HabitDefinition } from '../../shared/habits';
 import { z } from 'zod';
 import { DEMO_DATASET } from '../../shared/demo';
 import {
@@ -39,6 +40,7 @@ export class DemoWorkspace {
   readonly title: string;
   readonly id: string;
   readonly recordCount: number;
+  private definitions = new Map<string, HabitDefinition>();
   private rows: Map<string, StoredEntry>;
   constructor(
     snapshot: unknown,
@@ -63,6 +65,12 @@ export class DemoWorkspace {
         return [shifted.date, shifted];
       }),
     );
+    for (const entry of this.rows.values()) this.remember(entry);
+  }
+  private remember(entry: StoredEntry) {
+    for (const habit of entry.habits || [])
+      if (habit.name && !this.definitions.has(habit.key))
+        this.definitions.set(habit.key, { key: habit.key, name: habit.name, archived: false });
   }
   snapshot(): StoredEntry[] {
     return structuredClone([...this.rows.values()]);
@@ -89,6 +97,14 @@ export class DemoWorkspace {
       throw new ApiError('Sign in or create an account to manage your own journal.', 403);
     if (url.pathname === '/api/session' && method === 'GET')
       return { id: this.id, email: 'Demo workspace', local: false, admin: false };
+    if (url.pathname === '/api/habit-definitions') {
+      if (method === 'GET') return { definitions: structuredClone([...this.definitions.values()]) };
+      if (method === 'PUT') {
+        const definition = habitDefinitionSchema.parse(JSON.parse(String(options.body)));
+        this.definitions.set(definition.key, definition);
+        return structuredClone(definition);
+      }
+    }
     const match = url.pathname.match(/^\/api\/entries\/(\d{4}-\d{2}-\d{2})$/);
     if (match) {
       const date = dateSchema.parse(match[1]);
@@ -112,6 +128,7 @@ export class DemoWorkspace {
           createdAt: existing?.createdAt || now,
           updatedAt: now,
         });
+        this.remember(this.rows.get(date)!);
         return { date, revision: revision + 1 };
       }
       if (method === 'DELETE') {
@@ -146,6 +163,8 @@ export class DemoWorkspace {
       .toLowerCase();
     const type = url.searchParams.get('type');
     if (type) z.enum(workoutTypes).parse(type);
+    const habit = url.searchParams.get('habit');
+    if (habit) habitKeySchema.parse(habit);
     const illness = z.enum(['', 'all', 'yes', 'no']).parse(url.searchParams.get('illness') || '');
     const selected = [...this.rows.values()].filter(
       (entry) =>
@@ -153,6 +172,7 @@ export class DemoWorkspace {
         entry.date <= to &&
         (!q || JSON.stringify(entry).toLowerCase().includes(q)) &&
         (!type || entry.workouts.some((workout) => workout.type === type)) &&
+        (!habit || entry.habits.some((record) => record.key === habit)) &&
         (illness !== 'yes' || (entry.illnessSeverity ?? 0) > 0 || entry.symptoms.length > 0) &&
         (illness !== 'no' || entry.illnessSeverity === 0),
     );

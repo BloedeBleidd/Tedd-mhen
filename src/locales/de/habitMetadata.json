@@ -1,0 +1,15 @@
+{
+  "exportFields": "Anzahl, Zeiten und Dauer der Gewohnheiten",
+  "exportNotes": "Notizen zu Gewohnheiten (benötigt Gewohnheiten)",
+  "exportDescription": "Tagesanzahl, Ereigniszeiten, Dauer und eigene Kategorien",
+  "countDescription": "Tagesanzahl dieser erfassten Gewohnheit. Fehlend bedeutet unbekannt; eine ausdrückliche Null bedeutet kein Ereignis.",
+  "durationDescription": "Erfasste Gesamtminuten dieser Gewohnheit. Fehlende Dauer ist nicht null.",
+  "timeDescription": "Mittlerer Sinus/Kosinus der lokalen Ereigniszeiten; nur verfügbar, wenn jedes gezählte Ereignis eine Uhrzeit hat. Beide Komponenten auswählen. Keine verstrichenen Stunden.",
+  "nameError": "Eigene Aktivitäten brauchen einen Namen; Vorlagennamen stammen aus dem Katalog.",
+  "timeCountError": "Die Anzahl erfasster Zeiten darf die Tagesanzahl nicht überschreiten.",
+  "zeroDurationError": "Eine Anzahl von null kann keine positive Dauer haben.",
+  "duplicateError": "Jede Gewohnheit nur einmal pro Tag erfassen; Ereignisse in dieser Zeile zusammenfassen.",
+  "libraryLimit": "Die Aktivitätsbibliothek überschreitet 10.000 Definitionen.",
+  "legacyError": "Dieser Eintrag enthält neuere Aktivitätsfelder. Lade die App vor dem Speichern neu.",
+  "viewAll": "Alle Aktivitäten ansehen"
+}

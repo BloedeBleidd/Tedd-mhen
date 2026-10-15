@@ -1,0 +1,16 @@
+{
+  "heading": "Sprawdzenie wpisu · uwagi: {{count}}",
+  "purpose": "Te obserwacje różnią się od wcześniejszych zapisów. Mogą być prawidłowe. Sprawdź literówki i pozostaw oryginalne wartości, jeśli opisują Twój dzień. Nic nie jest automatycznie zmieniane ani wykluczane.",
+  "loading": "Sprawdzanie wcześniejszych obserwacji…",
+  "unavailable": "Nie udało się wczytać historii. Sprawdzenie statystyczne jest niedostępne; nadal możesz zapisać prawidłowe obserwacje.",
+  "history": "W poprzednich 90 dniach zapisano {{count}} wcześniejszych dni. Bieżący dzień i późniejsze daty są wykluczone.",
+  "insufficient": "Każde sprawdzenie wymaga co najmniej 30 porównywalnych wartości. Brak uwagi statystycznej nie dowodzi poprawności wpisu.",
+  "valueWarning": "Poza historycznym zakresem kontrolnym {{range}}, na podstawie {{count}} porównywalnych wartości. To reguła pomocnicza, a nie zakres zdrowia ani przedział ufności.",
+  "relationshipWarning": "Przy {{predictor}} = {{value}} ({{timing}}) regresja historyczna daje przedział predykcyjny 99,5%: {{range}}. Wcześniejsze pary: {{count}}; r = {{correlation}}. To związek statystyczny, a nie reguła przyczynowa ani kliniczna.",
+  "sameDay": "ta sama data wpisu",
+  "previousDay": "poprzedni dzień kalendarzowy",
+  "method": "Wartości są sprawdzane regułą mediany/MAD z minimalną skalą. Osiem ustalonych relacji wymaga też stabilnej korelacji w obu połowach historii oraz po usunięciu trendu. Wielokrotne sprawdzanie, braki danych i zależność obserwacji mogą dawać fałszywe uwagi. Rzeczywistą zmianę warto zapisać.",
+  "source": "NIST/SEMATECH: Wykrywanie obserwacji odstających (zmodyfikowany wynik Z)",
+  "confirm": "Sprawdziłem te obserwacje i chcę zachować wpisane wartości.",
+  "reviewButton": "Sprawdź uwagi ({{count}})"
+}

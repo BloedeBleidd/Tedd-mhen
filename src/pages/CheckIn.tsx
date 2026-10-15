@@ -1,3 +1,8 @@
+import { HabitsEditor } from '../components/HabitsEditor';
+import { CheckInReview } from '../components/CheckInReview';
+import { reviewCheckIn } from '../../shared/checkin-review';
+import { useLoad } from '../lib/api';
+import { shiftDate, type EntrySummary } from '../../shared/schema';
 import { MessageValue } from '../components/MessageValue';
 import { ActivitySelect } from '../components/ActivitySelect';
 import { supportsSets } from '../../shared/activities';
@@ -5,8 +10,8 @@ import { useTranslation, Trans } from 'react-i18next';
 import { enumLabel, t as tr } from '../i18n';
 import { invalidField } from '../lib/form-feedback';
 import { LabelsEditor } from '../components/LabelsEditor';
-import { useEffect, useRef, useState } from 'react';
-import { useBlocker, useSearchParams } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useBlocker, useLocation, useSearchParams } from 'react-router-dom';
 import { Check, ChevronDown, Dumbbell, Heart, Moon, Plus, Save, Trash2, Waves } from 'lucide-react';
 import { ApiError, useApi } from '../lib/api';
 import {
@@ -29,6 +34,7 @@ export function CheckIn() {
   const [params, setParams] = useSearchParams(),
     date = params.get('date') || localDate();
   const validDate = dateSchema.safeParse(date).success;
+  const { hash } = useLocation();
   const errorRef = useRef<HTMLDivElement>(null);
   const [loadAttempt, setLoadAttempt] = useState(0);
   const { request, invalidate, demo } = useApi();
@@ -40,6 +46,22 @@ export function CheckIn() {
     [saved, setSaved] = useState(false),
     [dirty, setDirty] = useState(false),
     [loadFailed, setLoadFailed] = useState(false);
+  const history = useLoad<{ entries: EntrySummary[] }>(
+    validDate ? `/api/series?from=${shiftDate(date, -90)}&to=${shiftDate(date, -1)}` : null,
+  );
+  const [reviewEntry, setReviewEntry] = useState(entry);
+  const [reviewOpen, setReviewOpen] = useState(false),
+    [confirmedReview, setConfirmedReview] = useState('');
+  useEffect(() => {
+    const timer = setTimeout(() => setReviewEntry(entry), 400);
+    return () => clearTimeout(timer);
+  }, [entry]);
+  const review = useMemo(
+    () => reviewCheckIn(reviewEntry, history.data?.entries || []),
+    [reviewEntry, history.data],
+  );
+  const reviewSignature = JSON.stringify([entry, history.data]);
+  const reviewConfirmed = confirmedReview === reviewSignature;
   const requestRef = useRef(request);
   requestRef.current = request;
   const blocker = useBlocker(
@@ -65,6 +87,8 @@ export function CheckIn() {
     setError(null);
     setDirty(false);
     setLoadFailed(false);
+    setReviewOpen(false);
+    setConfirmedReview('');
     if (!validDate) {
       setLoading(false);
       setLoadFailed(true);
@@ -76,12 +100,16 @@ export function CheckIn() {
       .then((data) => {
         if (!active) return;
         const { revision, createdAt: _c, updatedAt: _u, ...entry } = data;
-        setEntry(entry);
+        const loaded = { ...entry, habits: entry.habits || [] };
+        setEntry(loaded);
+        setReviewEntry(loaded);
         setRevision(revision);
       })
       .catch((err) => {
         if (!active) return;
-        setEntry(emptyEntry(date));
+        const blank = emptyEntry(date);
+        setEntry(blank);
+        setReviewEntry(blank);
         setRevision(0);
         if (!(err instanceof ApiError && err.status === 404)) {
           setError(err.message);
@@ -95,6 +123,17 @@ export function CheckIn() {
       active = false;
     };
   }, [date, demo, validDate, loadAttempt]);
+  useEffect(() => {
+    if (
+      loading ||
+      !['#habits', '#daily-ratings', '#sleep', '#body-signals', '#training'].includes(hash)
+    )
+      return;
+    const frame = requestAnimationFrame(() =>
+      document.getElementById(hash.slice(1))?.scrollIntoView({ block: 'start' }),
+    );
+    return () => cancelAnimationFrame(frame);
+  }, [loading, hash, date]);
   useEffect(() => {
     if (!dirty && !saving) return;
     const unload = (e: BeforeUnloadEvent) => {
@@ -146,7 +185,7 @@ export function CheckIn() {
   }
   async function save(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (saving || loadFailed) return;
+    if (saving || loadFailed || history.loading) return;
     const invalid = invalidField(e.currentTarget);
     if (invalid) {
       setError(invalid);
@@ -164,6 +203,16 @@ export function CheckIn() {
       requestAnimationFrame(() => {
         errorRef.current?.focus();
         errorRef.current?.scrollIntoView({ block: 'center' });
+      });
+      return;
+    }
+    const latestReview = reviewCheckIn(parsed.data, history.data?.entries || []);
+    if (latestReview.warnings.length && !reviewConfirmed) {
+      setReviewEntry(entry);
+      setReviewOpen(true);
+      requestAnimationFrame(() => {
+        document.getElementById('checkin-review')?.focus();
+        document.getElementById('checkin-review')?.scrollIntoView({ block: 'center' });
       });
       return;
     }
@@ -231,6 +280,7 @@ export function CheckIn() {
         <a href="#daily-ratings">{tr('checkIn:dailyRatings')}</a>
         <a href="#sleep">{tr('checkIn:sleep')}</a>
         <a href="#body-signals">{tr('checkIn:bodySignalsSymptoms')}</a>
+        <a href="#habits">{tr('habits:title')}</a>
         <a href="#training">{tr('checkIn:training')}</a>
       </nav>
       {loading ? (
@@ -514,6 +564,10 @@ export function CheckIn() {
                     />
                   </details>
                 </Panel>
+                <HabitsEditor
+                  value={entry.habits || []}
+                  onChange={(records) => update('habits', records)}
+                />
                 <Panel
                   id="training"
                   title={tr('checkIn:04MovementTraining')}
@@ -733,6 +787,17 @@ export function CheckIn() {
               </aside>
             </div>
           </fieldset>
+          <CheckInReview
+            result={review}
+            loading={history.loading}
+            unavailable={!!history.error}
+            open={reviewOpen}
+            setOpen={setReviewOpen}
+            confirmed={reviewConfirmed}
+            onConfirm={(checked) =>
+              setConfirmedReview(checked ? JSON.stringify([reviewEntry, history.data]) : '')
+            }
+          />
           <div className="save-bar">
             <div aria-live="polite">
               {saved ? (
@@ -761,9 +826,29 @@ export function CheckIn() {
                   <Trans i18nKey="checkIn:delete" components={{ slot0: <Trash2 size={16} /> }} />
                 </button>
               )}
-              <button className="button primary" type="submit" disabled={saving || loadFailed}>
+              {review.warnings.length > 0 && (
+                <button
+                  type="button"
+                  className="button secondary small-button"
+                  onClick={() => {
+                    setReviewOpen(true);
+                    document.getElementById('checkin-review')?.scrollIntoView({ block: 'center' });
+                  }}
+                >
+                  {tr('checkinReview:reviewButton', { count: review.warnings.length })}
+                </button>
+              )}
+              <button
+                className="button primary"
+                type="submit"
+                disabled={saving || loadFailed || history.loading}
+              >
                 <Save size={16} />
-                {saving ? tr('checkIn:saving') : tr('checkIn:saveCheckIn')}
+                {saving
+                  ? tr('checkIn:saving')
+                  : history.loading
+                    ? tr('checkinReview:loading')
+                    : tr('checkIn:saveCheckIn')}
               </button>
             </div>
           </div>

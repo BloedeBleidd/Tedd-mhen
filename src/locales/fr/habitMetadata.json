@@ -1,0 +1,15 @@
+{
+  "exportFields": "Nombres, heures et durée des habitudes",
+  "exportNotes": "Notes sur les habitudes (habitudes requises)",
+  "exportDescription": "Nombres quotidiens, heures, durée et catégories personnelles",
+  "countDescription": "Nombre quotidien pour cette habitude. Une valeur manquante est inconnue ; un zéro explicite signifie aucun événement.",
+  "durationDescription": "Total des minutes renseignées pour cette habitude. Une durée manquante n’est pas zéro.",
+  "timeDescription": "Moyenne du sinus/cosinus des heures locales ; disponible uniquement si chaque événement compté a une heure. Sélectionnez les deux composantes. Ce n’est pas une durée en heures.",
+  "nameError": "Les activités personnelles ont besoin d’un nom ; ceux des modèles viennent du catalogue.",
+  "timeCountError": "Le nombre d’heures renseignées ne peut dépasser le nombre d’événements du jour.",
+  "zeroDurationError": "Un nombre nul ne peut avoir une durée positive.",
+  "duplicateError": "Renseignez chaque habitude une seule fois par jour ; regroupez ses événements sur cette ligne.",
+  "libraryLimit": "La bibliothèque dépasse 10 000 définitions.",
+  "legacyError": "Ce bilan contient de nouveaux champs d’activité. Rechargez l’application avant d’enregistrer.",
+  "viewAll": "Voir toutes les activités"
+}

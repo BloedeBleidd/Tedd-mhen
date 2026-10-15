@@ -1,3 +1,4 @@
+import { WorkspaceLink } from '../components/WorkspaceLink';
 import { useTranslation } from 'react-i18next';
 import { localize, t as tr } from '../i18n';
 import { featureDescription } from '../lib/feature-labels';
@@ -21,6 +22,13 @@ export function MetricsGuide() {
           'metricsGuide:recordedMeasurementsTransparentTransformationsAndTheMathematicsBehindEach',
         )}
       />
+      <Panel title={tr('habits:title')}>
+        <p>{tr('habits:guide')}</p>
+        <p>{tr('habits:reviewGuide')}</p>
+        <WorkspaceLink className="text-link" to="/check-in#habits">
+          {tr('habits:openCheckIn')}
+        </WorkspaceLink>
+      </Panel>
       <Panel title={tr('metricsGuide:scopeOfTheEvidence')}>
         <p>{tr('metricsGuide:publishedMethodsExplainTheMathematicsAndMeasurementConceptsThey')}</p>
         <ul>

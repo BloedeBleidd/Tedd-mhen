@@ -1,0 +1,15 @@
+{
+  "exportFields": "Recuentos, horas y duración de hábitos",
+  "exportNotes": "Notas de hábitos (requiere hábitos)",
+  "exportDescription": "Recuentos diarios, horas, duración y categorías propias",
+  "countDescription": "Recuento diario de este hábito. Ausente significa desconocido; un cero explícito significa ninguno.",
+  "durationDescription": "Minutos totales registrados para este hábito. La duración ausente no es cero.",
+  "timeDescription": "Media del seno/coseno de las horas locales; disponible solo si cada evento contado tiene hora. Selecciona ambos componentes. No son horas transcurridas.",
+  "nameError": "Las actividades propias necesitan nombre; los nombres predefinidos vienen del catálogo.",
+  "timeCountError": "Las horas registradas no pueden superar el recuento diario.",
+  "zeroDurationError": "Un recuento de cero no puede tener duración positiva.",
+  "duplicateError": "Registra cada hábito una vez al día; combina sus eventos en esa fila.",
+  "libraryLimit": "La biblioteca supera las 10 000 definiciones.",
+  "legacyError": "El registro contiene campos de actividad nuevos. Recarga la aplicación antes de guardar.",
+  "viewAll": "Ver todas las actividades"
+}

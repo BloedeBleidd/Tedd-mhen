@@ -37,6 +37,10 @@ const groupInfo: Record<ExportGroup, { title: string; description: string }> = {
     description:
       'Activity, duration, distance, effort, pain, heart rate, strength sets, rest status',
   },
+  habits: {
+    title: 'Habits & activities',
+    description: 'Daily counts, event times, duration and your custom categories',
+  },
   context: {
     title: 'Context labels',
     description: 'Structured labels, including explicitly no labels or unrecorded context',
@@ -57,6 +61,7 @@ export function Export() {
       'physiology',
       'symptoms',
       'workouts',
+      'habits',
     ]),
     [format, setFormat] = useState<ExportFormat>('json'),
     [busy, setBusy] = useState(false),

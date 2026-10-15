@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import worker from '../worker/index';
 import { adapter } from './database';
 import type { Env } from '../worker/auth';
+import { customHabit } from './fixtures/habits';
 import { emptyEntry } from '../shared/schema';
 let actor = 'owner-a';
 vi.mock('../worker/auth', () => ({
@@ -39,10 +40,100 @@ beforeEach(() => {
   sqlite.exec(readFileSync('migrations/0001_initial.sql', 'utf8'));
   sqlite.exec(readFileSync('migrations/0002_accounts.sql', 'utf8'));
   sqlite.exec(readFileSync('migrations/0003_administrators.sql', 'utf8'));
+  sqlite.exec(readFileSync('migrations/0005_habit_definitions.sql', 'utf8'));
   env = { DB: adapter(sqlite) } as Env;
   actor = 'owner-a';
 });
 describe('API ownership, concurrency, filtering, and streaming exports', () => {
+  it('isolates custom libraries, validates writes and remembers imported categories only on successful revisions', async () => {
+    const definition = { key: customHabit.key, name: customHabit.name, archived: false };
+    expect(
+      (await call('/api/habit-definitions', 'PUT', definition, { Origin: 'https://evil.test' }))
+        .status,
+    ).toBe(403);
+    expect(
+      (await call('/api/habit-definitions', 'PUT', { ...definition, owner_id: 'owner-b' })).status,
+    ).toBe(400);
+    expect(
+      (
+        await call('/api/habit-definitions', 'PUT', definition, {
+          'X-Teddmhen-Expected-User': 'owner-b',
+        })
+      ).status,
+    ).toBe(403);
+    expect((await call('/api/habit-definitions', 'PUT', definition)).status).toBe(200);
+    expect(await (await call('/api/habit-definitions')).json()).toEqual({
+      definitions: [definition],
+    });
+    actor = 'owner-b';
+    expect(await (await call('/api/habit-definitions')).json()).toEqual({ definitions: [] });
+    const entry = { ...emptyEntry('2026-01-01'), habits: [customHabit] };
+    expect((await call('/api/entries/2026-01-01', 'PUT', { entry, revision: 0 })).status).toBe(201);
+    expect(await (await call('/api/habit-definitions')).json()).toEqual({
+      definitions: [definition],
+    });
+    const other = {
+      ...customHabit,
+      key: 'custom:00000000-0000-4000-8000-000000000099',
+      name: 'Stale',
+    };
+    expect(
+      (
+        await call('/api/entries/2026-01-01', 'PUT', {
+          entry: { ...entry, habits: [other] },
+          revision: 0,
+        })
+      ).status,
+    ).toBe(409);
+    expect(await (await call('/api/habit-definitions')).json()).toEqual({
+      definitions: [definition],
+    });
+    expect(
+      (await call('/api/habit-definitions', 'PUT', { ...definition, archived: true })).status,
+    ).toBe(200);
+    expect(await (await call('/api/entries/2026-01-01')).json()).toMatchObject({
+      habits: [customHabit],
+    });
+    actor = 'owner-a';
+    expect(await (await call('/api/habit-definitions')).json()).toEqual({
+      definitions: [definition],
+    });
+  });
+  it('returns safe habit summaries, filters recorded zero counts, exports all eight groups and protects older clients', async () => {
+    const date = '2026-01-01';
+    const entry = {
+      ...emptyEntry(date),
+      habits: [{ ...customHabit, count: 0, times: [], durationMinutes: 0 }],
+    };
+    expect((await call(`/api/entries/${date}`, 'PUT', { entry, revision: 0 })).status).toBe(201);
+    await call('/api/entries/2026-01-02', 'PUT', { entry: emptyEntry('2026-01-02'), revision: 0 });
+    const list = (await (await call(`/api/entries?habit=${customHabit.key}`)).json()) as {
+      entries: Record<string, unknown>[];
+      total: number;
+    };
+    expect(list.total).toBe(1);
+    expect(list.entries[0]).toHaveProperty('habits.0.count', 0);
+    expect(list.entries[0]).not.toHaveProperty('habits.0.notes');
+    expect(JSON.stringify(await (await call('/api/series?all=true')).json())).not.toContain(
+      'Oryginalny',
+    );
+    expect((await call('/api/entries?habit=invalid')).status).toBe(400);
+    const { habits: _habits, ...legacy } = entry;
+    expect((await call(`/api/entries/${date}`, 'PUT', { entry: legacy, revision: 1 })).status).toBe(
+      409,
+    );
+    expect(
+      (await call(`/api/entries/${date}`, 'PUT', { entry: { ...entry, habits: [] }, revision: 1 }))
+        .status,
+    ).toBe(200);
+    const full = await call('/api/export?from=2026-01-01&to=2026-01-02');
+    expect(full.status).toBe(200);
+    expect(await full.json()).toHaveProperty('groups.7', 'habits');
+    actor = 'owner-b';
+    expect(await (await call(`/api/entries?habit=${customHabit.key}`)).json()).toMatchObject({
+      total: 0,
+    });
+  });
   it('returns complete owner-scoped journal bounds independently of pagination', async () => {
     for (const date of ['2005-01-01', '2005-06-01', '2006-01-01'])
       await call(`/api/entries/${date}`, 'PUT', { entry: emptyEntry(date), revision: 0 });

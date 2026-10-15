@@ -91,7 +91,7 @@ function csvRows(text: string) {
           throw new Error('Unsupported schema version.');
         if (metadata.has(root) && root !== 'timezone' && root !== 'date') continue;
         let value: unknown = raw;
-        if (['labels', 'symptoms', 'workouts'].includes(root))
+        if (['labels', 'symptoms', 'workouts', 'habits'].includes(root))
           value = raw ? parseJson(raw) : root === 'labels' ? null : [];
         else if (
           root === 'date' ||
@@ -142,6 +142,14 @@ export function mergeImported(row: ImportRow, existing?: Entry): Entry {
         if (!Object.hasOwn(base[key], nested))
           throw new Error(`Unsupported ${key} field: ${nested}`);
       Object.assign(base[key], value);
+    } else if (key === 'habits') {
+      const parsed = entrySchema.shape.habits.parse(value);
+      base.habits = parsed.map((item, index) => ({
+        ...item,
+        notes: Object.hasOwn((value as Record<string, unknown>[])[index], 'notes')
+          ? item.notes
+          : (existing?.habits?.find((h) => h.key === item.key)?.notes ?? ''),
+      }));
     } else if (key === 'workouts') {
       if (!Array.isArray(value)) throw new Error('Workouts must be an array.');
       base.workouts = value.map((item) => {

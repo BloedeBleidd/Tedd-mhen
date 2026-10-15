@@ -1,3 +1,5 @@
+import { habitPresets, type HabitDefinition } from '../../shared/habits';
+import { habitName } from '../components/HabitsEditor';
 import { ActivitySelect } from '../components/ActivitySelect';
 import { MessageValue } from '../components/MessageValue';
 import { useTranslation, Trans } from 'react-i18next';
@@ -24,6 +26,7 @@ export function Journal() {
     [q, setQ] = useState(''),
     [search, setSearch] = useState(''),
     [type, setType] = useState(''),
+    [habit, setHabit] = useState(''),
     [illness, setIllness] = useState('all'),
     [cursors, setCursors] = useState<string[]>([]);
   useEffect(() => {
@@ -33,7 +36,9 @@ export function Journal() {
     }, 300);
     return () => clearTimeout(timer);
   }, [q]);
+  const library = useLoad<{ definitions: HabitDefinition[] }>('/api/habit-definitions');
   const query = new URLSearchParams({
+    habit,
     ...(from ? { from } : {}),
     ...(to ? { to } : {}),
     q: search,
@@ -47,13 +52,14 @@ export function Journal() {
     nextCursor: string | null;
     total: number;
   }>(`/api/entries?${query}`);
-  const filtered = !!(from || to || search || type || illness !== 'all');
+  const filtered = !!(from || to || search || type || habit || illness !== 'all');
   function reset() {
     setFrom('');
     setTo('');
     setQ('');
     setSearch('');
     setType('');
+    setHabit('');
     setIllness('all');
     setCursors([]);
   }
@@ -122,6 +128,25 @@ export function Journal() {
               }}
             />
           </div>
+          <Field label={tr('habits:filter')}>
+            <select
+              value={habit}
+              onChange={(e) => {
+                setHabit(e.target.value);
+                setCursors([]);
+              }}
+            >
+              <option value="">{tr('habits:all')}</option>
+              {[
+                ...habitPresets.map((id) => ({ key: `preset:${id}`, name: null })),
+                ...(library.data?.definitions || []),
+              ].map((d) => (
+                <option key={d.key} value={d.key}>
+                  {habitName(d)}
+                </option>
+              ))}
+            </select>
+          </Field>
           <Field label={tr('journal:illness')}>
             <select
               value={illness}
@@ -137,7 +162,7 @@ export function Journal() {
           </Field>
         </div>
       </Panel>
-      <ErrorBox message={error} />
+      <ErrorBox message={error || library.error} />
       {loading ? (
         <Loading />
       ) : (
@@ -183,6 +208,7 @@ export function Journal() {
                           />
                         </th>
                         <th>{tr('journal:activity')}</th>
+                        <th>{tr('habits:title')}</th>
                         <th>{tr('journal:wellbeing')}</th>
                         <th>{tr('journal:sleep')}</th>
                         <th>{tr('journal:hrv')}</th>
@@ -221,6 +247,24 @@ export function Journal() {
                                     : tr('journal:notRecorded')}
                                 </span>
                               )}
+                            </div>
+                          </td>
+                          <td>
+                            <div className="activity-tags">
+                              {(e.habits || []).slice(0, 3).map((record) => (
+                                <span key={record.key} className="tag">
+                                  {habitName(record)}:{' '}
+                                  {record.count === null
+                                    ? tr('habits:recorded')
+                                    : number(record.count, 0)}
+                                </span>
+                              ))}
+                              {(e.habits?.length || 0) > 3 && (
+                                <Link className="text-link" to={`/check-in?date=${e.date}#habits`}>
+                                  {tr('habitMetadata:viewAll')}
+                                </Link>
+                              )}
+                              {!e.habits?.length && <span className="muted">—</span>}
                             </div>
                           </td>
                           <td>

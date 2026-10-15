@@ -2,7 +2,7 @@
 
 ## Collection contract
 
-Daily check-ins record explicit numeric scales, sleep, physiology, symptoms and training sessions. Notes are optional. Missing values stay `null`; explicit rest and zero symptom severity have different meanings from unknown values. Context labels distinguish unrecorded (`null`) from explicitly no labels (`[]`). Sleep belongs to the date of waking. Field semantics and limits are defined in the [data dictionary](DATA_DICTIONARY.md).
+Daily check-ins record explicit numeric scales, sleep, physiology, symptoms, training sessions and custom/preset habit counts, event times and durations. Notes are optional. Missing values stay `null`; explicit rest and zero symptom severity have different meanings from unknown values. Context labels distinguish unrecorded (`null`) from explicitly no labels (`[]`). Sleep belongs to the date of waking. Field semantics and limits are defined in the [data dictionary](DATA_DICTIONARY.md).
 
 Each saved day has an owner ID, journal date, timezone, schema version, optimistic revision, and creation/update timestamps. One owner/date pair identifies a record. An update or deletion must match the current revision. Old revisions are not retained as an application audit history.
 
@@ -10,13 +10,13 @@ Each saved day has an owner ID, journal date, timezone, schema version, optimist
 
 The owner’s Cloudflare account hosts the Worker, static application, D1 SQLite database and authentication Durable Object. Public source and static assets contain no personal journal records. The repository includes only synthetic example records for seeding the shared demo. Personal data APIs derive the owner from a verified application session, never from imported metadata or browser-supplied ownership.
 
-D1 stores journal JSON, account identifiers, salted password hashes, recovery-code hashes and session-token hashes. The authentication Durable Object stores expiring attempt counters keyed by hashed IP/email identifiers. Email is an unverified sign-in identifier. No mail service is connected. See [Security](https://github.com/BloedeBleidd/Tedd-mhen/blob/main/SECURITY.md) for authentication, session lifetime and local-only bypass rules.
+D1 stores the owner-scoped custom activity library, journal JSON, account identifiers, salted password hashes, recovery-code hashes and session-token hashes. The authentication Durable Object stores expiring attempt counters keyed by hashed IP/email identifiers. Email is an unverified sign-in identifier. No mail service is connected. See [Security](https://github.com/BloedeBleidd/Tedd-mhen/blob/main/SECURITY.md) for authentication, session lifetime and local-only bypass rules.
 
 The database was provisioned in EEUR; this does not establish that all Cloudflare processing is confined to that region. Authorized infrastructure administrators can access data. Storage is not end-to-end encrypted. The application adds no analytics trackers, advertising SDKs, third-party fonts, or LLM integration.
 
 ## Analysis and browser state
 
-List/analysis payloads omit long narratives and workout details. Statistical calculations run in the browser; multivariable and correlation work runs in a Web Worker to keep the interface responsive. No observation is sent to an external statistics or AI service. All-history analysis accepts at most 10,000 recorded days and reports an error above that size; it never silently samples or truncates a journal.
+List/analysis payloads omit long narratives, including nested habit notes, and workout details. Historical check-in review runs locally on earlier numeric summaries and never changes data automatically. Statistical calculations run in the browser; multivariable and correlation work runs in a Web Worker to keep the interface responsive. No observation is sent to an external statistics or AI service. All-history analysis accepts at most 10,000 recorded days and reports an error above that size; it never silently samples or truncates a journal.
 
 Appearance, language preferences and optional approximate coordinates live in browser local storage. Geolocation is requested only after an explicit button action. Coordinates are rounded to two decimal places and are not sent to the application API or D1. Sunrise/sunset and country-based language suggestions are calculated locally. Auto uses light and English without location; manual choices override Auto. Language changes do not rewrite canonical records or translate notes. See [Localization](LOCALIZATION.md). Browser/OS location providers operate separately. The necessary-cookie notice acknowledgement is another local preference.
 
@@ -26,7 +26,7 @@ The [demo workspace](DEMO.md) loads a shared D1 baseline through a dedicated pub
 
 ## Retention and deletion
 
-Entries remain until deleted by their owner. Account deletion removes active entries, account credentials and sessions; administrative grants are removed with the user row. Sign-out deletes the current session; recovery/password changes invalidate previous sessions through the account version. Expired session rows are cleaned when sessions are created. Expired authentication-limiter keys are removed on subsequent authentication requests.
+Entries remain until deleted by their owner. Account deletion removes active entries, account credentials and sessions; administrative grants and custom activity definitions are removed with the user row. Archiving a category hides it from new selections while retaining its history. Deleting a daily entry does not delete its reusable library definitions. Sign-out deletes the current session; recovery/password changes invalidate previous sessions through the account version. Expired session rows are cleaned when sessions are created. Expired authentication-limiter keys are removed on subsequent authentication requests.
 
 D1 Time Travel and private operational backups can retain deleted records for their respective retention periods. Manual migration backups are retained for at most 30 days unless a documented incident requires longer. They contain sensitive data and credential hashes; no automated backup scheduler is installed. Restoration must reconcile deletions and invalidate restored sessions before reopening service. Procedures and provider recovery windows are in [Deployment](DEPLOYMENT.md).
 

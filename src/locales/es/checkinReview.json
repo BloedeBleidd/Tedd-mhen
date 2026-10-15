@@ -1,0 +1,16 @@
+{
+  "heading": "Revisión del registro · avisos: {{count}}",
+  "purpose": "Estas observaciones difieren de registros anteriores. Pueden ser correctas. Revisa posibles errores y conserva los valores si describen tu día. Nada se cambia ni excluye automáticamente.",
+  "loading": "Revisando observaciones anteriores…",
+  "unavailable": "No se pudo cargar el historial. La revisión estadística no está disponible; puedes guardar observaciones válidas.",
+  "history": "{{count}} días registrados en los 90 días naturales anteriores. Se excluyen el día actual y los posteriores.",
+  "insufficient": "Cada comprobación necesita al menos 30 valores comparables. La ausencia de avisos no demuestra que un registro sea correcto.",
+  "valueWarning": "Fuera del rango histórico de revisión {{range}}, basado en {{count}} valores comparables. Es una regla orientativa, no un rango saludable ni un intervalo de confianza.",
+  "relationshipWarning": "Con {{predictor}} = {{value}} ({{timing}}), la regresión histórica da un intervalo predictivo del 99,5 % de {{range}}. {{count}} pares anteriores; r = {{correlation}}. Es una asociación, no una regla causal ni clínica.",
+  "sameDay": "misma fecha del registro",
+  "previousDay": "día natural anterior",
+  "method": "Los valores usan una regla de mediana/MAD con escala mínima. Ocho relaciones predefinidas requieren correlación estable en ambas mitades del historial y tras eliminar tendencias. Las comprobaciones repetidas, datos ausentes y dependencia pueden generar falsos avisos. Un cambio real merece registrarse.",
+  "source": "NIST/SEMATECH: Detección de valores atípicos (Z modificado)",
+  "confirm": "He revisado estas observaciones y quiero conservar los valores introducidos.",
+  "reviewButton": "Revisar avisos ({{count}})"
+}

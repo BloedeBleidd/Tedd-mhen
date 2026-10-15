@@ -36,6 +36,8 @@ The application is a React SPA served with Cloudflare Workers Static Assets. `/a
 
 The public `/demo/*` route checks the real session and redirects authenticated visitors to their own journal. Anonymous visitors load the fixed synthetic snapshot into a separate in-memory API provider; no private data request is used as a fallback. Leaving the route discards its provider and temporary state. Workspace links retain the demo prefix; account-access links leave it. See [Demo workspace](DEMO.md).
 
+`shared/habits.ts` defines canonical preset/custom identities, structured observations and circular event-time features. `shared/checkin-review.ts` evaluates prior-data review heuristics. The check-in debounces review while editing, rechecks synchronously before save and binds confirmation to the displayed entry/history. These checks do not replace server-side structural validation.
+
 ## Storage model
 
 `users.id` is a random account UUID, or the unchanged verified Access subject for a migrated legacy owner. `entries` has a composite primary key `(owner_id, date)`, JSON-validated versioned data, an optimistic revision number, and UTC creation/update timestamps. One daily document contains its ratings, sleep, physiology, symptoms, workouts, strength sets, and optional narratives. Repeated workout items have stable UUIDs. This avoids losing relationships when exporting a day and accommodates long narratives without duplicating them across tables.
@@ -46,10 +48,14 @@ List and analysis responses use SQL projections that remove narratives and worko
 
 Each daily JSON request is limited to 256 KiB, each narrative to 50,000 characters, and each day to 20 sessions. This is a bounded large-text journal, not unlimited object storage. D1’s database limits remain authoritative; large attachments and archival R2 storage are not implemented.
 
+Custom definitions are owner-scoped in `habit_definitions`. Daily JSON contains self-contained habit keys/names. After-insert/update triggers remember new custom keys only when a journal write succeeds. Library operations use the same session, origin and expected-owner checks as journal operations. Old clients omitting `habits` receive 409 when editing a day with existing observations, preventing accidental erasure. See [Habits](HABITS.md).
+
 ## API
 
 | Method and path                        | Behavior                                                                     |
 | -------------------------------------- | ---------------------------------------------------------------------------- |
+| `GET /api/habit-definitions`           | Private reusable custom categories, including archived definitions           |
+| `PUT /api/habit-definitions`           | Strict `{key,name,archived}` upsert, owner derived from session              |
 | `GET /api/health`                      | Public liveness only; does not claim database readiness                      |
 | `GET /api/session`                     | Verified ID, email, local-mode and administrator status                      |
 | `GET /api/demo`                        | Public read of the fixed synthetic dataset; no owner or filter parameters    |

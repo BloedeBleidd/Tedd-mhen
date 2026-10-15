@@ -46,5 +46,12 @@
   "workouts.notes": "Notatki z treningu",
   "schemaVersion": "Wersja schematu",
   "revision": "Rewizja",
-  "workouts.id": "Identyfikator sesji"
+  "workouts.id": "Identyfikator sesji",
+  "habits": "Nawyki i aktywności",
+  "habits.key": "Identyfikator aktywności",
+  "habits.name": "Nazwa aktywności",
+  "habits.count": "Dzienny licznik",
+  "habits.times": "Godziny zdarzeń",
+  "habits.durationMinutes": "Czas aktywności w minutach",
+  "habits.notes": "Notatki o aktywności"
 }

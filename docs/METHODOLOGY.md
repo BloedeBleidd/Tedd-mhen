@@ -135,3 +135,39 @@ Both models report consecutive-calendar-day residual correlation when at least s
 Analysis downloads include versions, selections, exact paired/design observations, priors, scaling, posterior parameters, intervals, screening exclusions, bootstrap seed and held-out results as applicable. They contain personal data and are not journal-import files. All algorithms have reference and edge-case tests described in [Testing](TESTING.md). Computational correctness and synthetic forecast skill do not establish medical validity or accuracy for an individual’s real observations.
 
 The [demo journal](DEMO.md) deliberately constructs noisy relationships among training, sleep, stress, illness and context. It uses the same analysis functions, missingness rules and uncertainty calculations as personal data. Its apparent associations and forecast errors illustrate the interface only; they provide no empirical evidence about health effects or model accuracy in real users.
+
+## Historical check-in review
+
+`shared/checkin-review.ts` implements `checkin-history-review-v1`, a review aid independent of Bayesian forecasting. Only the preceding 90 calendar days are eligible. The day being edited and all later days are excluded, including when editing old entries. The browser requests summary observations without notes. At least 30 comparable nonmissing measurements/pairs are needed for each check. Missing history or a failed request does not prevent saving a structurally valid entry.
+
+For numeric values (including observed habit counts/durations, excluding cyclic clock coordinates), calculate the historical median `m` and median absolute deviation `MAD`. Flag a value only if:
+
+```text
+spread = max(MAD / 0.67448975, floor)
+abs(value − m) > 3.5 × spread
+```
+
+For standard metrics the floor is one quarter of the fixed modeling scale in `shared/metrics.ts`; for custom/preset counts it is 1 event and for habit duration it is 5 minutes. Floors avoid unstable prompts from rounded or constant observations. They are product choices, not inferred measurement precision. The displayed `m ± 3.5 × spread` is a review band, not a healthy range or confidence interval, and is not clipped to physical bounds. HRV, resting heart rate, respiratory rate, temperature, weight and device sleep score require the same recorded measurement source; HRV additionally requires a known matching method. A shared source label still does not prove identical measurement conditions.
+
+Eight fixed relationships are checked: stress→sleep hours (same date and one day later), training load→sleep hours (one day later), sleep hours→wellbeing and energy (same date), stress→fatigue and HRV (same date), and training load→soreness (one day later). Pairing uses actual calendar dates. A relationship needs all of:
+
+- Absolute Pearson correlation ≥ 0.7 across eligible pairs.
+- Correlation of the same sign and magnitude ≥ 0.5 in both chronological halves.
+- Correlation of the same sign and magnitude ≥ 0.6 after removing separate linear time trends.
+- The new predictor value inside the historical predictor range; no extrapolated notices.
+
+For an eligible relation, ordinary least squares estimates `y = intercept + slope × x`. The nominal two-sided 99.5% individual prediction interval is:
+
+```text
+ŷ(x) ± t(0.9975, n−2) × sqrt(s² × [1 + 1/n + (x−mean(x))² / Sxx])
+s² = max(SSE/(n−2), [outcome_scale/4]²)
+Sxx = Σ(x_i−mean(x))²
+```
+
+A notice appears when the entered outcome lies outside that interval. This is not a Bayesian credible interval. Its nominal coverage assumes an appropriate linear model with independent, homoskedastic normal errors; diaries often violate those assumptions. Detrending and split-history gates do not establish stationarity, eliminate autocorrelation or validate coverage. Repeated screening and multiple metrics increase false notices; no family-wise error claim is made. Custom habits participate in the univariate review and manual relationship/model exploration, not an automatic scan of every possible pair.
+
+The user reviews notices and confirms keeping the entered values, or edits them. Changing any entry value invalidates confirmation. Nothing is corrected, excluded, downweighted, diagnosed or prevented from being recorded after confirmation. Review acknowledgements are not stored as judgments about data quality. Imports perform structural validation but do not apply this interactive historical review. An absence of notices is not proof of correctness; real illness, schedule changes and new routines can legitimately depart from history.
+
+The modified-Z labeling concept and 3.5 threshold follow the discussion of Iglewicz and Hoaglin in [NIST/SEMATECH, _Detection of Outliers_](https://www.itl.nist.gov/div898/handbook/eda/section3/eda35h.htm). Our scale floors, history limits and relation gates are explicit application heuristics. Regression assumptions and serially correlated errors are discussed by Hyndman and Athanasopoulos in [_Forecasting: Principles and Practice_, Dynamic regression models](https://otexts.com/fpp3/dynamic-regression.html). Neither reference validates this application as a clinical or behavioral error detector.
+
+Habit input identities, event-time encodings and missingness are specified in [Habits and custom activities](HABITS.md).

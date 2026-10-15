@@ -1,3 +1,4 @@
+import { habitDefinitionSchema, habitKeySchema } from '../shared/habits';
 import { adminOverview, isAdministrator } from './admin';
 import { DEMO_DATASET, DEMO_OWNER } from '../shared/demo';
 import { z } from 'zod';
@@ -30,6 +31,7 @@ const error = (message: string, status = 400): never => {
 };
 type Row = { date: string; data: string; revision: number; created_at: string; updated_at: string };
 const fromRow = (row: Row): StoredEntry => ({
+  habits: [],
   ...JSON.parse(row.data),
   revision: row.revision,
   createdAt: row.created_at,
@@ -37,7 +39,8 @@ const fromRow = (row: Row): StoredEntry => ({
 });
 // Large narratives never enter list / analytics responses.
 const summarySelect = `SELECT date, revision, created_at, updated_at,
-  json_remove(data, '$.notes', '$.sleepNotes', '$.illnessNotes', '$.workouts') AS data,
+  json_remove(data, '$.notes', '$.sleepNotes', '$.illnessNotes', '$.workouts', '$.habits') AS data,
+  (SELECT json_group_array(json_remove(value, '$.notes')) FROM json_each(entries.data, '$.habits')) AS habits_json,
   json_array_length(data, '$.workouts') AS workout_count,
   (SELECT json_group_array(DISTINCT json_extract(value, '$.type')) FROM json_each(entries.data, '$.workouts')) AS workout_types,
   CASE WHEN json_extract(data, '$.trainingStatus') = 'unrecorded' THEN NULL ELSE
@@ -47,6 +50,7 @@ const summarySelect = `SELECT date, revision, created_at, updated_at,
     COALESCE((SELECT SUM(json_extract(value, '$.durationMinutes') * json_extract(value, '$.effort')) FROM json_each(entries.data, '$.workouts')), 0) END AS training_load
   FROM entries`;
 type SummaryRow = Row & {
+  habits_json: string;
   workout_count: number;
   workout_types: string;
   training_minutes: number | null;
@@ -55,6 +59,7 @@ type SummaryRow = Row & {
 function summary(row: SummaryRow) {
   return {
     ...fromRow(row),
+    habits: JSON.parse(row.habits_json || '[]'),
     workoutCount: row.workout_count,
     workoutTypes: JSON.parse(row.workout_types),
     trainingMinutes: row.training_minutes,
@@ -82,6 +87,14 @@ function filters(url: URL, owner: string) {
       "EXISTS(SELECT 1 FROM json_each(entries.data, '$.workouts') WHERE json_extract(value, '$.type') = ?)",
     );
     params.push(type);
+  }
+  const habit = url.searchParams.get('habit');
+  if (habit) {
+    habitKeySchema.parse(habit);
+    clauses.push(
+      "EXISTS(SELECT 1 FROM json_each(entries.data, '$.habits') WHERE json_extract(value, '$.key') = ?)",
+    );
+    params.push(habit);
   }
   const illness = url.searchParams.get('illness');
   if (illness === 'yes')
@@ -131,7 +144,7 @@ async function exportResponse(env: Env, url: URL, owner: string): Promise<Respon
   const groups = z
     .array(z.enum(exportGroups))
     .min(1)
-    .max(7)
+    .max(exportGroups.length)
     .parse((url.searchParams.get('groups') || exportGroups.join(',')).split(',')) as ExportGroup[];
   const fields = url.searchParams.has('fields')
     ? url.searchParams.get('fields')!.split(',')
@@ -150,6 +163,7 @@ async function exportResponse(env: Env, url: URL, owner: string): Promise<Respon
       query: url.searchParams.get('q') || '',
       type: url.searchParams.get('type') || '',
       illness: url.searchParams.get('illness') || 'all',
+      habit: url.searchParams.get('habit') || '',
     },
     groups,
     fields: fields || 'all in selected groups',
@@ -311,6 +325,32 @@ export async function handleApi(request: Request, env: Env): Promise<Response> {
       local: isLocal(request, env),
       admin: await isAdministrator(env.DB, user.id),
     });
+  if (url.pathname === '/api/habit-definitions') {
+    if (request.method === 'GET') {
+      const rows = await env.DB.prepare(
+        'SELECT key, name, archived FROM habit_definitions WHERE owner_id = ? ORDER BY name, key LIMIT 10001',
+      )
+        .bind(user.id)
+        .all<{ key: string; name: string; archived: number }>();
+      if (rows.results.length > 10000) error('Activity library exceeds 10,000 definitions.', 413);
+      return json({
+        definitions: rows.results.map((r) => ({ ...r, archived: Boolean(r.archived) })),
+      });
+    }
+    if (request.method === 'PUT') {
+      const definition = habitDefinitionSchema.parse(await readBody(request, 4096));
+      await env.DB.batch([
+        env.DB.prepare('INSERT INTO users(id, email) VALUES(?, ?) ON CONFLICT(id) DO NOTHING').bind(
+          user.id,
+          user.email,
+        ),
+        env.DB.prepare(
+          'INSERT INTO habit_definitions(owner_id, key, name, archived) VALUES(?, ?, ?, ?) ON CONFLICT(owner_id, key) DO UPDATE SET name = excluded.name, archived = excluded.archived',
+        ).bind(user.id, definition.key, definition.name, Number(definition.archived)),
+      ]);
+      return json(definition);
+    }
+  }
   if (url.pathname === '/api/export' && request.method === 'GET')
     return exportResponse(env, url, user.id);
   if (url.pathname === '/api/series' && request.method === 'GET') {
@@ -374,10 +414,20 @@ export async function handleApi(request: Request, env: Env): Promise<Response> {
       return row ? json(fromRow(row)) : json({ error: 'No entry for this day.' }, 404);
     }
     if (request.method === 'PUT') {
+      const body = await readBody(request);
+      if (body?.entry && !Object.hasOwn(body.entry, 'habits')) {
+        const prior = await env.DB.prepare(
+          "SELECT json_array_length(data, '$.habits') AS count FROM entries WHERE owner_id = ? AND date = ?",
+        )
+          .bind(user.id, date)
+          .first<{ count: number }>();
+        if (prior?.count)
+          error('This entry contains newer activity fields. Reload the app before saving.', 409);
+      }
       const { entry, revision } = z
         .object({ entry: entrySchema, revision: z.number().int().min(0) })
         .strict()
-        .parse(await readBody(request));
+        .parse(body);
       if (entry.date !== date) error('Entry date and URL do not match.');
       const data = JSON.stringify(entry);
       const operation =

@@ -66,6 +66,12 @@ HRV methods, recording duration, posture and devices affect comparability. Recor
 
 Derived training time sums duration only for explicitly recorded training/rest days. Derived daily load is `Σ(durationMinutes × effort)` in arbitrary units. Missing effort in any session makes the daily load unknown. Rest is zero. This is a descriptive project heuristic, not a validated readiness score or cross-sport equivalence.
 
+## Habits and custom activities
+
+`habits` is an additive schema-version-1 array; older entries default to `[]`, meaning no categories recorded. Each item has a `key` (`preset:<English ID>` or `custom:<UUID>`), `name` (null for presets, original text for custom categories), `count` (nullable integer 0–100,000), `times` (up to 500 local `HH:mm` strings), `durationMinutes` (nullable 0–1,440) and optional `notes` (up to 50,000 characters). Up to 100 unique keys can appear per day. The recorded count cannot be lower than the number of times; zero count cannot have positive duration. Absent categories and null values are unknown, not zero.
+
+`habit_definitions` stores private custom names and archive state keyed by owner and UUID. Archiving retains recorded observations. Notes do not enter summaries or analysis. See [Habits and custom activities](HABITS.md) for event definitions, time encoding, library behavior and portability.
+
 ## Context labels and analytical features
 
 `labels` is null when context was not recorded, an empty array when explicitly no labels apply, or up to 12 distinct case-preserving strings, trimmed at their boundaries, of 1–40 characters. Labels such as `travel` or `late meal` are user-defined observations, not inferred from notes. Older version-1 records without this additive field are treated as null.
@@ -84,7 +90,7 @@ See [Methodology](METHODOLOGY.md) for alignment, rolling windows and statistical
 
 `schemaVersion=1` identifies field semantics. `revision` starts at 1 and increases on successful edits. `createdAt` and `updatedAt` use UTC timestamps. These fields support reproducibility and conflict detection; this version does not retain previous record revisions as an audit history.
 
-Export field selection never removes required provenance. Including HRV without method/source may make it uninterpretable; retain those context fields. Excluding the written-context group also removes nested workout notes. JSON and NDJSON preserve nulls and nested data; CSV requires separate dictionary context.
+Export field selection never removes required provenance. Including HRV without method/source may make it uninterpretable; retain those context fields. Excluding the written-context group also removes nested workout and habit notes. JSON and NDJSON preserve nulls and nested data; CSV requires separate dictionary context.
 
 ## Account and local preference data
 

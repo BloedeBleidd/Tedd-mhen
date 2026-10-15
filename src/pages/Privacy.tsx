@@ -14,6 +14,7 @@ export function Privacy() {
       <Panel title={tr('privacy:privateRecordsInAPublicSourceProject')} className="prose-panel">
         <p>{tr('privacy:teddMhenIsOperatedByTheOwnerOfThis')}</p>
         <p>{tr('privacy:savingACheckInSendsYourSelectedRatingsTraining')}</p>
+        <p>{tr('habits:privacy')}</p>
         <p>{tr('privacy:emailAddressesAreNotVerifiedInThisPilotNo')}</p>
       </Panel>
       <Panel title={tr('privacy:analysisImportsAndAdministration')} className="prose-panel">

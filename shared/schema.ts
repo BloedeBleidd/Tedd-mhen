@@ -1,3 +1,4 @@
+import { habitsSchema, type HabitSummary } from './habits';
 import { workoutTypes } from './activities';
 import { z } from 'zod';
 
@@ -75,6 +76,7 @@ export const entrySchema = z
     stress: burden,
     soreness: burden,
     illnessSeverity: burden,
+    habits: habitsSchema,
     labels: z
       .array(z.string().trim().min(1).max(40))
       .max(12)
@@ -158,8 +160,9 @@ export type Workout = z.infer<typeof workoutSchema>;
 export type StoredEntry = Entry & { revision: number; createdAt: string; updatedAt: string };
 export type EntrySummary = Omit<
   StoredEntry,
-  'notes' | 'sleepNotes' | 'illnessNotes' | 'workouts'
+  'notes' | 'sleepNotes' | 'illnessNotes' | 'workouts' | 'habits'
 > & {
+  habits: HabitSummary[];
   workoutCount: number;
   workoutTypes: string[];
   trainingMinutes: number | null;
@@ -204,6 +207,7 @@ export function emptyEntry(date = localDate()): Entry {
     soreness: null,
     illnessSeverity: null,
     labels: null,
+    habits: [],
     symptoms: [],
     sleep: {
       durationMinutes: null,
@@ -234,6 +238,7 @@ export function summarize(entry: StoredEntry): EntrySummary {
   const { notes: _notes, sleepNotes: _sleep, illnessNotes: _illness, workouts, ...rest } = entry;
   return {
     ...rest,
+    habits: (entry.habits || []).map(({ notes: _habitNotes, ...record }) => record),
     workoutCount: workouts.length,
     workoutTypes: [...new Set(workouts.map((w) => w.type))],
     trainingMinutes:

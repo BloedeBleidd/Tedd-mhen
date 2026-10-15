@@ -1,3 +1,5 @@
+import { customHabit } from './fixtures/habits';
+import { habitPresets, habitFeatureLabel } from '../shared/habits';
 import { numberRange } from '../src/components/ui';
 import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 import i18n, { languages, loadLanguage, localize, locale, t, hasSourceMessage } from '../src/i18n';
@@ -17,6 +19,36 @@ afterEach(async () => {
 });
 
 describe('Localized presentation and canonical records', () => {
+  it('covers every habit preset and feature in all languages without translating custom names or notes', async () => {
+    const entry = {
+      ...emptyEntry('2026-01-01'),
+      habits: [customHabit],
+      revision: 1,
+      createdAt: '',
+      updatedAt: '',
+    };
+    for (const language of languages) {
+      await i18n.changeLanguage(language);
+      for (const preset of habitPresets)
+        expect(i18n.exists(`habitCatalog:${preset}`, { lng: language })).toBe(true);
+      expect(localize(habitFeatureLabel(customHabit, 'count'))).toContain(customHabit.name);
+      for (const feature of featureCatalog([summarize(entry)]).filter((f) =>
+        f.id.startsWith('habit:'),
+      )) {
+        expect(hasSourceMessage(feature.group), feature.group).toBe(true);
+        expect(hasSourceMessage(feature.description), feature.description).toBe(true);
+        expect(localize(feature.label)).not.toContain('Habit: {');
+        expect(localize(feature.label)).toContain(customHabit.name);
+      }
+      expect(mergeImported(parseImport(JSON.stringify([entry]), 'json')[0]).habits).toEqual([
+        customHabit,
+      ]);
+    }
+    await i18n.changeLanguage('pl');
+    expect(
+      localize(habitFeatureLabel({ key: 'preset:reading_before_bed', name: null }, 'count')),
+    ).toContain('Czytanie przed snem');
+  });
   it('searches accented activity names without mutating their labels', () => {
     expect(searchText('Pływanie')).toBe('plywanie');
     expect(searchText('Fußball')).toBe('fussball');
