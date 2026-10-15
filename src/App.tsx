@@ -13,13 +13,14 @@ import {
   X,
   UserRound,
 } from 'lucide-react';
-import { NavLink, Route, Routes, useLocation } from 'react-router-dom';
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { Link, Route, Routes, useLocation } from 'react-router-dom';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { useApi, useLoad } from './lib/api';
 import { EmptyState, Loading } from './components/ui';
 import { AppearanceControl } from './components/AppearanceControl';
 import { PrivacyNotice } from './components/PrivacyNotice';
-import { DemoSwitcher } from './components/DemoSwitcher';
+import { WorkspaceNavLink as NavLink } from './components/WorkspaceLink';
+import { Welcome } from './pages/Welcome';
 import { AuthPage } from './pages/Auth';
 import { Privacy } from './pages/Privacy';
 import { About } from './pages/About';
@@ -35,17 +36,50 @@ const Account = lazy(() => import('./pages/Account').then((m) => ({ default: m.A
 const Import = lazy(() => import('./pages/Import').then((m) => ({ default: m.Import })));
 const Admin = lazy(() => import('./pages/Admin').then((m) => ({ default: m.Admin })));
 export function App() {
-  const { demo, toggleDemo } = useApi(),
+  const { demo } = useApi(),
     location = useLocation(),
     [menuOpen, setMenuOpen] = useState(false);
+  const sidebar = useRef<HTMLElement>(null);
+  const menuButton = useRef<HTMLButtonElement>(null);
   const session = useLoad<{ email: string; local: boolean; admin: boolean }>('/api/session', true);
   useEffect(() => {
+    if (!menuOpen) return;
+    const panel = sidebar.current;
+    const trigger = menuButton.current;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    panel?.querySelector<HTMLElement>('button, a')?.focus();
     const close = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setMenuOpen(false);
+      if (event.key !== 'Tab' || !panel) return;
+      const targets = [...panel.querySelectorAll<HTMLElement>('a[href], button')];
+      const first = targets[0],
+        last = targets.at(-1);
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last?.focus();
+      }
+      if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first?.focus();
+      }
+    };
+    const resize = () => {
+      if (window.innerWidth > 720) setMenuOpen(false);
     };
     window.addEventListener('keydown', close);
-    return () => window.removeEventListener('keydown', close);
-  }, []);
+    window.addEventListener('resize', resize);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', close);
+      window.removeEventListener('resize', resize);
+      trigger?.focus({ preventScroll: true });
+    };
+  }, [menuOpen]);
+  useEffect(() => {
+    setMenuOpen(false);
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
   const nav = [
     { to: '/', icon: LayoutDashboard, label: 'Overview' },
     { to: '/check-in', icon: Plus, label: 'Daily check-in' },
@@ -57,6 +91,9 @@ export function App() {
       ? [{ to: '/admin', icon: ShieldCheck, label: 'Administration' }]
       : []),
   ];
+  const pathname = demo
+    ? location.pathname.replace(/^\/demo(?=\/|$)/, '') || '/'
+    : location.pathname;
   const authRoute = ['/sign-in', '/register', '/recover', '/api/auth/claim'].includes(
     location.pathname,
   );
@@ -69,18 +106,20 @@ export function App() {
           </NavLink>
           <AppearanceControl />
         </header>
-        <PrivacyNotice />
         <main id="main">
           {location.pathname === '/about' ? (
             <About />
-          ) : location.pathname === '/privacy' ? (
+          ) : pathname === '/privacy' ? (
             <Privacy />
           ) : !authRoute && session.loading ? (
             <Loading />
+          ) : location.pathname === '/' ? (
+            <Welcome />
           ) : (
             <AuthPage key={location.pathname} />
           )}
         </main>
+        <PrivacyNotice />
         <footer className="public-footer">
           <NavLink to="/privacy">Privacy & data</NavLink>
           <NavLink to="/about">About the author</NavLink>
@@ -94,7 +133,18 @@ export function App() {
       <a className="skip-link" href="#main">
         Skip to content
       </a>
-      <aside className={`sidebar ${menuOpen ? 'open' : ''}`}>
+      <aside
+        ref={sidebar}
+        id="workspace-navigation"
+        className={`sidebar ${menuOpen ? 'open' : ''}`}
+      >
+        <button
+          className="icon-button mobile-menu sidebar-close"
+          aria-label="Close navigation"
+          onClick={() => setMenuOpen(false)}
+        >
+          <X size={20} />
+        </button>
         <NavLink className="brand" to="/" onClick={() => setMenuOpen(false)}>
           <span className="brand-mark">
             t<span>·</span>
@@ -154,11 +204,14 @@ export function App() {
           onClick={() => setMenuOpen(false)}
         />
       )}
-      <div className="main-shell">
+      <div className="main-shell" inert={menuOpen || undefined}>
         <header className="topbar">
           <div className="breadcrumb">
             <button
+              ref={menuButton}
               className="icon-button mobile-menu"
+              aria-controls="workspace-navigation"
+              aria-expanded={menuOpen}
               aria-label={menuOpen ? 'Close navigation' : 'Open navigation'}
               onClick={() => setMenuOpen(!menuOpen)}
             >
@@ -169,14 +222,13 @@ export function App() {
             <strong>
               {nav.find(
                 (n) =>
-                  n.to === location.pathname ||
-                  (n.to === '/analysis' && location.pathname.startsWith('/analysis/')),
+                  n.to === pathname || (n.to === '/analysis' && pathname.startsWith('/analysis/')),
               )?.label ||
-                (location.pathname === '/about'
+                (pathname === '/about'
                   ? 'About the author'
-                  : location.pathname === '/privacy'
+                  : pathname === '/privacy'
                     ? 'Privacy & data'
-                    : location.pathname === '/account'
+                    : pathname === '/account'
                       ? 'Account'
                       : 'Guide & methodology')}
             </strong>
@@ -189,15 +241,24 @@ export function App() {
             </span>
           </div>
         </header>
-        <PrivacyNotice />
         {demo && (
-          <div className="demo-banner">
-            <FlaskConical size={15} />
-            You’re exploring synthetic data. Changes stay in memory and disappear when you leave.
-            <button onClick={toggleDemo}>
-              Back to my journal <ArrowUpRight size={14} />
-            </button>
-          </div>
+          <aside className="demo-banner" aria-label="Demo information">
+            <div className="demo-description">
+              <FlaskConical size={20} />
+              <div>
+                <strong>Explore the demo</strong>
+                <p>Synthetic data. Edits reset when you leave or reload.</p>
+              </div>
+            </div>
+            <nav className="demo-actions" aria-label="Account access">
+              <Link className="button secondary" to="/sign-in">
+                Sign in
+              </Link>
+              <Link className="button primary" to="/register">
+                Create account <ArrowUpRight size={15} />
+              </Link>
+            </nav>
+          </aside>
         )}
         {session.error && !demo && (
           <div className="setup-banner">
@@ -232,6 +293,7 @@ export function App() {
               />
             </Routes>
           </Suspense>
+          <PrivacyNotice />
           <footer className="page-footer">
             <span>
               <Activity size={13} /> Tedd’mhen
@@ -241,7 +303,6 @@ export function App() {
             <NavLink to="/about">About the author</NavLink>
           </footer>
         </main>
-        <DemoSwitcher />
       </div>
     </div>
   );

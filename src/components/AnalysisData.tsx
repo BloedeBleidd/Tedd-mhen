@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { WorkspaceLink as Link } from '../components/WorkspaceLink';
 import { useLoad } from '../lib/api';
 import { dayNumber, localDate, shiftDate, type EntrySummary } from '../../shared/schema';
 import { featureCatalog, type Feature } from '../../shared/features';

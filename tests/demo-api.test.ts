@@ -34,7 +34,7 @@ beforeEach(() => {
   env = { DB: adapter(sqlite) } as Env;
 });
 afterEach(() => sqlite.close());
-describe('Authenticated, fixed-owner demo endpoint', () => {
+describe('Public, fixed-owner demo endpoint', () => {
   it('shares only the synthetic baseline, never private records, and leaves personal endpoints owner-scoped', async () => {
     const date = '2026-10-01';
     await call(`/api/entries/${date}`, 'PUT', {
@@ -44,15 +44,15 @@ describe('Authenticated, fixed-owner demo endpoint', () => {
     const first = await call('/api/demo');
     expect(first.status).toBe(200);
     expect(first.headers.get('Cache-Control')).toBe('private, no-store');
-    const a = (await first.json()) as { viewerId: string; entries: StoredEntry[] };
-    expect(a.viewerId).toBe('a');
+    const a = (await first.json()) as { entries: StoredEntry[] };
+    expect(a).not.toHaveProperty('viewerId');
     expect(a.entries).toHaveLength(236);
     expect(JSON.stringify(a)).not.toContain('private test A');
     expect(JSON.stringify(a)).not.toContain(DEMO_OWNER);
     actor = 'b';
     const b = (await (await call('/api/demo')).json()) as typeof a;
     expect(b.entries).toEqual(a.entries);
-    expect(b.viewerId).toBe('b');
+    expect(b).toEqual(a);
     expect(await (await call('/api/entries?owner_id=system-demo-v1')).json()).toMatchObject({
       entries: [],
       total: 0,
@@ -78,6 +78,18 @@ describe('Authenticated, fixed-owner demo endpoint', () => {
           'Cf-Access-Authenticated-User-Email': 'fake@example.test',
         })
       ).status,
+    ).toBe(200);
+    expect(await (await call('/api/demo')).json()).toEqual(a);
+    for (const path of [
+      '/api/session',
+      '/api/entries',
+      '/api/series',
+      '/api/export',
+      '/api/admin/overview',
+    ])
+      expect((await call(path)).status).toBe(401);
+    expect(
+      (await call(`/api/entries/${date}`, 'PUT', { entry: emptyEntry(date), revision: 0 })).status,
     ).toBe(401);
   });
   it('fails explicitly when a configured dataset is absent or incomplete', async () => {

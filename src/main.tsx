@@ -1,8 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Outlet } from 'react-router-dom';
 import { ApiProvider } from './lib/api';
 import { App } from './App';
+import { PublicDemo } from './pages/PublicDemo';
 import './styles.css';
 import { AppearanceProvider } from './lib/appearance-context';
 import {
@@ -21,14 +22,22 @@ applyTheme(
 );
 const router = createBrowserRouter([
   {
-    path: '*',
     element: (
-      <ApiProvider>
-        <AppearanceProvider>
-          <App />
-        </AppearanceProvider>
-      </ApiProvider>
+      <AppearanceProvider>
+        <Outlet />
+      </AppearanceProvider>
     ),
+    children: [
+      { path: '/demo/*', element: <PublicDemo /> },
+      {
+        path: '*',
+        element: (
+          <ApiProvider>
+            <App />
+          </ApiProvider>
+        ),
+      },
+    ],
   },
 ]);
 ReactDOM.createRoot(document.getElementById('root')!).render(

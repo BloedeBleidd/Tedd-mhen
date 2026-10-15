@@ -13,7 +13,6 @@ const snapshot = () => ({
   title: demoFixture.title,
   anchorDate: demoFixture.anchorDate,
   recordCount: 236,
-  viewerId: 'viewer-a',
   entries: makeDemoFixture().map((e) => ({
     ...e,
     revision: 1,
@@ -233,9 +232,11 @@ describe('Isolated browser demo workspace', () => {
   });
   it('denies account, administration and arbitrary endpoints and requires the displayed workspace identity', () => {
     const a = workspace();
-    expect(a.request('/api/session')).toMatchObject({ id: 'demo:viewer-a', admin: false });
+    expect(a.request('/api/session')).toMatchObject({ id: 'demo:guest', admin: false });
     expect(() => a.request('/api/admin/overview')).toThrow('Administration is unavailable');
-    expect(() => a.request('/api/auth/logout', { method: 'POST' })).toThrow('Switch to My data');
+    expect(() => a.request('/api/auth/logout', { method: 'POST' })).toThrow(
+      'Sign in or create an account',
+    );
     expect(() => a.request('/api/export')).toThrow('Endpoint not found');
     expect(() => a.request('https://elsewhere.test/api/entries')).toThrow('Endpoint not found');
     expect(() => a.request('/api/entries', { method: 'POST' })).toThrow('Endpoint not found');
@@ -243,7 +244,7 @@ describe('Isolated browser demo workspace', () => {
       a.request('/api/entries', { headers: { 'X-Teddmhen-Expected-User': 'viewer-a' } }),
     ).toThrow('workspace changed');
     expect(
-      a.request('/api/entries', { headers: { 'X-Teddmhen-Expected-User': 'demo:viewer-a' } }).total,
+      a.request('/api/entries', { headers: { 'X-Teddmhen-Expected-User': 'demo:guest' } }).total,
     ).toBe(236);
   });
 });

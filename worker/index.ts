@@ -255,6 +255,34 @@ export async function handleApi(request: Request, env: Env): Promise<Response> {
   }
   if (url.pathname === '/api/health' && request.method === 'GET')
     return json({ ok: true, service: 'teddmhen' });
+  if (url.pathname === '/api/demo') {
+    if (request.method !== 'GET') error('The shared demo is read-only.', 405);
+    if (url.search) error('The demo endpoint does not accept parameters.');
+    const dataset = await env.DB.prepare(
+      'SELECT title, anchor_date, record_count FROM demo_datasets WHERE id = ? AND owner_id = ?',
+    )
+      .bind(DEMO_DATASET, DEMO_OWNER)
+      .first<{ title: string; anchor_date: string; record_count: number }>();
+    if (!dataset) error('Demo data is temporarily unavailable. Please try again later.', 503);
+    const records = await env.DB.prepare(
+      'SELECT date, data, revision, created_at, updated_at FROM entries WHERE owner_id = ? ORDER BY date LIMIT 501',
+    )
+      .bind(DEMO_OWNER)
+      .all<Row>();
+    if (
+      !records.results.length ||
+      records.results.length > 500 ||
+      records.results.length !== dataset!.record_count
+    )
+      error('Demo data is temporarily unavailable. Please try again later.', 503);
+    return json({
+      id: DEMO_DATASET,
+      title: dataset!.title,
+      anchorDate: dataset!.anchor_date,
+      recordCount: dataset!.record_count,
+      entries: records.results.map(fromRow),
+    });
+  }
   const user = await authenticate(request, env);
   if (url.pathname.startsWith('/api/admin/')) {
     if (!(await isAdministrator(env.DB, user.id))) error('Administrator access is required.', 403);
@@ -285,35 +313,6 @@ export async function handleApi(request: Request, env: Env): Promise<Response> {
     });
   if (url.pathname === '/api/export' && request.method === 'GET')
     return exportResponse(env, url, user.id);
-  if (url.pathname === '/api/demo') {
-    if (request.method !== 'GET') error('The shared demo is read-only.', 405);
-    if (url.search) error('The demo endpoint does not accept parameters.');
-    const dataset = await env.DB.prepare(
-      'SELECT title, anchor_date, record_count FROM demo_datasets WHERE id = ? AND owner_id = ?',
-    )
-      .bind(DEMO_DATASET, DEMO_OWNER)
-      .first<{ title: string; anchor_date: string; record_count: number }>();
-    if (!dataset) error('Demo data is temporarily unavailable. Please try again later.', 503);
-    const records = await env.DB.prepare(
-      'SELECT date, data, revision, created_at, updated_at FROM entries WHERE owner_id = ? ORDER BY date LIMIT 501',
-    )
-      .bind(DEMO_OWNER)
-      .all<Row>();
-    if (
-      !records.results.length ||
-      records.results.length > 500 ||
-      records.results.length !== dataset!.record_count
-    )
-      error('Demo data is temporarily unavailable. Please try again later.', 503);
-    return json({
-      id: DEMO_DATASET,
-      title: dataset!.title,
-      anchorDate: dataset!.anchor_date,
-      recordCount: dataset!.record_count,
-      viewerId: user.id,
-      entries: records.results.map(fromRow),
-    });
-  }
   if (url.pathname === '/api/series' && request.method === 'GET') {
     const all = url.searchParams.get('all') === 'true';
     if (all) {

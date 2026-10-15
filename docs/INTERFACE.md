@@ -12,9 +12,13 @@ New passwords require 12–128 characters; a visible count reports progress towa
 
 Analysis views appear before the page heading in a distinct bordered panel. Each view has an icon, a descriptive label and a large clickable card. The active card uses a contrasting fill and check mark, with `aria-current="page"`; keyboard focus remains visible. Supporting descriptions are associated with their links for assistive technology. Narrow layouts show all four choices in two columns without horizontal scrolling.
 
-## Motion contract
+## Public entry and mobile layout
 
-The My data / Demo data control stays at the bottom of every authenticated workspace page. Pressed states identify the active source, and the demo banner labels synthetic results. Layout reserves space for the control and keeps sticky save actions above it, including on mobile. Decorative sparkle and flask icons animate twice over four seconds; click targets remain stationary. Reduced-motion preferences disable the pulse. Loading, cancellation and retry are explicit; switching resets page-specific forms and import previews. See [Demo workspace](DEMO.md).
+The public home page presents **Try demo** before registration. Account forms also link to `/demo`. The demo uses the full journal interface with a normal-flow banner above content offering sign-in and registration. Signed-in workspaces contain no demo switcher. See [Demo workspace](DEMO.md).
+
+Mobile account inputs use 16 px text; primary form actions are at least 48 px tall. Buttons, field controls and account-access links have at least 44 px touch height. The navigation trigger exposes its expanded state and controls the mobile sidebar; closed navigation is excluded from keyboard focus. Open navigation traps keyboard focus, locks background scrolling, and closes with its close button, backdrop or Escape; focus returns to the trigger. Page navigation closes the drawer and returns the viewport to the top. The privacy notice follows the main content so it does not push first-use actions below the fold. Sticky check-in save actions respect the device's bottom safe area without reserving space for a floating demo control.
+
+## Motion contract
 
 Motion communicates appearance, selection and feedback. It never changes a measurement, uncertainty bound, prediction, ranking value or downloaded record.
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Check, Download, FileJson, FileSpreadsheet, FileText, ShieldCheck } from 'lucide-react';
 import { useApi, useLoad, download } from '../lib/api';
 import { dayNumber, localDate, shiftDate } from '../../shared/schema';
@@ -59,12 +59,6 @@ export function Export() {
     [error, setError] = useState<string | null>(null),
     [success, setSuccess] = useState(false);
   const valid = !!from && !!to && from <= to && dayNumber(to) - dayNumber(from) <= 1830;
-  useEffect(() => {
-    if (!busy) return;
-    const preventSwitch = (event: Event) => event.preventDefault();
-    window.addEventListener('teddmhen:mode-change', preventSwitch);
-    return () => window.removeEventListener('teddmhen:mode-change', preventSwitch);
-  }, [busy]);
   const [fields, setFields] = useState<string[]>(allowedExportFields);
   const selectedFields = fields.filter((field) =>
     groups.some((group) => exportFieldOptions[group].some((option) => option.path === field)),

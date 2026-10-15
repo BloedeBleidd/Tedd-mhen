@@ -22,7 +22,7 @@ Appearance and optional approximate coordinates live in browser local storage. G
 
 Journal imports are parsed and previewed in the browser before confirmation. Confirmed imports use ordinary authenticated, revision-checked writes into the current account. Exports and model reports are downloaded to user-controlled files. See [Import and export](IMPORT_EXPORT.md).
 
-The [demo workspace](DEMO.md) loads a shared D1 baseline through a dedicated authenticated endpoint. A technical user owns these synthetic records and cannot sign in. Demo check-ins and imports change a browser-memory copy only; switching back or reloading discards it. There is no local-storage persistence of demo observations. Downloaded demo files remain until the user deletes them.
+The [demo workspace](DEMO.md) loads a shared D1 baseline through a dedicated public read-only endpoint. A technical user owns these synthetic records and cannot sign in. Demo check-ins and imports change a browser-memory copy only; leaving `/demo/*` or reloading discards it. There is no local-storage persistence of demo observations. Downloaded demo files remain until the user deletes them.
 
 ## Retention and deletion
 

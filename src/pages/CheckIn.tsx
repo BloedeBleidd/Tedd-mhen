@@ -80,14 +80,9 @@ export function CheckIn() {
       e.preventDefault();
       e.returnValue = '';
     };
-    const modeChange = (e: Event) => {
-      if (!window.confirm('Discard your unsaved check-in?')) e.preventDefault();
-    };
     window.addEventListener('beforeunload', unload);
-    window.addEventListener('teddmhen:mode-change', modeChange);
     return () => {
       window.removeEventListener('beforeunload', unload);
-      window.removeEventListener('teddmhen:mode-change', modeChange);
     };
   }, [dirty]);
   function update<K extends keyof Entry>(key: K, value: Entry[K]) {

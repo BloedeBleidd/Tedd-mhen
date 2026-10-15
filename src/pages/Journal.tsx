@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ArrowDown, ArrowUpRight, Plus, Search, SlidersHorizontal } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { WorkspaceLink as Link } from '../components/WorkspaceLink';
 import { useLoad } from '../lib/api';
 import { workoutTypes, type EntrySummary } from '../../shared/schema';
 import {

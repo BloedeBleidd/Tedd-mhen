@@ -161,6 +161,11 @@ export function AuthPage() {
               ? 'Use your email and saved recovery code to set a new password. The old code and all previous sessions will stop working.'
               : 'Sign in with your email and password.'}
       </p>
+      {mode !== 'claim' && (
+        <Link className="auth-demo-link button secondary" to="/demo">
+          Try demo — no account needed
+        </Link>
+      )}
       <form noValidate onSubmit={submit} className="auth-form" aria-busy={busy}>
         {mode !== 'claim' && (
           <Field label="Email">

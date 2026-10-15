@@ -23,7 +23,6 @@ const snapshotSchema = z
     title: z.string().min(1).max(200),
     anchorDate: dateSchema,
     recordCount: z.number().int().min(1).max(500),
-    viewerId: z.string().min(1),
     entries: z.array(storedEntrySchema).min(1).max(500),
   })
   .strict()
@@ -47,7 +46,7 @@ export class DemoWorkspace {
   ) {
     const value = snapshotSchema.parse(snapshot);
     dateSchema.parse(today);
-    this.id = `demo:${value.viewerId}`;
+    this.id = 'demo:guest';
     this.title = value.title;
     this.recordCount = value.recordCount;
     const days = dayNumber(today) - dayNumber(value.anchorDate);
@@ -87,7 +86,7 @@ export class DemoWorkspace {
     if (url.pathname.startsWith('/api/admin/'))
       throw new ApiError('Administration is unavailable in the synthetic demo.', 403);
     if (url.pathname.startsWith('/api/auth/'))
-      throw new ApiError('Switch to My data to manage your account.', 403);
+      throw new ApiError('Sign in or create an account to manage your own journal.', 403);
     if (url.pathname === '/api/session' && method === 'GET')
       return { id: this.id, email: 'Demo workspace', local: false, admin: false };
     const match = url.pathname.match(/^\/api\/entries\/(\d{4}-\d{2}-\d{2})$/);

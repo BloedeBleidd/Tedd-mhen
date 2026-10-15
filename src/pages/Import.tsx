@@ -28,12 +28,9 @@ export function Import() {
       event.preventDefault();
       event.returnValue = '';
     };
-    const preventModeChange = (event: Event) => event.preventDefault();
     window.addEventListener('beforeunload', beforeUnload);
-    window.addEventListener('teddmhen:mode-change', preventModeChange);
     return () => {
       window.removeEventListener('beforeunload', beforeUnload);
-      window.removeEventListener('teddmhen:mode-change', preventModeChange);
     };
   }, [busy]);
   async function read(file: File | undefined) {

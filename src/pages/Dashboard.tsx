@@ -1,7 +1,7 @@
 import { ArrowRight, ArrowUpRight, Heart, Moon, Plus, Timer, Waves } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { WorkspaceLink as Link } from '../components/WorkspaceLink';
 import { useState } from 'react';
-import { useApi, useLoad } from '../lib/api';
+import { useLoad } from '../lib/api';
 import { localDate, shiftDate, type EntrySummary } from '../../shared/schema';
 import { metrics, type MetricKey } from '../../shared/metrics';
 import { TrendChart } from '../components/Charts';
@@ -15,8 +15,7 @@ import {
   prettyDate,
 } from '../components/ui';
 export function Dashboard() {
-  const today = localDate(),
-    { demo, toggleDemo } = useApi();
+  const today = localDate();
   const [days, setDays] = useState(28),
     [metric, setMetric] = useState<MetricKey>('wellbeing');
   const { data, loading, error } = useLoad<{ entries: EntrySummary[] }>(
@@ -116,11 +115,6 @@ export function Dashboard() {
           {entries.length === 0 && !error ? (
             <Panel>
               <EmptyState />
-              {!demo && (
-                <button className="text-link empty-demo" onClick={toggleDemo}>
-                  See what your journal could look like <ArrowRight size={16} />
-                </button>
-              )}
             </Panel>
           ) : (
             <>

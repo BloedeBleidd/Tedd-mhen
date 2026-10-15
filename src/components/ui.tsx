@@ -1,5 +1,5 @@
 import { ArrowUpRight, CircleHelp, LoaderCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { WorkspaceLink as Link } from '../components/WorkspaceLink';
 import type { ReactNode } from 'react';
 import { useReveal } from '../lib/motion';
 export const prettyDate = (date: string, options?: Intl.DateTimeFormatOptions) =>

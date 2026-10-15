@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { WorkspaceLink as Link } from '../components/WorkspaceLink';
 import { PageHeading, Panel } from '../components/ui';
 export function Privacy() {
   return (
@@ -166,10 +166,10 @@ export function Privacy() {
           Exports are downloaded to a destination you choose. Deleting data here does not remove
           downloaded files or copies shared elsewhere. No LLM is connected to Tedd’mhen; uploading
           an export to another service is your separate action. Shared synthetic demo records are
-          stored in D1 under a technical owner without sign-in credentials. Every signed-in user can
-          load them. Your demo edits and imports stay only in this tab’s memory and disappear when
-          you leave demo mode or reload; they never update your personal journal or the shared
-          examples.
+          stored in D1 under a technical owner without sign-in credentials. Anyone can explore them
+          at /demo without an account. Your demo edits and imports stay only in this tab’s memory
+          and disappear when you leave demo mode or reload; they never update your personal journal
+          or the shared examples.
         </p>
       </Panel>
       <Panel title="Hosting and pilot limits" className="prose-panel">

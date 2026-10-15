@@ -34,6 +34,8 @@ The application is a React SPA served with Cloudflare Workers Static Assets. `/a
 | `migrations/`                                                           | Versioned D1 schema migrations                                                      |
 | `tests/`                                                                | Statistical, schema, export, security, SQLite-backed API and browser tests          |
 
+The public `/demo/*` route checks the real session and redirects authenticated visitors to their own journal. Anonymous visitors load the fixed synthetic snapshot into a separate in-memory API provider; no private data request is used as a fallback. Leaving the route discards its provider and temporary state. Workspace links retain the demo prefix; account-access links leave it. See [Demo workspace](DEMO.md).
+
 ## Storage model
 
 `users.id` is a random account UUID, or the unchanged verified Access subject for a migrated legacy owner. `entries` has a composite primary key `(owner_id, date)`, JSON-validated versioned data, an optimistic revision number, and UTC creation/update timestamps. One daily document contains its ratings, sleep, physiology, symptoms, workouts, strength sets, and optional narratives. Repeated workout items have stable UUIDs. This avoids losing relationships when exporting a day and accommodates long narratives without duplicating them across tables.
@@ -46,19 +48,19 @@ Each daily JSON request is limited to 256 KiB, each narrative to 50,000 characte
 
 ## API
 
-| Method and path                        | Behavior                                                                         |
-| -------------------------------------- | -------------------------------------------------------------------------------- |
-| `GET /api/health`                      | Public liveness only; does not claim database readiness                          |
-| `GET /api/session`                     | Verified ID, email, local-mode and administrator status                          |
-| `GET /api/demo`                        | Authenticated read of the fixed synthetic dataset; no owner or filter parameters |
-| `GET /api/entries`                     | Owner-scoped summaries, total, date cursor; default 30, maximum 100 rows         |
-| `GET /api/entries/:date`               | One complete daily record, or 404                                                |
-| `PUT /api/entries/:date`               | `{ entry, revision }`; revision 0 creates, current revision updates              |
-| `DELETE /api/entries/:date?revision=N` | Delete only when the revision matches                                            |
-| `GET /api/series?from=...&to=...`      | Lightweight observations; range span at most 1,830 days                          |
-| `GET /api/series?all=true`             | All owner observations, at most 10,000 days; larger requests fail explicitly     |
-| `GET /api/admin/overview`              | Aggregate operational statistics, explicit administrator role required           |
-| `GET /api/export`                      | Stream selected records as JSON, NDJSON, CSV, or Markdown                        |
+| Method and path                        | Behavior                                                                     |
+| -------------------------------------- | ---------------------------------------------------------------------------- |
+| `GET /api/health`                      | Public liveness only; does not claim database readiness                      |
+| `GET /api/session`                     | Verified ID, email, local-mode and administrator status                      |
+| `GET /api/demo`                        | Public read of the fixed synthetic dataset; no owner or filter parameters    |
+| `GET /api/entries`                     | Owner-scoped summaries, total, date cursor; default 30, maximum 100 rows     |
+| `GET /api/entries/:date`               | One complete daily record, or 404                                            |
+| `PUT /api/entries/:date`               | `{ entry, revision }`; revision 0 creates, current revision updates          |
+| `DELETE /api/entries/:date?revision=N` | Delete only when the revision matches                                        |
+| `GET /api/series?from=...&to=...`      | Lightweight observations; range span at most 1,830 days                      |
+| `GET /api/series?all=true`             | All owner observations, at most 10,000 days; larger requests fail explicitly |
+| `GET /api/admin/overview`              | Aggregate operational statistics, explicit administrator role required       |
+| `GET /api/export`                      | Stream selected records as JSON, NDJSON, CSV, or Markdown                    |
 
 List, series, and export filters accept `from`, `to`, `q`, `type`, and `illness`. `illness=no` includes only explicitly zero severity; unknown is not treated as well. `illness=yes` includes positive severity or recorded symptoms. UI journal exposes all filters; analysis exposes dates/all history, illness, source, HRV method, training status and labels; export exposes date and field selection.
 

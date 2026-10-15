@@ -1,4 +1,5 @@
-import { NavLink, Route, Routes } from 'react-router-dom';
+import { WorkspaceNavLink as NavLink } from '../components/WorkspaceLink';
+import { Route, Routes } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import {
   BookOpen,

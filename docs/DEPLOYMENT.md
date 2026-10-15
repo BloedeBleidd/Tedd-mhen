@@ -59,7 +59,7 @@ Apply the role migration before deploying a Worker that checks the role table. C
 
 ## Backups and restoration
 
-Migration `0004_demo_journal.sql` seeds 236 synthetic days under a credential-free technical user, dataset metadata and database guards against changing the shared baseline or assigning it credentials. Apply it before deploying the `/api/demo` endpoint. Back up and verify restoration first. Verify anonymous demo reads return 401, two ordinary accounts see identical examples, personal entries remain isolated, and demo edits disappear on return to My data. The demo is part of the normal migration chain and release archive, with no external service or recurring seeding job. See [Demo workspace](DEMO.md) for versioning.
+Migration `0004_demo_journal.sql` seeds 236 synthetic days under a credential-free technical user, dataset metadata and database guards against changing the shared baseline or assigning it credentials. Apply it before deploying the `/api/demo` endpoint. Back up and verify restoration first. Verify `/demo` opens without an account, anonymous `/api/demo` reads return only the synthetic baseline, private APIs still return 401, and signed-in visits to `/demo/*` redirect to the private journal. Check that demo edits disappear after leaving or reloading and that registration starts with an empty private journal. The demo is part of the normal migration chain and release archive, with no external service or recurring seeding job. See [Demo workspace](DEMO.md) for versioning.
 
 A full database export preserves identities, credential hashes, revisions and timestamps. Treat it as sensitive:
 

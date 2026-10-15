@@ -1,6 +1,6 @@
 import { ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { WorkspaceLink as Link } from '../components/WorkspaceLink';
 import { NOTICE_KEY, readLocal, writeLocal } from '../lib/appearance';
 
 export function PrivacyNotice() {
@@ -12,9 +12,8 @@ export function PrivacyNotice() {
       <div>
         <strong>Cookies & your data</strong>
         <p>
-          Necessary cookies keep you signed in. Your saved journal is stored in the project’s
-          Cloudflare database. Appearance preferences stay in this browser. No advertising or
-          analytics trackers.
+          We use necessary sign-in cookies. Saved journals are stored in Cloudflare; appearance
+          preferences stay in your browser. No advertising or analytics trackers.
         </p>
         <Link to="/privacy">Read about privacy & data</Link>
       </div>

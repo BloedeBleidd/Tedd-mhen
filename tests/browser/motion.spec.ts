@@ -13,8 +13,7 @@ async function observeMotion(page: Page) {
   });
 }
 async function demo(page: Page) {
-  await page.goto('/');
-  await page.getByRole('button', { name: 'Explore a demo' }).click();
+  await page.goto('http://127.0.0.1:8789/demo');
   await expect(page.getByRole('heading', { name: 'Your days, in perspective' })).toBeVisible();
 }
 const revealCount = (page: Page, selector: string) =>

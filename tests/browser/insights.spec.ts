@@ -11,9 +11,7 @@ test('administrator dashboard exposes aggregate statistics to the granted fixtur
   await expect(page.getByText('Journal JSON payload', { exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Activity and coverage' })).toBeVisible();
   await expect(page.getByRole('alert')).toHaveCount(0);
-  await page.getByRole('button', { name: 'Explore a demo' }).click();
-  await expect(page.getByRole('alert')).toContainText('Administration is unavailable');
-  await expect(page.getByRole('link', { name: 'Administration', exact: true })).toHaveCount(0);
+  await expect(page.locator('a[href^="/demo"]')).toHaveCount(0);
 });
 
 test('stopping an import during a read prevents sending that row and later rows', async ({
@@ -60,8 +58,7 @@ test('relationships and multivariable predictions use demo observations, expose 
 }) => {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
-  await page.goto('/');
-  await page.getByRole('button', { name: 'Explore a demo' }).click();
+  await page.goto('http://127.0.0.1:8789/demo');
   await page.getByRole('link', { name: 'Trends & predictions', exact: true }).click();
   await page.getByRole('link', { name: 'Relationships', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'What moves together?' })).toBeVisible();

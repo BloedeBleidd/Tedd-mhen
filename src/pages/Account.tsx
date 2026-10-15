@@ -1,11 +1,11 @@
 import { useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useApi, useLoad } from '../lib/api';
 import { ErrorBox, Field, PageHeading, Panel } from '../components/ui';
 import { RecoverySecret } from './Auth';
 
 export function Account() {
-  const { request, invalidate, demo, toggleDemo } = useApi();
+  const { request, invalidate, demo } = useApi();
   const session = useLoad<{ email: string; local: boolean }>('/api/session');
   const navigate = useNavigate();
   const [currentPassword, setCurrent] = useState(''),
@@ -79,13 +79,13 @@ export function Account() {
           <>
             <p>
               {demo
-                ? 'You are exploring a temporary demo workspace. Switch to My data to manage your account.'
+                ? 'Create an account to save your own journal. Demo changes are temporary and will not be transferred.'
                 : 'Account changes are unavailable in the local development bypass.'}
             </p>
             {demo && (
-              <button className="button primary" onClick={toggleDemo}>
-                Back to my account
-              </button>
+              <Link className="button primary" to="/register">
+                Create account
+              </Link>
             )}
           </>
         ) : (

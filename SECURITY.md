@@ -1,6 +1,6 @@
 # Security
 
-The repository and sign-up pages are public; each account's journal is private.
+The repository, sign-up pages and synthetic demo are public; each account's journal is private. `GET /api/demo` exposes only the fixed synthetic baseline, without identity or owner parameters. Demo edits stay in browser memory; private data endpoints still require a verified session.
 
 ## Authentication and ownership
 

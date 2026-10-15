@@ -1,5 +1,5 @@
 import { BookOpen, ExternalLink, LockKeyhole } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { WorkspaceLink as Link } from '../components/WorkspaceLink';
 import { scaleDefinitions } from '../../shared/schema';
 import { PageHeading, Panel } from '../components/ui';
 export function Help() {
@@ -142,16 +142,16 @@ export function Help() {
         </Panel>
         <Panel title="Explore with demo data">
           <p>
-            Use the My data / Demo data switch at the bottom of any workspace page. The example
-            journal covers months of running, strength training, sleep, recovery, symptoms and
-            context labels. Dates shift to end today, so the charts and predictions are ready to
-            explore.
+            Before signing in, open /demo or choose Try demo on the home or account-access pages.
+            The example journal covers months of running, strength training, sleep, recovery,
+            symptoms and context labels. Dates shift to end today, so the charts and predictions are
+            ready to explore.
           </p>
           <p>
             Try every journal, analysis, import and export view. Edits and imports affect only your
-            temporary copy and reset when you return to My data or reload. Your personal journal and
-            the shared examples stay unchanged. Account management requires My data; demo mode does
-            not grant administrator access.
+            temporary copy and reset when you leave the demo or reload. Sign in and Create account
+            are available at the top. Signed-in accounts use only their private journal. The demo
+            does not grant account or administrator access.
           </p>
           <p>
             The relationships were deliberately constructed to demonstrate the tools. They are not

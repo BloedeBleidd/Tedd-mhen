@@ -5,7 +5,7 @@ test('themes persist, privacy notice is dismissible, and dark pages fit mobile',
   page,
 }) => {
   await page.emulateMedia({ colorScheme: 'light' });
-  await page.goto('/');
+  await page.goto('http://127.0.0.1:8789/demo');
   await expect(page.getByRole('complementary', { name: 'Cookies and data notice' })).toBeVisible();
   await page.getByRole('button', { name: 'Got it', exact: true }).click();
   await page.getByRole('button', { name: 'Appearance', exact: true }).click();
@@ -15,7 +15,6 @@ test('themes persist, privacy notice is dismissible, and dark pages fit mobile',
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await expect(page.getByRole('complementary', { name: 'Cookies and data notice' })).toHaveCount(0);
-  await page.getByRole('button', { name: 'Explore a demo' }).click();
   await expect(page.locator('.recharts-surface').first()).toBeVisible();
   await page.screenshot({ path: 'test-results/overview-dark.png', fullPage: true });
   await page.getByRole('link', { name: 'Privacy & data', exact: true }).first().click();

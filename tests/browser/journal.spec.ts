@@ -44,8 +44,7 @@ test('daily check-in persists, edits, exports selected fields, and deletes', asy
 test('demo charts, settings, export, mobile navigation and no runtime errors', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
-  await page.goto('/');
-  await page.getByRole('button', { name: 'Explore a demo' }).click();
+  await page.goto('http://127.0.0.1:8789/demo');
   await expect(page.getByText('DEMO DATA', { exact: true })).toBeVisible();
   await expect(page.locator('.recharts-surface').first()).toBeVisible();
   await page.screenshot({ path: 'test-results/overview-desktop.png', fullPage: true });
@@ -77,7 +76,7 @@ test('demo charts, settings, export, mobile navigation and no runtime errors', a
   );
   expect(errors).toEqual([]);
 });
-test('unsaved edits are protected when navigating or switching the demo', async ({ page }) => {
+test('unsaved edits are protected when navigating', async ({ page }) => {
   await page.goto('/check-in?date=2001-02-04');
   await page.getByRole('checkbox', { name: 'Energy', exact: true }).check();
   let handled = new Promise<void>((resolve) =>
@@ -89,15 +88,6 @@ test('unsaved edits are protected when navigating or switching the demo', async 
   await page.getByRole('link', { name: 'Journal', exact: true }).click();
   await handled;
   await expect(page.getByRole('heading', { name: 'How was your day?' })).toBeVisible();
-  handled = new Promise<void>((resolve) =>
-    page.once('dialog', async (dialog) => {
-      await dialog.dismiss();
-      resolve();
-    }),
-  );
-  await page.getByRole('button', { name: 'Explore a demo' }).click();
-  await handled;
-  await expect(page.getByText('DEMO DATA', { exact: true })).toHaveCount(0);
   handled = new Promise<void>((resolve) =>
     page.once('dialog', async (dialog) => {
       await dialog.accept();
