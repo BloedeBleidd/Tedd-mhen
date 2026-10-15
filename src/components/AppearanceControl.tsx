@@ -6,7 +6,7 @@ import { useRef, useState } from 'react';
 import { useAppearance } from '../lib/appearance-context';
 import type { ThemeMode } from '../lib/appearance';
 
-export function AppearanceControl() {
+export function AppearanceControl({ disabled = false }: { disabled?: boolean }) {
   useTranslation();
   const { settings, update, resolved, persistent } = useAppearance();
   const dialog = useRef<HTMLDialogElement>(null);
@@ -47,6 +47,7 @@ export function AppearanceControl() {
     <>
       <button
         className="appearance-trigger button secondary small-button"
+        disabled={disabled}
         onClick={() => dialog.current?.showModal()}
         aria-label={tr('appearanceControl:appearance')}
       >

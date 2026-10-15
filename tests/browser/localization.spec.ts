@@ -153,6 +153,25 @@ test('a permission denial keeps Auto English/light and preserves manual choices'
   await expect(page.locator('html')).toHaveAttribute('lang', 'de');
 });
 
+test('demo loading keeps settings unavailable until their persistent controls are ready', async ({
+  page,
+}) => {
+  let release!: () => void;
+  const ready = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route('**/api/demo', async (route) => {
+    await ready;
+    await route.continue();
+  });
+  await page.goto(publicOrigin + '/demo');
+  await expect(page.locator('.language-trigger')).toBeDisabled();
+  await expect(page.locator('.appearance-trigger')).toBeDisabled();
+  release();
+  await choose(page, 'pl');
+  await expect(page.locator('main h1')).toHaveText(messages('pl', 'dashboard').findYourRhythm);
+});
+
 test('unavailable page code shows a localized recovery screen without exposing a stack trace', async ({
   page,
 }) => {

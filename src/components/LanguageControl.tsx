@@ -5,7 +5,7 @@ import { languages, languageNames, t as tr } from '../i18n';
 import { useLanguage, type LanguageMode } from '../lib/language-context';
 import { useAppearance } from '../lib/appearance-context';
 
-export function LanguageControl() {
+export function LanguageControl({ disabled = false }: { disabled?: boolean }) {
   useTranslation();
   const { mode, language, choose, persistent, loading, loadFailed, retry } = useLanguage();
   const { settings, update } = useAppearance();
@@ -42,6 +42,7 @@ export function LanguageControl() {
     <>
       <button
         className="language-trigger button secondary small-button"
+        disabled={disabled}
         aria-label={tr('language:open')}
         title={tr('language:open')}
         onClick={() => dialog.current?.showModal()}

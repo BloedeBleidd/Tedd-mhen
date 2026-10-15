@@ -2,7 +2,7 @@ import { MessageValue } from '../components/MessageValue';
 import { useTranslation, Trans } from 'react-i18next';
 import { localize, t as tr } from '../i18n';
 import { PendingAccountGuard } from '../components/PendingAccountGuard';
-import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState, type FormEvent } from 'react';
 import { validateAuthForm, type AuthField } from '../../shared/credentials';
 import { Link, useBlocker, useLocation, useNavigate } from 'react-router-dom';
 import { useApi } from '../lib/api';
@@ -95,6 +95,11 @@ export function AuthPage() {
   const [attempted, setAttempted] = useState(false);
   const [touched, setTouched] = useState<Partial<Record<AuthField, boolean>>>({});
   const errorRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    if (!error) return;
+    errorRef.current?.focus();
+    errorRef.current?.scrollIntoView({ block: 'center', behavior: 'instant' });
+  }, [error]);
   const id = useId();
   const issues = validateAuthForm(mode, { email, password, confirm, code, privacy });
   const visibleIssue = (field: AuthField) =>
@@ -132,10 +137,8 @@ export function AuthPage() {
     const first = Object.keys(issues)[0];
     if (first) {
       const input = event.currentTarget.elements.namedItem(first) as HTMLInputElement | null;
-      requestAnimationFrame(() => {
-        input?.focus();
-        input?.scrollIntoView({ block: 'center', behavior: 'instant' });
-      });
+      input?.focus();
+      input?.scrollIntoView({ block: 'center', behavior: 'instant' });
       return;
     }
     pending.current = true;
@@ -159,10 +162,6 @@ export function AuthPage() {
       else finish();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : tr('auth:unableToCompleteThisRequest'));
-      requestAnimationFrame(() => {
-        errorRef.current?.focus();
-        errorRef.current?.scrollIntoView({ block: 'center', behavior: 'instant' });
-      });
     } finally {
       pending.current = false;
       setBusy(false);

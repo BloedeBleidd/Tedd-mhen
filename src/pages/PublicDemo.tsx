@@ -55,8 +55,8 @@ export function PublicDemo() {
           {tr('publicDemo:teddMhen')}
         </Link>
         <div className="topbar-tools">
-          <AppearanceControl />
-          <LanguageControl />
+          <AppearanceControl disabled={!error} />
+          <LanguageControl disabled={!error} />
         </div>
       </header>
       <main id="main">
