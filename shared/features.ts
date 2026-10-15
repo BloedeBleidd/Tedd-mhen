@@ -110,7 +110,7 @@ export function featureCatalog(entries: EntrySummary[] = []): Feature[] {
               ? 'Training'
               : id.startsWith('symptom')
                 ? 'Symptoms'
-                : 'Body signals',
+                : 'Sleep',
       description:
         descriptions[id as MetricKey] ||
         (scale

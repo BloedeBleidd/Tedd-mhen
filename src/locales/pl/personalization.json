@@ -1,0 +1,23 @@
+{
+  "customize": "Dostosuj mój formularz",
+  "account": "Wybory zapisują się od razu na Twoim koncie. Pomiary z danego dnia nadal wymagają zapisania formularza.",
+  "demo": "Ustawienia demo działają do odświeżenia lub opuszczenia demo. Pomiary nigdy nie są kopiowane na kolejny dzień.",
+  "explanation": "Wybierz pola, które chcesz widzieć w kolejnych dniach. Tutaj zawsze możesz je przywrócić. Pole z zapisaną wartością pozostaje widoczne przy edycji danego dnia; ukrycie nigdy nie usuwa danych. Odznaczenie zapisanej oceny ukrywa też jej puste pole w kolejnych dniach.",
+  "ratings": "Oceny dnia i kontekst",
+  "sleep": "Sen i regeneracja",
+  "training": "Ruch i trening",
+  "habits": "Nawyki i codzienne rytuały",
+  "custom": "Moje własne aktywności",
+  "symptoms": "Objawy",
+  "contextLabels": "Etykiety kontekstu",
+  "recordedVisible": "Wpisane tego dnia — nadal widoczne",
+  "repeat": "Dodawaj w nowe dni, z pustymi wartościami",
+  "recent": "Ostatnio używane",
+  "saving": "Zapisywanie ustawień…",
+  "saveError": "Nie udało się zsynchronizować ustawień. Nie zamykaj strony i ponów próbę, aby zapisać wybory.",
+  "retry": "Ponów zapis ustawień",
+  "retainedSportFields": "Wcześniej wypełnione pola pozostają widoczne, aby po zmianie aktywności można je było sprawdzić lub wyczyścić.",
+  "privacy": "Widoczność pól, wybory stałych aktywności i historia wyborów są prywatnie zapisywane na koncie, aby dostosować przyszłe formularze i kolejność opcji. Nie zawierają skopiowanych pomiarów dziennych. Usunięcie konta usuwa te ustawienia z aktywnej bazy. W demo ustawienia są tylko w pamięci i znikają po odświeżeniu lub wyjściu.",
+  "firstUse": "Po pierwszym zapisie niezaznaczone oceny zostaną ukryte w kolejnych dniach, chyba że zachowasz je w ustawieniach formularza. Zawsze możesz je ponownie dodać.",
+  "routineLimit": "Formularz dzienny obsługuje 100 aktywności. Wyłącz powtarzanie jednej z nich, aby dodać kolejną do rutyny. Dotychczasowe pomiary pozostają zapisane."
+}

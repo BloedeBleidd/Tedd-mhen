@@ -8,6 +8,7 @@ Tedd’mhen collects structured training, sleep and wellbeing observations, expl
 | --------------------------------------------------------- | ------------------------------------- |
 | Mathematics, priors, correlations and forecast evaluation | [Methodology](METHODOLOGY.md)         |
 | Custom categories, counts, event times and privacy        | [Habits and activities](HABITS.md)    |
+| Personal form layouts, routines and choice ordering       | [Personalization](PERSONALIZATION.md) |
 | Measurements, units, scales and missing observations      | [Data dictionary](DATA_DICTIONARY.md) |
 | Collection, storage, privacy and retention                | [Data lifecycle](DATA_STORAGE.md)     |
 | File formats, import review and conflict handling         | [Import and export](IMPORT_EXPORT.md) |

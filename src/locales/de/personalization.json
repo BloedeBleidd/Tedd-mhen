@@ -1,0 +1,23 @@
+{
+  "customize": "Meinen Tagesbericht anpassen",
+  "account": "Deine Auswahl wird sofort im Konto gespeichert. Tagesmessungen musst du weiterhin mit dem Tagesbericht speichern.",
+  "demo": "Demo-Einstellungen gelten bis zum Neuladen oder Verlassen der Demo. Messwerte werden nie auf den nächsten Tag übertragen.",
+  "explanation": "Wähle die Felder für kommende Tage. Hier kannst du sie jederzeit wieder hinzufügen. Felder mit Werten bleiben beim Bearbeiten dieses Tages sichtbar; Ausblenden löscht keine Daten. Wenn du eine erfasste Bewertung abwählst, wird ihr leeres Feld an künftigen Tagen ebenfalls ausgeblendet.",
+  "ratings": "Tagesbewertungen & Kontext",
+  "sleep": "Schlaf & Erholung",
+  "training": "Bewegung & Training",
+  "habits": "Gewohnheiten & Alltagsroutinen",
+  "custom": "Meine eigenen Aktivitäten",
+  "symptoms": "Symptome",
+  "contextLabels": "Kontextmarkierungen",
+  "recordedVisible": "An diesem Tag erfasst — bleibt sichtbar",
+  "repeat": "An neuen Tagen mit leeren Werten anzeigen",
+  "recent": "Zuletzt verwendet",
+  "saving": "Einstellungen werden gespeichert…",
+  "saveError": "Deine Einstellungen konnten nicht synchronisiert werden. Lass die Seite geöffnet und versuche es erneut, um deine Auswahl zu speichern.",
+  "retry": "Einstellungen erneut laden oder speichern",
+  "retainedSportFields": "Bereits ausgefüllte Felder bleiben sichtbar, damit du sie nach einem Aktivitätswechsel prüfen oder leeren kannst.",
+  "privacy": "Feldsichtbarkeit, wiederkehrende Aktivitäten und Auswahlverlauf werden privat im Konto gespeichert, um Formulare und Optionsreihenfolgen anzupassen. Sie enthalten keine kopierten Tagesmessungen. Beim Löschen des Kontos werden diese Einstellungen aus der aktiven Datenbank entfernt. Demo-Einstellungen bleiben nur im Arbeitsspeicher bis zum Neuladen oder Verlassen.",
+  "firstUse": "Nach dem ersten gespeicherten Tagesbericht werden nicht ausgewählte Bewertungen an künftigen Tagen ausgeblendet, sofern du sie nicht ausdrücklich in der Anpassung behältst. Du kannst sie jederzeit wieder hinzufügen.",
+  "routineLimit": "Ein Tagesformular unterstützt 100 Aktivitäten. Deaktiviere eine wiederkehrende Aktivität, bevor du eine weitere zur Routine hinzufügst. Bestehende Beobachtungen bleiben erhalten."
+}

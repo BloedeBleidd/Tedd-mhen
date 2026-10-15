@@ -15,6 +15,7 @@ export function Privacy() {
         <p>{tr('privacy:teddMhenIsOperatedByTheOwnerOfThis')}</p>
         <p>{tr('privacy:savingACheckInSendsYourSelectedRatingsTraining')}</p>
         <p>{tr('habits:privacy')}</p>
+        <p>{tr('personalization:privacy')}</p>
         <p>{tr('privacy:emailAddressesAreNotVerifiedInThisPilotNo')}</p>
       </Panel>
       <Panel title={tr('privacy:analysisImportsAndAdministration')} className="prose-panel">

@@ -5,6 +5,7 @@ A personal training, sleep and wellbeing journal with structured measurements, e
 **[Open Tedd’mhen](https://teddmhen.piotrzmudadev.com)** · [Try demo](https://teddmhen.piotrzmudadev.com/demo) · [Documentation](https://bloedeBleidd.github.io/Tedd-mhen/) · [Releases](https://github.com/BloedeBleidd/Tedd-mhen/releases) · by [Piotr Żmuda](https://piotrzmudadev.com)
 
 - Daily numeric scales, sleep, physiology, 150 sports, 40 habit presets, custom activities with counts/times, context labels and optional notes.
+- Account-saved check-in layouts and blank recurring routines, recent choices first, and activity-specific training fields.
 - Historical check-in review with explainable notices and explicit confirmation of unusual observations.
 - Filtered journals, selective JSON/NDJSON/CSV/Markdown exports, and reviewed JSON/NDJSON/CSV imports.
 - Same-day and lagged relationships, trend-adjusted correlations, multiple-input Bayesian models, exploratory forecasts up to 28 days, uncertainty and chronological evaluation with cited methods.
@@ -40,6 +41,7 @@ npm run test:e2e
 | ----------------------------------------------------------- | --------------------------------------------------------- |
 | Mathematics, priors, uncertainty and evaluation             | [Methodology](docs/METHODOLOGY.md)                        |
 | Custom categories, event counts/times and analytical inputs | [Habits and activities](docs/HABITS.md)                   |
+| Personal form layouts, routines and choice ordering         | [Personalization](docs/PERSONALIZATION.md)                |
 | Fields, units, scales and missing values                    | [Data dictionary](docs/DATA_DICTIONARY.md)                |
 | Collection, storage, privacy and retention                  | [Data lifecycle](docs/DATA_STORAGE.md)                    |
 | Formats, round trips and conflict handling                  | [Import and export](docs/IMPORT_EXPORT.md)                |

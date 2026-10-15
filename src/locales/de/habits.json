@@ -1,7 +1,7 @@
 {
   "title": "Gewohnheiten & Aktivitäten",
   "intro": "Erfasse beliebiges Verhalten: Wähle eine Vorlage oder erstelle eine eigene. Definiere ein Ereignis einheitlich, etwa eine Zigarette oder eine Leseeinheit. Dies sind Erfassungskategorien, keine Empfehlungen oder nachgewiesenen Maßnahmen zur Lebensverlängerung.",
-  "semantics": "Leer bedeutet unbekannt. Trage 0 ein, wenn die Aktivität nicht stattfand. Eine entfernte Zeile gilt an diesem Tag als nicht erfasst.",
+  "semantics": "Leer bedeutet unbekannt; 0 bedeutet, dass die Aktivität nicht stattfand. Entfernen einer Zeile entfernt sie auch aus der Routine neuer Tage. Um die Wiederholung ohne Verlust des heutigen Wertes zu stoppen, lasse die Zeile stehen und deaktiviere das Routinekästchen.",
   "search": "Aktivität suchen",
   "choose": "Zu erfassende Aktivität",
   "select": "Aktivität auswählen…",
@@ -18,7 +18,7 @@
   "archiveHelp": "Archivieren blendet die Kategorie bei neuen Auswahlen aus. Alle Beobachtungen und Analyseeingaben bleiben erhalten.",
   "loading": "Aktivitätsbibliothek wird geladen…",
   "retry": "Bibliothek erneut laden",
-  "remove": "{{name}} aus diesem Tag entfernen",
+  "remove": "{{name}} aus diesem Tag und der Routine entfernen",
   "count": "Anzahl am Tag · {{name}}",
   "duration": "Gesamtminuten (optional)",
   "times": "Ereigniszeiten (optional)",

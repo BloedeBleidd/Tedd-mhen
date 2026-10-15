@@ -1,3 +1,9 @@
+import {
+  preferenceChangeSchema,
+  preferenceKey,
+  preferencesFromRows,
+  type PreferenceRow,
+} from '../shared/preferences';
 import { habitDefinitionSchema, habitKeySchema } from '../shared/habits';
 import { adminOverview, isAdministrator } from './admin';
 import { DEMO_DATASET, DEMO_OWNER } from '../shared/demo';
@@ -325,6 +331,30 @@ export async function handleApi(request: Request, env: Env): Promise<Response> {
       local: isLocal(request, env),
       admin: await isAdministrator(env.DB, user.id),
     });
+  if (url.pathname === '/api/preferences') {
+    if (request.method === 'GET') {
+      const rows = await env.DB.prepare(
+        'SELECT key, payload, uses, last_used FROM user_preferences WHERE owner_id = ? ORDER BY last_used, key',
+      )
+        .bind(user.id)
+        .all<PreferenceRow>();
+      return json(preferencesFromRows(rows.results));
+    }
+    if (request.method === 'PATCH') {
+      const change = preferenceChangeSchema.parse(await readBody(request, 4096));
+      const key = preferenceKey(change);
+      const result = await env.DB.batch([
+        env.DB.prepare('INSERT INTO users(id, email) VALUES(?, ?) ON CONFLICT(id) DO NOTHING').bind(
+          user.id,
+          user.email,
+        ),
+        env.DB.prepare(
+          `INSERT INTO user_preferences(owner_id, key, payload, uses, last_used) VALUES(?, ?, ?, 1, ?) ON CONFLICT(owner_id, key) DO UPDATE SET payload = excluded.payload, uses = MIN(user_preferences.uses + 1, 2147483647), last_used = MAX(user_preferences.last_used, excluded.last_used) RETURNING key, payload, uses, last_used`,
+        ).bind(user.id, key, JSON.stringify(change), Date.now()),
+      ]);
+      return json(result[1].results[0]);
+    }
+  }
   if (url.pathname === '/api/habit-definitions') {
     if (request.method === 'GET') {
       const rows = await env.DB.prepare(

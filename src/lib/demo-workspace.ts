@@ -1,3 +1,9 @@
+import {
+  preferenceChangeSchema,
+  preferenceKey,
+  preferencesFromRows,
+  type PreferenceRow,
+} from '../../shared/preferences';
 import { habitDefinitionSchema, habitKeySchema, type HabitDefinition } from '../../shared/habits';
 import { z } from 'zod';
 import { DEMO_DATASET } from '../../shared/demo';
@@ -40,6 +46,7 @@ export class DemoWorkspace {
   readonly title: string;
   readonly id: string;
   readonly recordCount: number;
+  private preferences = new Map<string, PreferenceRow>();
   private definitions = new Map<string, HabitDefinition>();
   private rows: Map<string, StoredEntry>;
   constructor(
@@ -97,6 +104,22 @@ export class DemoWorkspace {
       throw new ApiError('Sign in or create an account to manage your own journal.', 403);
     if (url.pathname === '/api/session' && method === 'GET')
       return { id: this.id, email: 'Demo workspace', local: false, admin: false };
+    if (url.pathname === '/api/preferences') {
+      if (method === 'GET') return preferencesFromRows([...this.preferences.values()]);
+      if (method === 'PATCH') {
+        const change = preferenceChangeSchema.parse(JSON.parse(String(options.body)));
+        const key = preferenceKey(change),
+          previous = this.preferences.get(key);
+        const row = {
+          key,
+          payload: JSON.stringify(change),
+          uses: Math.min((previous?.uses || 0) + 1, 2147483647),
+          last_used: Math.max(previous?.last_used || 0, Date.now()),
+        };
+        this.preferences.set(key, row);
+        return structuredClone(row);
+      }
+    }
     if (url.pathname === '/api/habit-definitions') {
       if (method === 'GET') return { definitions: structuredClone([...this.definitions.values()]) };
       if (method === 'PUT') {

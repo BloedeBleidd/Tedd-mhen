@@ -1,7 +1,8 @@
+import { usePreferences } from '../lib/preferences-context';
 import { MessageValue } from '../components/MessageValue';
 import { useTranslation, Trans } from 'react-i18next';
 import { t as tr } from '../i18n';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 export function LabelsEditor({
   value,
   onChange,
@@ -10,6 +11,15 @@ export function LabelsEditor({
   onChange: (value: string[] | null) => void;
 }) {
   useTranslation();
+  const { preferences, rank, remember } = usePreferences();
+  const suggestionsId = useId();
+  const suggestions = rank(
+    preferences.usage
+      .filter((u) => u.list === 'label' && !value?.includes(u.value))
+      .map((u) => u.value),
+    'label',
+    (label) => label,
+  );
   const [draft, setDraft] = useState('');
   const add = () => {
     const label = draft.trim();
@@ -19,6 +29,7 @@ export function LabelsEditor({
       !(value || []).includes(label) &&
       (value || []).length < 12
     ) {
+      remember('label', label);
       onChange([...(value || []), label]);
       setDraft('');
     }
@@ -62,6 +73,7 @@ export function LabelsEditor({
               aria-label={tr('labelsEditor:newContextLabel')}
               value={draft}
               maxLength={40}
+              list={suggestionsId}
               placeholder={tr('labelsEditor:addAReusableLabel')}
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={(e) => {
@@ -71,6 +83,11 @@ export function LabelsEditor({
                 }
               }}
             />
+            <datalist id={suggestionsId}>
+              {suggestions.map((label) => (
+                <option key={label} value={label} />
+              ))}
+            </datalist>
             <button
               type="button"
               className="button secondary"

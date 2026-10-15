@@ -1,7 +1,7 @@
 {
   "title": "Hábitos e atividades",
   "intro": "Registe qualquer comportamento: escolha uma opção ou crie a sua. Mantenha uma definição consistente de evento, como um cigarro ou uma sessão de leitura. São categorias de registo, não recomendações nem intervenções de longevidade comprovadas.",
-  "semantics": "Em branco significa desconhecido. Introduza 0 se a atividade não ocorreu. Remover uma linha deixa essa atividade sem registo nesse dia.",
+  "semantics": "Vazio significa desconhecido; 0 indica que a atividade não ocorreu. Remover uma linha também a retira da rotina dos novos dias. Para parar a repetição sem perder a observação de hoje, mantém a linha e desmarca a opção de rotina.",
   "search": "Procurar uma atividade",
   "choose": "Atividade a registar",
   "select": "Selecione uma atividade…",
@@ -18,7 +18,7 @@
   "archiveHelp": "Arquivar oculta a categoria nas novas seleções. Mantém todas as observações e dados de análise.",
   "loading": "A carregar a biblioteca…",
   "retry": "Tentar carregar novamente",
-  "remove": "Remover {{name}} deste dia",
+  "remove": "Remover {{name}} deste dia e da rotina",
   "count": "Contagem diária · {{name}}",
   "duration": "Total em minutos (opcional)",
   "times": "Horas dos eventos (opcional)",

@@ -1,3 +1,4 @@
+import { usePreferences } from '../lib/preferences-context';
 import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { activityGroups, workoutTypes, type Activity } from '../../shared/activities';
@@ -13,6 +14,7 @@ export function ActivitySelect({
   includeAll?: boolean;
 }) {
   useTranslation();
+  const { preferences, rank, remember } = usePreferences();
   const [search, setSearch] = useState('');
   const id = useId();
   const normalized = searchText(search);
@@ -24,6 +26,13 @@ export function ActivitySelect({
   const visible = workoutTypes.filter(
     (activity) => activity === value || matches.includes(activity),
   );
+  const recent = rank(
+    visible.filter((activity) =>
+      preferences.usage.some((u) => u.list === 'activity' && u.value === activity),
+    ),
+    'activity',
+    (value) => value,
+  ).slice(0, 8);
   return (
     <div className="activity-select">
       <input
@@ -36,12 +45,26 @@ export function ActivitySelect({
       />
       <select
         value={value}
-        onChange={(e) => onChange(e.target.value as Activity | 'all')}
+        onChange={(e) => {
+          if (e.target.value !== 'all') remember('activity', e.target.value);
+          onChange(e.target.value as Activity | 'all');
+        }}
         aria-label={tr('activityPicker:activity')}
       >
         {includeAll && <option value="all">{tr('activityPicker:all')}</option>}
+        {!!recent.length && (
+          <optgroup label={tr('personalization:recent')}>
+            {recent.map((activity) => (
+              <option key={activity} value={activity}>
+                {tr(`activities:${activity}`)}
+              </option>
+            ))}
+          </optgroup>
+        )}
         {[...new Set(workoutTypes.map((activity) => activityGroups[activity]))].map((group) => {
-          const activities = visible.filter((activity) => activityGroups[activity] === group);
+          const activities = visible.filter(
+            (activity) => activityGroups[activity] === group && !recent.includes(activity),
+          );
           return activities.length ? (
             <optgroup key={group} label={tr(`activityPicker:${group}`)}>
               {activities.map((activity) => (

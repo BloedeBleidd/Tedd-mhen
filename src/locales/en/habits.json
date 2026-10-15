@@ -1,7 +1,7 @@
 {
   "title": "Habits & activities",
   "intro": "Track any behavior: choose a preset or define your own. Keep a consistent definition of one event, such as one cigarette or one reading session. These are recording categories, not recommendations or proven longevity interventions.",
-  "semantics": "Blank means unknown. Enter 0 to record that an activity did not occur. Removing a row makes that activity unrecorded for this day.",
+  "semantics": "Blank means unknown; 0 means the activity did not occur. Removing a row also removes it from your routine for new days. Keep the row and switch off its routine checkbox to stop repeating it without losing today’s observation.",
   "search": "Find an activity",
   "choose": "Activity to track",
   "select": "Select an activity…",
@@ -18,7 +18,7 @@
   "archiveHelp": "Archiving hides a category from new selections. It keeps all recorded observations and analysis inputs.",
   "loading": "Loading your activity library…",
   "retry": "Retry library loading",
-  "remove": "Remove {{name}} from this day",
+  "remove": "Remove {{name}} from this day and routine",
   "count": "Daily count · {{name}}",
   "duration": "Total minutes (optional)",
   "times": "Event times (optional)",

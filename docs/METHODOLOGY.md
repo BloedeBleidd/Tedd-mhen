@@ -171,3 +171,9 @@ The user reviews notices and confirms keeping the entered values, or edits them.
 The modified-Z labeling concept and 3.5 threshold follow the discussion of Iglewicz and Hoaglin in [NIST/SEMATECH, _Detection of Outliers_](https://www.itl.nist.gov/div898/handbook/eda/section3/eda35h.htm). Our scale floors, history limits and relation gates are explicit application heuristics. Regression assumptions and serially correlated errors are discussed by Hyndman and Athanasopoulos in [_Forecasting: Principles and Practice_, Dynamic regression models](https://otexts.com/fpp3/dynamic-regression.html). Neither reference validates this application as a clinical or behavioral error detector.
 
 Habit input identities, event-time encodings and missingness are specified in [Habits and custom activities](HABITS.md).
+
+## Reading the in-application explanations
+
+Definitions & methods contains expandable mathematical topics with equations, symbol definitions and numerical examples. The examples are illustrative arithmetic, not fitted user results: a coefficient of −0.2 hours per stress point converts to −12 minutes per point; a 95% predictive interval [6,8] scores 2 at observation 7 and 42 at observation 9; a review median of 10 and spread of 2 gives the band [3,17]. These panels link the underlying publications and this full specification. Searchable dictionary categories describe encodings without rendering the complete sports catalog by default.
+
+Personal form preferences and option-use metadata are not outcomes, predictors or evidence of an observed behavior. Remembering a routine creates missing future observations, never zero counts or copied values. Grouping HRV under Sleep & recovery is a presentation choice, not a change to its mathematical definition or measurement timing.

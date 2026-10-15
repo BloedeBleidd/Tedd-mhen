@@ -1,3 +1,4 @@
+import { RememberedSelect } from '../components/RememberedSelect';
 import { MethodSources } from '../components/MethodSources';
 import { numberRange } from '../components/ui';
 import { MessageValue } from '../components/MessageValue';
@@ -77,16 +78,24 @@ export function Relationships() {
       <Panel>
         <div className="fields-grid three">
           <Field label={tr('relationships:outcome')}>
-            <select value={target} onChange={(e) => setTarget(e.target.value as MetricKey)}>
+            <RememberedSelect
+              list="metric"
+              value={target}
+              onChange={(e) => setTarget(e.target.value as MetricKey)}
+            >
               {Object.entries(metrics).map(([id, m]) => (
                 <option key={id} value={id}>
                   {localize(m.label)}
                 </option>
               ))}
-            </select>
+            </RememberedSelect>
           </Field>
           <Field label={tr('relationships:compareWith')}>
-            <select value={activePredictor} onChange={(e) => setPredictor(e.target.value)}>
+            <RememberedSelect
+              list="feature"
+              value={activePredictor}
+              onChange={(e) => setPredictor(e.target.value)}
+            >
               {data.catalog
                 .filter((f) => lag > 0 || f.id !== target)
                 .map((f) => (
@@ -94,7 +103,7 @@ export function Relationships() {
                     {localize(f.label)}
                   </option>
                 ))}
-            </select>
+            </RememberedSelect>
           </Field>
           <Field label={tr('relationships:outcomeOccurs')}>
             <select value={lag} onChange={(e) => setLag(Number(e.target.value))}>

@@ -1,6 +1,33 @@
 import { test, expect } from '@playwright/test';
 import { emptyEntry, shiftDate } from '../../shared/schema';
 
+test.beforeEach(async ({ request }) => {
+  const prefs = await (await request.get('/api/preferences')).json();
+  for (const id of Object.keys(prefs.fields))
+    await request.patch('/api/preferences', {
+      headers: { 'X-Teddmhen-Request': '1' },
+      data: { kind: 'field', id, visible: true },
+    });
+  for (const key of prefs.habits)
+    await request.patch('/api/preferences', {
+      headers: { 'X-Teddmhen-Request': '1' },
+      data: { kind: 'habit', key, enabled: false },
+    });
+});
+test.afterEach(async ({ request }) => {
+  const prefs = await (await request.get('/api/preferences')).json();
+  for (const id of Object.keys(prefs.fields))
+    await request.patch('/api/preferences', {
+      headers: { 'X-Teddmhen-Request': '1' },
+      data: { kind: 'field', id, visible: true },
+    });
+  for (const key of prefs.habits)
+    await request.patch('/api/preferences', {
+      headers: { 'X-Teddmhen-Request': '1' },
+      data: { kind: 'habit', key, enabled: false },
+    });
+});
+
 const custom = 'Oddychanie {{count}} <mój rytuał>';
 test('mobile custom activities save, reuse, archive and export without changing user text', async ({
   page,
@@ -9,7 +36,7 @@ test('mobile custom activities save, reuse, archive and export without changing 
   await page.setViewportSize({ width: 390, height: 844 });
   const date = '2008-01-01';
   await page.goto(`/check-in?date=${date}`);
-  await page.getByRole('link', { name: 'Habits & activities', exact: true }).click();
+  await page.getByRole('link', { name: 'My custom activities', exact: true }).click();
   await page.getByText('Create your own activity & manage your library', { exact: true }).click();
   await page.getByLabel('Your activity name').fill(custom);
   await page.getByRole('button', { name: 'Create and track', exact: true }).click();
@@ -29,7 +56,7 @@ test('mobile custom activities save, reuse, archive and export without changing 
   await page.getByRole('button', { name: 'Save check-in' }).click();
   await expect(page.getByText('Saved to your journal')).toBeVisible();
   await page
-    .locator('#habits')
+    .locator('#custom-habits')
     .screenshot({ path: 'test-results/habits-mobile.png', animations: 'disabled' });
   const saved = await (await request.get(`/api/entries/${date}`)).json();
   expect(saved.habits).toHaveLength(1);
@@ -43,10 +70,10 @@ test('mobile custom activities save, reuse, archive and export without changing 
   await page.reload();
   await expect(editor.getByLabel('Event 2 time', { exact: true })).toHaveValue('21:30');
   await page.goto('/check-in?date=2008-01-02');
-  await page
-    .getByRole('combobox', { name: 'Activity to track', exact: true })
-    .selectOption(saved.habits[0].key);
-  await page.getByRole('button', { name: 'Track this activity today' }).click();
+  await expect(
+    editor.getByRole('spinbutton', { name: `Daily count · ${custom}`, exact: true }),
+  ).toHaveValue('');
+  await expect(editor.getByLabel('Event 1 time', { exact: true })).toHaveCount(0);
   await editor.getByRole('spinbutton', { name: `Daily count · ${custom}`, exact: true }).fill('0');
   await page.getByRole('button', { name: 'Save check-in' }).click();
   await expect(page.getByText('Saved to your journal')).toBeVisible();
@@ -82,7 +109,7 @@ test('public demo includes habits, custom library and browser-only experimentati
 }) => {
   const writes: string[] = [];
   page.on('request', (r) => {
-    if (['PUT', 'POST', 'DELETE'].includes(r.method())) writes.push(r.url());
+    if (['PUT', 'POST', 'DELETE', 'PATCH'].includes(r.method())) writes.push(r.url());
   });
   await page.goto('http://127.0.0.1:8789/demo/journal');
   await page
@@ -171,9 +198,10 @@ test('a delayed custom category preserves intervening edits and cannot attach it
   const date = '2010-02-01';
   await page.goto(`/check-in?date=${date}`);
   await page
+    .locator('#habits')
     .getByRole('combobox', { name: 'Activity to track', exact: true })
     .selectOption('preset:reading_before_bed');
-  await page.getByRole('button', { name: 'Track this activity today' }).click();
+  await page.locator('#habits').getByRole('button', { name: 'Track this activity today' }).click();
   const count = page.getByRole('spinbutton', {
     name: 'Daily count · Reading before bed',
     exact: true,
@@ -205,7 +233,12 @@ test('a delayed custom category preserves intervening edits and cannot attach it
   await page.getByRole('button', { name: 'Create and track', exact: true }).click();
   await page.getByLabel('Journal date', { exact: true }).fill('2010-02-02');
   await expect(page.getByRole('button', { name: 'Save check-in' })).toBeEnabled();
-  await expect(page.locator('.habit-editor')).toHaveCount(0);
+  await expect(
+    page.getByRole('heading', { name: 'Created while switching day', exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole('spinbutton', { name: 'Daily count · Reading before bed', exact: true }),
+  ).toHaveValue('');
   release();
   await expect
     .poll(async () =>
@@ -214,7 +247,12 @@ test('a delayed custom category preserves intervening edits and cannot attach it
       ),
     )
     .toBe(true);
-  await expect(page.locator('.habit-editor')).toHaveCount(0);
+  await expect(
+    page.getByRole('heading', { name: 'Created while switching day', exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole('spinbutton', { name: 'Daily count · Reading before bed', exact: true }),
+  ).toHaveValue('');
   expect((await request.get('/api/entries/2010-02-02')).status()).toBe(404);
   await request.delete(`/api/entries/${date}?revision=1`, {
     headers: { 'X-Teddmhen-Request': '1' },

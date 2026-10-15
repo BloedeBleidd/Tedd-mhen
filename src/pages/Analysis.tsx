@@ -1,3 +1,4 @@
+import { RememberedSelect } from '../components/RememberedSelect';
 import { MethodSources } from '../components/MethodSources';
 import { MessageValue } from '../components/MessageValue';
 import { useTranslation, Trans } from 'react-i18next';
@@ -69,13 +70,17 @@ export function Analysis() {
       <Panel className="filter-panel">
         <div className="analysis-filters">
           <Field label={tr('analysis:whatWouldYouLikeToUnderstand')}>
-            <select value={metric} onChange={(e) => setMetric(e.target.value as MetricKey)}>
+            <RememberedSelect
+              list="metric"
+              value={metric}
+              onChange={(e) => setMetric(e.target.value as MetricKey)}
+            >
               {Object.entries(metrics).map(([k, m]) => (
                 <option key={k} value={k}>
                   {localize(m.label)}
                 </option>
               ))}
-            </select>
+            </RememberedSelect>
           </Field>
           <Field label={tr('analysis:from')}>
             <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />

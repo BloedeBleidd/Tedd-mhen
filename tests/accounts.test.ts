@@ -19,6 +19,7 @@ beforeEach(() => {
     .run('legacy-owner', '2001-01-01', JSON.stringify(emptyEntry('2001-01-01')));
   sqlite.exec(readFileSync('migrations/0002_accounts.sql', 'utf8'));
   sqlite.exec(readFileSync('migrations/0005_habit_definitions.sql', 'utf8'));
+  sqlite.exec(readFileSync('migrations/0007_preferences.sql', 'utf8'));
   db = adapter(sqlite);
 });
 afterEach(() => sqlite.close());

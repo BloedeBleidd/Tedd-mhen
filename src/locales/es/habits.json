@@ -1,7 +1,7 @@
 {
   "title": "Hábitos y actividades",
   "intro": "Registra cualquier conducta: elige una opción o crea la tuya. Define de forma constante un evento, por ejemplo un cigarrillo o una sesión de lectura. Son categorías de registro, no recomendaciones ni intervenciones de longevidad demostradas.",
-  "semantics": "En blanco significa desconocido. Introduce 0 si la actividad no ocurrió. Eliminar una fila deja esa actividad sin registrar ese día.",
+  "semantics": "Vacío significa desconocido; 0 indica que la actividad no ocurrió. Quitar una fila también la elimina de la rutina de días nuevos. Para dejar de repetirla conservando el dato de hoy, mantén la fila y desmarca su casilla de rutina.",
   "search": "Buscar una actividad",
   "choose": "Actividad que registrar",
   "select": "Selecciona una actividad…",
@@ -18,7 +18,7 @@
   "archiveHelp": "Archivar oculta la categoría en nuevas selecciones. Conserva todas las observaciones y entradas de análisis.",
   "loading": "Cargando tu biblioteca…",
   "retry": "Reintentar cargar la biblioteca",
-  "remove": "Quitar {{name}} de este día",
+  "remove": "Quitar {{name}} de este día y la rutina",
   "count": "Recuento diario · {{name}}",
   "duration": "Minutos totales (opcional)",
   "times": "Horas de los eventos (opcional)",

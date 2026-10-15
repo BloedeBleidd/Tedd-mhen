@@ -117,3 +117,9 @@ The `AppearanceProvider` resolves manual Light/Dark or Auto. With saved approxim
 Shared interface motion uses viewport-triggered panel and SVG reveals, respects live reduced-motion preferences, and preserves statistical coordinates. See [Interface and motion](INTERFACE.md) for timing, accessibility and lifecycle contracts.
 
 Journal-list responses include `total`, `firstDate` and `lastDate` for the full owner-scoped filter, independently of pagination. Overview uses this metadata to distinguish an empty recent window from an empty journal; the backup preset uses it to select recorded dates. Empty selections return null date bounds.
+
+## Account personalization
+
+`shared/preferences.ts` defines strict preference operations, deterministic option ordering, field visibility checks and blank routine construction. `/api/preferences` authenticates the owner for reads and patches; `user_preferences` stores one row per setting, so independent changes from different tabs do not overwrite a complete settings document. The last committed change wins for the same field. Choice counters increment in SQL, with a monotonic server timestamp.
+
+`PreferencesProvider` lives inside the signed-in or demo shell, serializes immediate writes and overlays pending operations on confirmed state. Failed operations remain queued with visible retry; closing the tab while pending prompts the user. Initial preferences load before a new check-in template is constructed. `DemoWorkspace` implements the same operation contract in its own memory map. Preferences never enter statistical observation payloads. See [Personalization](PERSONALIZATION.md).

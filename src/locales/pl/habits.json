@@ -1,7 +1,7 @@
 {
   "title": "Nawyki i aktywności",
   "intro": "Śledź dowolne zachowanie: wybierz gotową pozycję lub utwórz własną. Stosuj stałą definicję jednego zdarzenia, np. jeden papieros albo jedna sesja czytania. To kategorie zapisu, a nie zalecenia ani potwierdzone sposoby wydłużania życia.",
-  "semantics": "Puste pole oznacza brak informacji. Wpisz 0, jeśli aktywność nie wystąpiła. Usunięcie pozycji oznacza brak zapisu tej aktywności w danym dniu.",
+  "semantics": "Puste oznacza brak danych; 0 — że aktywność nie wystąpiła. Usunięcie wiersza usuwa go też z rutyny nowych dni. Aby wyłączyć powtarzanie i zachować dzisiejszy pomiar, pozostaw wiersz i odznacz pole dodawania w nowe dni.",
   "search": "Znajdź aktywność",
   "choose": "Aktywność do zapisania",
   "select": "Wybierz aktywność…",
@@ -18,7 +18,7 @@
   "archiveHelp": "Archiwizacja ukrywa kategorię w nowych wyborach. Zachowuje wszystkie zapisane obserwacje i dane do analiz.",
   "loading": "Wczytywanie biblioteki aktywności…",
   "retry": "Ponów wczytywanie biblioteki",
-  "remove": "Usuń {{name}} z tego dnia",
+  "remove": "Usuń {{name}} z tego dnia i rutyny",
   "count": "Liczba zdarzeń w dniu · {{name}}",
   "duration": "Łączny czas w minutach (opcjonalnie)",
   "times": "Godziny zdarzeń (opcjonalnie)",

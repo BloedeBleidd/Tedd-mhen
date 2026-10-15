@@ -1,3 +1,4 @@
+import { PreferencesProvider, PreferencesStatus } from './lib/preferences-context';
 import { useTranslation, Trans } from 'react-i18next';
 import { t as tr } from './i18n';
 import {
@@ -146,202 +147,209 @@ export function App() {
     );
   }
   return (
-    <div className="app-shell">
-      <a className="skip-link" href="#main">
-        {tr('app:skipToContent')}
-      </a>
-      <aside
-        ref={sidebar}
-        id="workspace-navigation"
-        className={`sidebar ${menuOpen ? 'open' : ''}`}
-      >
-        <button
-          className="icon-button mobile-menu sidebar-close"
-          aria-label={tr('app:closeNavigation')}
-          onClick={() => setMenuOpen(false)}
+    <PreferencesProvider>
+      <div className="app-shell">
+        <a className="skip-link" href="#main">
+          {tr('app:skipToContent')}
+        </a>
+        <aside
+          ref={sidebar}
+          id="workspace-navigation"
+          className={`sidebar ${menuOpen ? 'open' : ''}`}
         >
-          <X size={20} />
-        </button>
-        <NavLink className="brand" to="/" onClick={() => setMenuOpen(false)}>
-          <span className="brand-mark">
-            <Trans i18nKey="app:t" components={{ slot0: <span /> }} />
-          </span>
-          <span>
-            <Trans
-              i18nKey="app:teddMhenYourPersonalObservatory"
-              components={{ slot0: <small /> }}
-            />
-          </span>
-        </NavLink>
-        <p className="nav-caption">{tr('app:workspace')}</p>
-        <nav aria-label={tr('app:mainNavigation')}>
-          {nav.map(({ to, icon: Icon, label }) => (
-            <NavLink key={to} to={to} end={to === '/'} onClick={() => setMenuOpen(false)}>
-              <Icon size={18} strokeWidth={1.7} />
-              {label}
-            </NavLink>
-          ))}
-        </nav>
-        <div className="sidebar-note">
-          <span className="leaf-decoration">✳</span>
-          <p>
-            <Trans i18nKey="app:noticeYourPatternsFindYourRhythm" components={{ slot0: <br /> }} />
-          </p>
-          <span>{tr('app:oneDayAtATime')}</span>
-        </div>
-        <div className="sidebar-bottom">
-          <NavLink to="/account" onClick={() => setMenuOpen(false)}>
-            <Trans i18nKey="app:account" components={{ slot0: <UserRound size={17} /> }} />
-          </NavLink>
-          <NavLink to="/privacy" onClick={() => setMenuOpen(false)}>
-            <Trans i18nKey="app:privacyData2" components={{ slot0: <ShieldCheck size={17} /> }} />
-          </NavLink>
-          <NavLink to="/help" onClick={() => setMenuOpen(false)}>
-            <Trans
-              i18nKey="app:guideMethodology"
-              components={{ slot0: <BookOpen size={17} />, slot1: <ArrowUpRight size={14} /> }}
-            />
-          </NavLink>
-          <div className="profile">
-            <span className="avatar">{demo ? 'D' : 'Y'}</span>
-            <div>
-              <strong>{demo ? tr('app:demoWorkspace') : tr('app:yourWorkspace')}</strong>
-              <small>
-                {session.data?.local
-                  ? tr('app:localDevelopment')
-                  : demo
-                    ? tr('app:syntheticDataOnly')
-                    : tr('app:privateJournal')}
-              </small>
-            </div>
-            <ShieldCheck size={16} />
-          </div>
-        </div>
-      </aside>
-      {menuOpen && (
-        <button
-          className="nav-backdrop"
-          aria-label={tr('app:dismissNavigation')}
-          onClick={() => setMenuOpen(false)}
-        />
-      )}
-      <div className="main-shell" inert={menuOpen || undefined}>
-        <header className="topbar">
-          <div className="breadcrumb">
-            <button
-              ref={menuButton}
-              className="icon-button mobile-menu"
-              aria-controls="workspace-navigation"
-              aria-expanded={menuOpen}
-              aria-label={menuOpen ? tr('app:closeNavigation') : tr('app:openNavigation')}
-              onClick={() => setMenuOpen(!menuOpen)}
-            >
-              {menuOpen ? <X size={20} /> : <Menu size={20} />}
-              <span className="menu-label">{tr('app:menu')}</span>
-            </button>
-            <span>{tr('app:workspace2')}</span>
-            <span className="slash">/</span>
-            <strong>
-              {nav.find(
-                (n) =>
-                  n.to === pathname || (n.to === '/analysis' && pathname.startsWith('/analysis/')),
-              )?.label ||
-                (pathname === '/about'
-                  ? tr('app:aboutTheAuthor')
-                  : pathname === '/privacy'
-                    ? tr('app:privacyData')
-                    : pathname === '/account'
-                      ? tr('app:account2')
-                      : tr('app:guideMethodology2'))}
-            </strong>
-          </div>
-          <div className="topbar-tools">
-            <AppearanceControl />
-            <LanguageControl />
-            <span className={`privacy-pill ${demo ? 'demo' : ''}`}>
-              <span />
-              {demo
-                ? tr('app:demoData')
-                : session.data?.local
-                  ? tr('app:localWorkspace')
-                  : tr('app:privateByDesign')}
+          <button
+            className="icon-button mobile-menu sidebar-close"
+            aria-label={tr('app:closeNavigation')}
+            onClick={() => setMenuOpen(false)}
+          >
+            <X size={20} />
+          </button>
+          <NavLink className="brand" to="/" onClick={() => setMenuOpen(false)}>
+            <span className="brand-mark">
+              <Trans i18nKey="app:t" components={{ slot0: <span /> }} />
             </span>
-          </div>
-        </header>
-        {demo && (
-          <aside className="demo-banner" aria-label={tr('app:demoInformation')}>
-            <div className="demo-description">
-              <FlaskConical size={20} />
-              <div>
-                <strong>{tr('app:exploreTheDemo')}</strong>
-                <p>{tr('app:syntheticDataEditsResetWhenYouLeaveOrReload')}</p>
-              </div>
-            </div>
-            <nav className="demo-actions" aria-label={tr('app:accountAccess')}>
-              <Link className="button secondary" to="/sign-in">
-                {tr('app:signIn')}
-              </Link>
-              <Link className="button primary" to="/register">
-                <Trans
-                  i18nKey="app:createAccount"
-                  components={{ slot0: <ArrowUpRight size={15} /> }}
-                />
-              </Link>
-            </nav>
-          </aside>
-        )}
-        {session.error && !demo && (
-          <div className="setup-banner">
-            <ShieldCheck size={17} />
-            <span>{session.error}</span>
-            <button className="button secondary" onClick={session.retry}>
-              {tr('app:retryConnection')}
-            </button>
-            <Link to="/sign-in">{tr('app:signInAgain')}</Link>
-          </div>
-        )}
-        <main id="main" tabIndex={-1}>
-          <Suspense key={demo ? 'demo' : 'personal'} fallback={<Loading />}>
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/check-in" element={<CheckIn />} />
-              <Route path="/journal" element={<Journal />} />
-              <Route path="/analysis/*" element={<Analysis />} />
-              <Route path="/export" element={<Export />} />
-              <Route path="/import" element={<Import />} />
-              <Route path="/admin" element={<Admin />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/help" element={<Help />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/account" element={<Account />} />
-              <Route
-                path="*"
-                element={
-                  <section className="panel">
-                    <EmptyState
-                      title={tr('app:thisPageCouldNotBeFound')}
-                      description={tr('app:returnToYourOverviewAndChooseAPageFrom')}
-                      action={false}
-                    />
-                    <WorkspaceLink className="button primary" to="/">
-                      {tr('app:backToOverview')}
-                    </WorkspaceLink>
-                  </section>
-                }
-              />
-            </Routes>
-          </Suspense>
-          <PrivacyNotice />
-          <footer className="page-footer">
             <span>
-              <Trans i18nKey="app:teddMhen2" components={{ slot0: <Activity size={13} /> }} />
+              <Trans
+                i18nKey="app:teddMhenYourPersonalObservatory"
+                components={{ slot0: <small /> }}
+              />
             </span>
-            <span>{tr('app:yourObservationsALittleMorePerspective')}</span>
-            <NavLink to="/privacy">{tr('app:privacyData')}</NavLink>
-            <NavLink to="/about">{tr('app:aboutTheAuthor')}</NavLink>
-          </footer>
-        </main>
+          </NavLink>
+          <p className="nav-caption">{tr('app:workspace')}</p>
+          <nav aria-label={tr('app:mainNavigation')}>
+            {nav.map(({ to, icon: Icon, label }) => (
+              <NavLink key={to} to={to} end={to === '/'} onClick={() => setMenuOpen(false)}>
+                <Icon size={18} strokeWidth={1.7} />
+                {label}
+              </NavLink>
+            ))}
+          </nav>
+          <div className="sidebar-note">
+            <span className="leaf-decoration">✳</span>
+            <p>
+              <Trans
+                i18nKey="app:noticeYourPatternsFindYourRhythm"
+                components={{ slot0: <br /> }}
+              />
+            </p>
+            <span>{tr('app:oneDayAtATime')}</span>
+          </div>
+          <div className="sidebar-bottom">
+            <NavLink to="/account" onClick={() => setMenuOpen(false)}>
+              <Trans i18nKey="app:account" components={{ slot0: <UserRound size={17} /> }} />
+            </NavLink>
+            <NavLink to="/privacy" onClick={() => setMenuOpen(false)}>
+              <Trans i18nKey="app:privacyData2" components={{ slot0: <ShieldCheck size={17} /> }} />
+            </NavLink>
+            <NavLink to="/help" onClick={() => setMenuOpen(false)}>
+              <Trans
+                i18nKey="app:guideMethodology"
+                components={{ slot0: <BookOpen size={17} />, slot1: <ArrowUpRight size={14} /> }}
+              />
+            </NavLink>
+            <div className="profile">
+              <span className="avatar">{demo ? 'D' : 'Y'}</span>
+              <div>
+                <strong>{demo ? tr('app:demoWorkspace') : tr('app:yourWorkspace')}</strong>
+                <small>
+                  {session.data?.local
+                    ? tr('app:localDevelopment')
+                    : demo
+                      ? tr('app:syntheticDataOnly')
+                      : tr('app:privateJournal')}
+                </small>
+              </div>
+              <ShieldCheck size={16} />
+            </div>
+          </div>
+        </aside>
+        {menuOpen && (
+          <button
+            className="nav-backdrop"
+            aria-label={tr('app:dismissNavigation')}
+            onClick={() => setMenuOpen(false)}
+          />
+        )}
+        <div className="main-shell" inert={menuOpen || undefined}>
+          <header className="topbar">
+            <div className="breadcrumb">
+              <button
+                ref={menuButton}
+                className="icon-button mobile-menu"
+                aria-controls="workspace-navigation"
+                aria-expanded={menuOpen}
+                aria-label={menuOpen ? tr('app:closeNavigation') : tr('app:openNavigation')}
+                onClick={() => setMenuOpen(!menuOpen)}
+              >
+                {menuOpen ? <X size={20} /> : <Menu size={20} />}
+                <span className="menu-label">{tr('app:menu')}</span>
+              </button>
+              <span>{tr('app:workspace2')}</span>
+              <span className="slash">/</span>
+              <strong>
+                {nav.find(
+                  (n) =>
+                    n.to === pathname ||
+                    (n.to === '/analysis' && pathname.startsWith('/analysis/')),
+                )?.label ||
+                  (pathname === '/about'
+                    ? tr('app:aboutTheAuthor')
+                    : pathname === '/privacy'
+                      ? tr('app:privacyData')
+                      : pathname === '/account'
+                        ? tr('app:account2')
+                        : tr('app:guideMethodology2'))}
+              </strong>
+            </div>
+            <div className="topbar-tools">
+              <AppearanceControl />
+              <LanguageControl />
+              <span className={`privacy-pill ${demo ? 'demo' : ''}`}>
+                <span />
+                {demo
+                  ? tr('app:demoData')
+                  : session.data?.local
+                    ? tr('app:localWorkspace')
+                    : tr('app:privateByDesign')}
+              </span>
+            </div>
+          </header>
+          {demo && (
+            <aside className="demo-banner" aria-label={tr('app:demoInformation')}>
+              <div className="demo-description">
+                <FlaskConical size={20} />
+                <div>
+                  <strong>{tr('app:exploreTheDemo')}</strong>
+                  <p>{tr('app:syntheticDataEditsResetWhenYouLeaveOrReload')}</p>
+                </div>
+              </div>
+              <nav className="demo-actions" aria-label={tr('app:accountAccess')}>
+                <Link className="button secondary" to="/sign-in">
+                  {tr('app:signIn')}
+                </Link>
+                <Link className="button primary" to="/register">
+                  <Trans
+                    i18nKey="app:createAccount"
+                    components={{ slot0: <ArrowUpRight size={15} /> }}
+                  />
+                </Link>
+              </nav>
+            </aside>
+          )}
+          {session.error && !demo && (
+            <div className="setup-banner">
+              <ShieldCheck size={17} />
+              <span>{session.error}</span>
+              <button className="button secondary" onClick={session.retry}>
+                {tr('app:retryConnection')}
+              </button>
+              <Link to="/sign-in">{tr('app:signInAgain')}</Link>
+            </div>
+          )}
+          <main id="main" tabIndex={-1}>
+            <PreferencesStatus />
+            <Suspense key={demo ? 'demo' : 'personal'} fallback={<Loading />}>
+              <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/check-in" element={<CheckIn />} />
+                <Route path="/journal" element={<Journal />} />
+                <Route path="/analysis/*" element={<Analysis />} />
+                <Route path="/export" element={<Export />} />
+                <Route path="/import" element={<Import />} />
+                <Route path="/admin" element={<Admin />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/help" element={<Help />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/account" element={<Account />} />
+                <Route
+                  path="*"
+                  element={
+                    <section className="panel">
+                      <EmptyState
+                        title={tr('app:thisPageCouldNotBeFound')}
+                        description={tr('app:returnToYourOverviewAndChooseAPageFrom')}
+                        action={false}
+                      />
+                      <WorkspaceLink className="button primary" to="/">
+                        {tr('app:backToOverview')}
+                      </WorkspaceLink>
+                    </section>
+                  }
+                />
+              </Routes>
+            </Suspense>
+            <PrivacyNotice />
+            <footer className="page-footer">
+              <span>
+                <Trans i18nKey="app:teddMhen2" components={{ slot0: <Activity size={13} /> }} />
+              </span>
+              <span>{tr('app:yourObservationsALittleMorePerspective')}</span>
+              <NavLink to="/privacy">{tr('app:privacyData')}</NavLink>
+              <NavLink to="/about">{tr('app:aboutTheAuthor')}</NavLink>
+            </footer>
+          </main>
+        </div>
       </div>
-    </div>
+    </PreferencesProvider>
   );
 }

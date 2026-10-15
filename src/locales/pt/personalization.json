@@ -1,0 +1,23 @@
+{
+  "customize": "Personalizar o meu registo",
+  "account": "As tuas escolhas são guardadas de imediato na conta. As medições do dia continuam a exigir a gravação do registo.",
+  "demo": "As preferências da demonstração duram até recarregares ou saíres. As medições nunca são copiadas para o dia seguinte.",
+  "explanation": "Escolhe os campos para os próximos dias. Podes repô-los aqui a qualquer momento. Um campo preenchido continua visível ao editar esse dia; ocultá-lo não apaga dados. Desmarcar uma avaliação registada também oculta o seu campo vazio nos dias seguintes.",
+  "ratings": "Avaliações e contexto",
+  "sleep": "Sono e recuperação",
+  "training": "Movimento e treino",
+  "habits": "Hábitos e rotinas diárias",
+  "custom": "As minhas atividades personalizadas",
+  "symptoms": "Sintomas",
+  "contextLabels": "Etiquetas de contexto",
+  "recordedVisible": "Com dados neste dia — continua visível",
+  "repeat": "Incluir em novos dias, sem valores",
+  "recent": "Usados recentemente",
+  "saving": "A guardar as preferências…",
+  "saveError": "Não foi possível sincronizar as preferências. Mantém esta página aberta e tenta novamente para guardar as escolhas.",
+  "retry": "Tentar sincronizar novamente",
+  "retainedSportFields": "Os campos já preenchidos continuam visíveis para os reveres ou limpares após mudares de atividade.",
+  "privacy": "A visibilidade dos campos, as atividades recorrentes e o histórico de escolhas são guardados em privado na conta para personalizar formulários e ordenar opções. Não contêm medições diárias copiadas. Eliminar a conta remove estas preferências da base ativa. Na demonstração ficam apenas na memória até recarregares ou saíres.",
+  "firstUse": "Após o primeiro registo guardado, as avaliações não selecionadas ficam ocultas nos dias seguintes, salvo se as mantiveres na personalização. Podes sempre repô-las.",
+  "routineLimit": "O formulário diário admite 100 atividades. Desativa uma atividade recorrente antes de adicionares outra à rotina. As observações existentes são mantidas."
+}

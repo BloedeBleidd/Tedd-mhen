@@ -1,7 +1,7 @@
 {
   "title": "Habitudes et activités",
   "intro": "Suivez tout comportement : choisissez une catégorie ou créez la vôtre. Gardez une définition constante d’un événement, par exemple une cigarette ou une séance de lecture. Ce sont des catégories de suivi, pas des recommandations ni des interventions de longévité prouvées.",
-  "semantics": "Un champ vide signifie inconnu. Saisissez 0 si l’activité n’a pas eu lieu. Supprimer une ligne laisse cette activité non renseignée ce jour-là.",
+  "semantics": "Vide signifie inconnu ; 0 indique que l’activité n’a pas eu lieu. Retirer une ligne la retire aussi de la routine des nouveaux jours. Pour arrêter la répétition sans perdre la mesure du jour, garde la ligne et décoche sa case de routine.",
   "search": "Rechercher une activité",
   "choose": "Activité à suivre",
   "select": "Choisissez une activité…",
@@ -18,7 +18,7 @@
   "archiveHelp": "L’archivage masque la catégorie dans les nouvelles sélections. Toutes les observations et données d’analyse sont conservées.",
   "loading": "Chargement de votre bibliothèque…",
   "retry": "Réessayer le chargement",
-  "remove": "Retirer {{name}} de ce jour",
+  "remove": "Retirer {{name}} de ce jour et de la routine",
   "count": "Nombre d’événements du jour · {{name}}",
   "duration": "Total en minutes (facultatif)",
   "times": "Heures des événements (facultatif)",

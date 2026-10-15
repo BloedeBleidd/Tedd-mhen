@@ -1,0 +1,23 @@
+{
+  "customize": "Personnaliser mon bilan",
+  "account": "Tes choix sont enregistrés immédiatement dans ton compte. Les mesures du jour doivent toujours être enregistrées avec le bilan.",
+  "demo": "Les préférences de la démo durent jusqu’au rechargement ou à la sortie. Les mesures ne sont jamais recopiées au lendemain.",
+  "explanation": "Choisis les champs des prochains jours. Tu peux les rétablir ici à tout moment. Un champ renseigné reste visible lors de la modification du jour concerné ; le masquer ne supprime rien. Décocher une évaluation renseignée masque aussi son champ vide les jours suivants.",
+  "ratings": "Évaluations et contexte",
+  "sleep": "Sommeil et récupération",
+  "training": "Mouvement et entraînement",
+  "habits": "Habitudes et routines quotidiennes",
+  "custom": "Mes activités personnalisées",
+  "symptoms": "Symptômes",
+  "contextLabels": "Étiquettes de contexte",
+  "recordedVisible": "Renseigné ce jour — reste visible",
+  "repeat": "Inclure les nouveaux jours, sans valeurs",
+  "recent": "Utilisés récemment",
+  "saving": "Enregistrement des préférences…",
+  "saveError": "Impossible de synchroniser tes préférences. Garde cette page ouverte et réessaie pour enregistrer tes choix.",
+  "retry": "Réessayer la synchronisation",
+  "retainedSportFields": "Les champs déjà renseignés restent visibles pour les vérifier ou les vider après un changement d’activité.",
+  "privacy": "La visibilité des champs, les activités récurrentes et l’historique des choix sont conservés dans ton compte privé pour adapter les formulaires et trier les options. Ils ne contiennent aucune mesure quotidienne recopiée. Supprimer le compte les retire de la base active. Dans la démo, ils restent en mémoire jusqu’au rechargement ou à la sortie.",
+  "firstUse": "Après le premier bilan enregistré, les évaluations non sélectionnées seront masquées les jours suivants, sauf si tu les conserves dans la personnalisation. Tu peux toujours les rétablir.",
+  "routineLimit": "Le formulaire quotidien accepte 100 activités. Désactive une activité récurrente avant d’en ajouter une autre à ta routine. Les observations existantes sont conservées."
+}

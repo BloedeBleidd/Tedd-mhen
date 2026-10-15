@@ -1,3 +1,4 @@
+import { RememberedSelect } from './RememberedSelect';
 import { MessageValue } from '../components/MessageValue';
 import { useTranslation, Trans } from 'react-i18next';
 import { enumLabel, localize, t as tr } from '../i18n';
@@ -128,37 +129,49 @@ export function useAnalysisData() {
             </select>
           </Field>
           <Field label={tr('analysisData:measurementSource')}>
-            <select value={source} onChange={(e) => setSource(e.target.value)}>
+            <RememberedSelect
+              list="source"
+              value={source}
+              onChange={(e) => setSource(e.target.value)}
+            >
               <option value="all">{tr('analysisData:allSources')}</option>
               {['manual', 'garmin', 'apple', 'oura', 'whoop', 'polar', 'other'].map((s) => (
                 <option key={s} value={s}>
                   {enumLabel(s)}
                 </option>
               ))}
-            </select>
+            </RememberedSelect>
           </Field>
           <Field label={tr('analysisData:hrvMethod')}>
-            <select value={method} onChange={(e) => setMethod(e.target.value)}>
+            <RememberedSelect
+              list="hrvMethod"
+              value={method}
+              onChange={(e) => setMethod(e.target.value)}
+            >
               <option value="all">{tr('analysisData:allMethods')}</option>
               {['rmssd', 'sdnn', 'unknown'].map((s) => (
                 <option key={s} value={s}>
                   {enumLabel(s)}
                 </option>
               ))}
-            </select>
+            </RememberedSelect>
           </Field>
           <Field label={tr('analysisData:trainingStatus')}>
-            <select value={training} onChange={(e) => setTraining(e.target.value)}>
+            <RememberedSelect
+              list="trainingStatus"
+              value={training}
+              onChange={(e) => setTraining(e.target.value)}
+            >
               <option value="all">{tr('analysisData:allStatuses')}</option>
               {['trained', 'rest', 'unrecorded'].map((s) => (
                 <option key={s} value={s}>
                   {enumLabel(s)}
                 </option>
               ))}
-            </select>
+            </RememberedSelect>
           </Field>
           <Field label={tr('analysisData:requiredContextLabel')}>
-            <select value={label} onChange={(e) => setLabel(e.target.value)}>
+            <RememberedSelect list="label" value={label} onChange={(e) => setLabel(e.target.value)}>
               <option value="all">{tr('analysisData:allContexts')}</option>
               {label !== 'all' && !labelOptions.some((f) => f.id === `label:${label}`) && (
                 <option value={label}>
@@ -173,7 +186,7 @@ export function useAnalysisData() {
                   {f.id.slice(6)}
                 </option>
               ))}
-            </select>
+            </RememberedSelect>
           </Field>
         </div>
       </details>

@@ -1,0 +1,23 @@
+{
+  "customize": "Personalizar mi registro",
+  "account": "Tus preferencias se guardan al instante en tu cuenta. Las mediciones del día requieren guardar el registro.",
+  "demo": "Las preferencias de la demo duran hasta recargar o salir. Las mediciones nunca se copian al día siguiente.",
+  "explanation": "Elige los campos para los próximos días. Puedes recuperarlos aquí en cualquier momento. Los campos con datos siguen visibles al editar ese día; ocultarlos no borra datos. Desmarcar una valoración registrada también oculta su campo vacío en días posteriores.",
+  "ratings": "Valoraciones y contexto",
+  "sleep": "Sueño y recuperación",
+  "training": "Movimiento y entrenamiento",
+  "habits": "Hábitos y rutinas diarias",
+  "custom": "Mis actividades personalizadas",
+  "symptoms": "Síntomas",
+  "contextLabels": "Etiquetas de contexto",
+  "recordedVisible": "Con datos este día: sigue visible",
+  "repeat": "Incluir en días nuevos, sin valores",
+  "recent": "Usados recientemente",
+  "saving": "Guardando tus preferencias…",
+  "saveError": "No se pudieron sincronizar tus preferencias. Mantén la página abierta y vuelve a intentarlo para guardarlas.",
+  "retry": "Reintentar preferencias",
+  "retainedSportFields": "Los campos ya rellenados siguen visibles para revisarlos o borrarlos al cambiar la actividad.",
+  "privacy": "La visibilidad de campos, las actividades recurrentes y el historial de selecciones se guardan de forma privada en tu cuenta para adaptar formularios y ordenar opciones. No contienen mediciones diarias copiadas. Al eliminar la cuenta se borran de la base activa. En la demo solo están en memoria y desaparecen al recargar o salir.",
+  "firstUse": "Tras el primer registro guardado, las valoraciones no seleccionadas se ocultan en días futuros salvo que las mantengas en la personalización. Siempre puedes recuperarlas.",
+  "routineLimit": "El formulario diario admite 100 actividades. Desactiva una recurrente antes de añadir otra a tu rutina. Los datos existentes se conservan."
+}

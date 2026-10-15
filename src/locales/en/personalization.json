@@ -1,0 +1,23 @@
+{
+  "customize": "Customize my check-in",
+  "account": "Your choices save to your account immediately. Daily measurements still need Save check-in.",
+  "demo": "Demo preferences last until you reload or leave the demo. Measurements are never copied to the next day.",
+  "explanation": "Choose the fields you want on future days. You can add them back here at any time. A field with a recorded value stays visible when editing that day; hiding it never deletes data. Unchecking a recorded rating also hides its empty field on future days.",
+  "ratings": "Daily ratings & context",
+  "sleep": "Sleep & recovery",
+  "training": "Movement & training",
+  "habits": "Habits & daily routines",
+  "custom": "My custom activities",
+  "symptoms": "Symptoms",
+  "contextLabels": "Context labels",
+  "recordedVisible": "Recorded today — still visible",
+  "repeat": "Include on new days, with blank values",
+  "recent": "Recently used",
+  "saving": "Saving your preferences…",
+  "saveError": "Your preferences could not be synchronized. Keep this page open and retry to save your choices.",
+  "retry": "Retry preferences",
+  "retainedSportFields": "Previously entered fields stay visible so you can review or clear them after changing the activity.",
+  "privacy": "Check-in field visibility, recurring activity choices and selection history are stored privately in your account to personalize future forms and option ordering. They contain no copied daily measurements. Deleting your account removes these preferences from the active database. Demo preferences stay in memory only and disappear on reload or exit.",
+  "firstUse": "On your first saved check-in, unselected ratings are hidden on future days unless you explicitly keep them in Customize my check-in. You can always add them back.",
+  "routineLimit": "A daily form supports 100 activities. Turn off a recurring activity before adding another to your routine. Existing observations are kept."
+}

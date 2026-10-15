@@ -1,3 +1,4 @@
+import { RememberedSelect } from '../components/RememberedSelect';
 import { MethodSources } from '../components/MethodSources';
 import { numberRange } from '../components/ui';
 import { MessageValue } from '../components/MessageValue';
@@ -64,13 +65,17 @@ export function Prediction() {
       <Panel>
         <div className="fields-grid three">
           <Field label={tr('prediction:predictAnOutcome')}>
-            <select value={target} onChange={(e) => setTarget(e.target.value as MetricKey)}>
+            <RememberedSelect
+              list="metric"
+              value={target}
+              onChange={(e) => setTarget(e.target.value as MetricKey)}
+            >
               {Object.entries(metrics).map(([id, m]) => (
                 <option key={id} value={id}>
                   {localize(m.label)}
                 </option>
               ))}
-            </select>
+            </RememberedSelect>
           </Field>
           <Field label={tr('prediction:predictionTiming')}>
             <select value={horizon} onChange={(e) => setHorizon(Number(e.target.value))}>

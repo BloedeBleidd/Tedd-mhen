@@ -41,6 +41,7 @@ beforeEach(() => {
   sqlite.exec(readFileSync('migrations/0002_accounts.sql', 'utf8'));
   sqlite.exec(readFileSync('migrations/0003_administrators.sql', 'utf8'));
   sqlite.exec(readFileSync('migrations/0005_habit_definitions.sql', 'utf8'));
+  sqlite.exec(readFileSync('migrations/0007_preferences.sql', 'utf8'));
   env = { DB: adapter(sqlite) } as Env;
   actor = 'owner-a';
 });
@@ -342,5 +343,74 @@ describe('API ownership, concurrency, filtering, and streaming exports', () => {
       if (format === 'md') expect(text).toContain('## 2026-10-12');
       expect(response.headers.get('cache-control')).toContain('no-store');
     }
+  });
+});
+
+it('isolates immediate preferences and concurrent independent changes with account deletion cascades', async () => {
+  expect(await (await call('/api/preferences')).json()).toEqual({
+    fields: {},
+    habits: [],
+    usage: [],
+  });
+  const field = { kind: 'field', id: 'wellbeing', visible: false };
+  expect(
+    (await call('/api/preferences', 'PATCH', field, { Origin: 'https://evil.test' })).status,
+  ).toBe(403);
+  expect(
+    (await call('/api/preferences', 'PATCH', field, { 'X-Teddmhen-Expected-User': 'owner-b' }))
+      .status,
+  ).toBe(403);
+  expect((await call('/api/preferences', 'PATCH', { ...field, owner_id: 'owner-b' })).status).toBe(
+    400,
+  );
+  expect(
+    (
+      await call('/api/preferences', 'PATCH', {
+        kind: 'choice',
+        list: 'activity',
+        value: 'Pływanie',
+      })
+    ).status,
+  ).toBe(400);
+  const changes = [
+    field,
+    { kind: 'field', id: 'sleep.score', visible: false },
+    { kind: 'habit', key: customHabit.key, enabled: true },
+  ];
+  expect(
+    (await Promise.all(changes.map((change) => call('/api/preferences', 'PATCH', change)))).every(
+      (r) => r.status === 200,
+    ),
+  ).toBe(true);
+  const choice = { kind: 'choice', list: 'activity', value: 'swimming' };
+  await Promise.all([
+    call('/api/preferences', 'PATCH', choice),
+    call('/api/preferences', 'PATCH', choice),
+  ]);
+  const response = await call('/api/preferences');
+  expect(response.headers.get('Cache-Control')).toContain('no-store');
+  expect(await response.json()).toMatchObject({
+    fields: { wellbeing: false, 'sleep.score': false },
+    habits: [customHabit.key],
+    usage: [{ list: 'activity', value: 'swimming', count: 2 }],
+  });
+  actor = 'owner-b';
+  expect(await (await call('/api/preferences')).json()).toEqual({
+    fields: {},
+    habits: [],
+    usage: [],
+  });
+  await call('/api/preferences', 'PATCH', { ...field, visible: true });
+  actor = 'owner-a';
+  expect(await (await call('/api/preferences')).json()).toMatchObject({
+    fields: { wellbeing: false },
+  });
+  sqlite.prepare('DELETE FROM users WHERE id = ?').run(actor);
+  expect(
+    sqlite.prepare('SELECT COUNT(*) AS n FROM user_preferences WHERE owner_id = ?').get(actor),
+  ).toMatchObject({ n: 0 });
+  actor = 'owner-b';
+  expect(await (await call('/api/preferences')).json()).toMatchObject({
+    fields: { wellbeing: true },
   });
 });

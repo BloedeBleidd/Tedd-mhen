@@ -1,3 +1,4 @@
+import { usePreferences } from '../lib/preferences-context';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Plus, Trash2 } from 'lucide-react';
@@ -15,12 +16,15 @@ export const habitName = (record: Pick<HabitRecord, 'key' | 'name'>) =>
 export function HabitsEditor({
   value,
   onChange,
+  kind,
 }: {
+  kind: 'preset' | 'custom';
   value: HabitRecord[];
   onChange: (records: HabitRecord[]) => void;
 }) {
   useTranslation();
   const { request } = useApi();
+  const { preferences, change, remember, rank, loaded } = usePreferences();
   const active = useRef(true);
   const currentValue = useRef(value);
   currentValue.current = value;
@@ -30,7 +34,9 @@ export function HabitsEditor({
       active.current = false;
     };
   }, []);
-  const library = useLoad<{ definitions: HabitDefinition[] }>('/api/habit-definitions');
+  const library = useLoad<{ definitions: HabitDefinition[] }>(
+    kind === 'custom' ? '/api/habit-definitions' : null,
+  );
   const [created, setCreated] = useState<HabitDefinition[]>([]);
   const [query, setQuery] = useState(''),
     [chosen, setChosen] = useState(''),
@@ -45,12 +51,18 @@ export function HabitsEditor({
     ],
     [library.data, created],
   );
-  const available = [
-    ...habitPresets.map((id) => ({ key: `preset:${id}`, name: null })),
-    ...definitions.filter((d) => !d.archived),
-  ].filter(
-    (d) =>
-      !value.some((r) => r.key === d.key) && searchText(habitName(d)).includes(searchText(query)),
+  const available = rank(
+    [
+      ...habitPresets.map((id) => ({ key: `preset:${id}`, name: null })),
+      ...definitions.filter((d) => !d.archived),
+    ].filter(
+      (d) =>
+        d.key.startsWith(kind + ':') &&
+        !value.some((r) => r.key === d.key) &&
+        searchText(habitName(d)).includes(searchText(query)),
+    ),
+    'habit',
+    (d) => d.key,
   );
   function add(definition: { key: string; name: string | null }) {
     const records = currentValue.current;
@@ -66,6 +78,9 @@ export function HabitsEditor({
         notes: '',
       },
     ]);
+    if (preferences.habits.includes(definition.key) || preferences.habits.length < 100)
+      change({ kind: 'habit', key: definition.key, enabled: true });
+    remember('habit', definition.key);
     setChosen('');
   }
   function edit(index: number, patch: Partial<HabitRecord>) {
@@ -81,6 +96,7 @@ export function HabitsEditor({
       });
       if (!active.current) return;
       setCreated((rows) => [...rows.filter((d) => d.key !== saved.key), saved]);
+      if (saved.archived) change({ kind: 'habit', key: saved.key, enabled: false });
       if (track) {
         add(saved);
         setName('');
@@ -92,8 +108,17 @@ export function HabitsEditor({
     }
   }
   return (
-    <Panel id="habits" title={t('habits:title')} subtitle={t('habits:intro')}>
+    <Panel
+      id={kind === 'preset' ? 'habits' : 'custom-habits'}
+      title={t(kind === 'preset' ? 'personalization:habits' : 'personalization:custom')}
+      subtitle={t(kind === 'preset' ? 'habits:intro' : 'habits:customHelp')}
+    >
       <p className="small muted">{t('habits:semantics')}</p>
+      {preferences.habits.length >= 100 && (
+        <p role="status" className="small">
+          {t('personalization:routineLimit')}
+        </p>
+      )}
       <div className="fields-grid">
         <Field label={t('habits:search')}>
           <input
@@ -124,7 +149,7 @@ export function HabitsEditor({
       <button
         type="button"
         className="button secondary"
-        disabled={!chosen || value.length >= 100}
+        disabled={!loaded || !chosen || value.length >= 100}
         onClick={() => {
           const d = available.find((d) => d.key === chosen);
           if (d) add(d);
@@ -133,54 +158,61 @@ export function HabitsEditor({
         <Plus size={16} />
         {t('habits:add')}
       </button>
-      <details className="habit-library">
-        <summary>{t('habits:customLibrary')}</summary>
-        <Field label={t('habits:customName')}>
-          <input value={name} maxLength={120} onChange={(e) => setName(e.target.value)} />
-        </Field>
-        <button
-          type="button"
-          className="button secondary"
-          disabled={
-            !name.trim() || busy || library.loading || !!library.error || value.length >= 100
-          }
-          onClick={() => {
-            const existing = definitions.find(
-              (d) => searchText(d.name) === searchText(name.trim()),
-            );
-            store(
-              {
-                key: existing?.key || `custom:${crypto.randomUUID()}`,
-                name: existing?.name || name,
-                archived: false,
-              },
-              true,
-            );
-          }}
-        >
-          {busy ? t('habits:saving') : t('habits:create')}
-        </button>
-        <p className="small muted">{t('habits:customHelp')}</p>
-        {definitions.length > 0 && (
-          <details>
-            <summary>{t('habits:manage')}</summary>
-            {definitions.map((d) => (
-              <div className="habit-library-row" key={d.key}>
-                <span>{d.name}</span>
-                <button
-                  type="button"
-                  className="button secondary small-button"
-                  disabled={busy}
-                  onClick={() => store({ ...d, archived: !d.archived })}
-                >
-                  {d.archived ? t('habits:restore') : t('habits:archive')}
-                </button>
-              </div>
-            ))}
-            <p className="small muted">{t('habits:archiveHelp')}</p>
-          </details>
-        )}
-      </details>
+      {kind === 'custom' && (
+        <details className="habit-library">
+          <summary>{t('habits:customLibrary')}</summary>
+          <Field label={t('habits:customName')}>
+            <input value={name} maxLength={120} onChange={(e) => setName(e.target.value)} />
+          </Field>
+          <button
+            type="button"
+            className="button secondary"
+            disabled={
+              !loaded ||
+              !name.trim() ||
+              busy ||
+              library.loading ||
+              !!library.error ||
+              value.length >= 100
+            }
+            onClick={() => {
+              const existing = definitions.find(
+                (d) => searchText(d.name) === searchText(name.trim()),
+              );
+              store(
+                {
+                  key: existing?.key || `custom:${crypto.randomUUID()}`,
+                  name: existing?.name || name,
+                  archived: false,
+                },
+                true,
+              );
+            }}
+          >
+            {busy ? t('habits:saving') : t('habits:create')}
+          </button>
+          <p className="small muted">{t('habits:customHelp')}</p>
+          {definitions.length > 0 && (
+            <details>
+              <summary>{t('habits:manage')}</summary>
+              {definitions.map((d) => (
+                <div className="habit-library-row" key={d.key}>
+                  <span>{d.name}</span>
+                  <button
+                    type="button"
+                    className="button secondary small-button"
+                    disabled={busy}
+                    onClick={() => store({ ...d, archived: !d.archived })}
+                  >
+                    {d.archived ? t('habits:restore') : t('habits:archive')}
+                  </button>
+                </div>
+              ))}
+              <p className="small muted">{t('habits:archiveHelp')}</p>
+            </details>
+          )}
+        </details>
+      )}
       {library.loading && (
         <p role="status" className="small">
           {t('habits:loading')}
@@ -192,90 +224,109 @@ export function HabitsEditor({
           {t('habits:retry')}
         </button>
       )}
-      {value.map((record, index) => (
-        <div className="habit-editor" key={record.key}>
-          <div className="workout-heading">
-            <h3>{habitName(record)}</h3>
+      {value.map((record, index) =>
+        record.key.startsWith(kind + ':') ? (
+          <div className="habit-editor" key={record.key}>
+            <div className="workout-heading">
+              <h3>{habitName(record)}</h3>
+              <button
+                type="button"
+                className="icon-button danger-text"
+                aria-label={t('habits:remove', { name: habitName(record) })}
+                onClick={() => {
+                  change({ kind: 'habit', key: record.key, enabled: false });
+                  onChange(value.filter((r) => r.key !== record.key));
+                }}
+              >
+                <Trash2 size={17} />
+              </button>
+            </div>
+            <label className="check-label routine-choice">
+              <input
+                type="checkbox"
+                checked={preferences.habits.includes(record.key)}
+                disabled={
+                  !loaded ||
+                  (!preferences.habits.includes(record.key) && preferences.habits.length >= 100)
+                }
+                onChange={(event) =>
+                  change({ kind: 'habit', key: record.key, enabled: event.target.checked })
+                }
+              />
+              {t('personalization:repeat')}
+            </label>
+            <div className="fields-grid">
+              <NumberField
+                label={t('habits:count', { name: habitName(record) })}
+                value={record.count}
+                min={0}
+                max={100000}
+                onChange={(count) => edit(index, { count })}
+              />
+              <NumberField
+                label={t('habits:duration')}
+                value={record.durationMinutes}
+                min={0}
+                max={1440}
+                step={0.1}
+                onChange={(durationMinutes) => edit(index, { durationMinutes })}
+              />
+            </div>
+            <p className="field-label">{t('habits:times')}</p>
+            <p className="small muted">{t('habits:timeHelp')}</p>
+            <div className="habit-times">
+              {record.times.map((time, i) => (
+                <div key={i}>
+                  <Field label={t('habits:eventTime', { value: i + 1 })}>
+                    <input
+                      type="time"
+                      required
+                      value={time}
+                      onChange={(e) =>
+                        edit(index, {
+                          times: record.times.map((v, j) => (j === i ? e.target.value : v)),
+                        })
+                      }
+                    />
+                  </Field>
+                  <button
+                    type="button"
+                    className="icon-button"
+                    aria-label={t('habits:removeTime', { value: i + 1 })}
+                    onClick={() => edit(index, { times: record.times.filter((_, j) => i !== j) })}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
             <button
               type="button"
-              className="icon-button danger-text"
-              aria-label={t('habits:remove', { name: habitName(record) })}
-              onClick={() => onChange(value.filter((r) => r.key !== record.key))}
+              className="button secondary small-button"
+              disabled={record.times.length >= 500}
+              onClick={() =>
+                edit(index, {
+                  times: [...record.times, ''],
+                  count:
+                    record.count === null ? null : Math.max(record.count, record.times.length + 1),
+                })
+              }
             >
-              <Trash2 size={17} />
+              {t('habits:addTime')}
             </button>
+            <details className="notes-details">
+              <summary>{t('habits:notes')}</summary>
+              <textarea
+                aria-label={t('habits:noteLabel', { name: habitName(record) })}
+                rows={2}
+                maxLength={50000}
+                value={record.notes}
+                onChange={(e) => edit(index, { notes: e.target.value })}
+              />
+            </details>
           </div>
-          <div className="fields-grid">
-            <NumberField
-              label={t('habits:count', { name: habitName(record) })}
-              value={record.count}
-              min={0}
-              max={100000}
-              onChange={(count) => edit(index, { count })}
-            />
-            <NumberField
-              label={t('habits:duration')}
-              value={record.durationMinutes}
-              min={0}
-              max={1440}
-              step={0.1}
-              onChange={(durationMinutes) => edit(index, { durationMinutes })}
-            />
-          </div>
-          <p className="field-label">{t('habits:times')}</p>
-          <p className="small muted">{t('habits:timeHelp')}</p>
-          <div className="habit-times">
-            {record.times.map((time, i) => (
-              <div key={i}>
-                <Field label={t('habits:eventTime', { value: i + 1 })}>
-                  <input
-                    type="time"
-                    required
-                    value={time}
-                    onChange={(e) =>
-                      edit(index, {
-                        times: record.times.map((v, j) => (j === i ? e.target.value : v)),
-                      })
-                    }
-                  />
-                </Field>
-                <button
-                  type="button"
-                  className="icon-button"
-                  aria-label={t('habits:removeTime', { value: i + 1 })}
-                  onClick={() => edit(index, { times: record.times.filter((_, j) => i !== j) })}
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            ))}
-          </div>
-          <button
-            type="button"
-            className="button secondary small-button"
-            disabled={record.times.length >= 500}
-            onClick={() =>
-              edit(index, {
-                times: [...record.times, ''],
-                count:
-                  record.count === null ? null : Math.max(record.count, record.times.length + 1),
-              })
-            }
-          >
-            {t('habits:addTime')}
-          </button>
-          <details className="notes-details">
-            <summary>{t('habits:notes')}</summary>
-            <textarea
-              aria-label={t('habits:noteLabel', { name: habitName(record) })}
-              rows={2}
-              maxLength={50000}
-              value={record.notes}
-              onChange={(e) => edit(index, { notes: e.target.value })}
-            />
-          </details>
-        </div>
-      ))}
+        ) : null,
+      )}
     </Panel>
   );
 }

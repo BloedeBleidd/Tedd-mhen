@@ -1,3 +1,4 @@
+import { RememberedSelect } from '../components/RememberedSelect';
 import { habitPresets, type HabitDefinition } from '../../shared/habits';
 import { habitName } from '../components/HabitsEditor';
 import { ActivitySelect } from '../components/ActivitySelect';
@@ -129,7 +130,8 @@ export function Journal() {
             />
           </div>
           <Field label={tr('habits:filter')}>
-            <select
+            <RememberedSelect
+              list="habit"
               value={habit}
               onChange={(e) => {
                 setHabit(e.target.value);
@@ -145,7 +147,7 @@ export function Journal() {
                   {habitName(d)}
                 </option>
               ))}
-            </select>
+            </RememberedSelect>
           </Field>
           <Field label={tr('journal:illness')}>
             <select

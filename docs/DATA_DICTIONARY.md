@@ -103,3 +103,9 @@ Account data is separate from the journal export schema. `auth_accounts` contain
 The AuthService Durable Object stores hashed IP/email limiter keys, attempt counts and expiry instants for ten-minute windows. Expired keys are removed on later authentication requests. These are operational abuse controls and are never part of journal exports.
 
 Appearance mode and optional approximate device coordinates (two decimal places, with a capture timestamp) are browser-local preferences, not health observations. The notice acknowledgement is also browser-local. Neither enters D1, analysis, or exports. See the application's Privacy & data page for cookie lifetimes and retention.
+
+## Form preferences and presentation
+
+Sleep and physiological recovery measurements share the **Sleep & recovery** check-in section; canonical `sleep` and `physiology` storage groups and interchange paths remain unchanged. Presentation does not imply every physiological measurement was taken during sleep. Users select fields through their account's layout preferences; missing observations remain null. Prior measurements remain visible when editing a day regardless of a later layout preference.
+
+The activity registry defines which sports normally show distance and which show resistance sets. Common duration, effort, pain and average heart rate remain available. Existing non-null distance and nonempty sets remain editable after changing sport; switching type does not delete values. Distance remains in kilometers in storage and interchange files. See [Personalization](PERSONALIZATION.md).
