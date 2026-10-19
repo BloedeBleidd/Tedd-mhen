@@ -30,9 +30,11 @@ Data transfer combines Export and Import into a single navigation entry (**Expor
 
 A collapsible per-page guide (**Quick guide**) appears above main content on workspace pages. It summarizes page workflows and contracts: how check-in fields and routines are preserved in the account overnight, why removed activities must be re-added via search, why blank values remain unrecorded rather than zero or rest, and how export/import policies operate. Users can collapse the guide on any page; dismissal choices are stored per page in browser storage under `teddmhen.guides.v1` without storing journal data or measurements.
 
-A floating **Back to top** button appears at the bottom-right of the viewport across desktop and mobile after scrolling past 480 px. It uses `window.scrollTo` with smooth scrolling, respects `prefers-reduced-motion: reduce` by jumping instantly, returns keyboard focus to the main content container (`#main`), and on pages with sticky bottom save bars positions itself above the action bar.
+A floating **Back to top** button appears at the bottom-right of the viewport across desktop and mobile after scrolling past 480 px. It uses `window.scrollTo` with smooth scrolling, respects `prefers-reduced-motion: reduce` by jumping instantly, returns keyboard focus to the main content container (`#main`), and on pages with sticky bottom save bars positions itself above the action bar. Public and workspace main containers use `tabIndex={-1}` to receive programmatic focus without adding a Tab stop.
 
 ## Public entry and mobile layout
+
+Author links in the public footer, workspace footer and Help open the external portfolio: `https://piotrzmudadev.com/o-mnie/` for Polish and `https://piotrzmudadev.com/en/about/` for all other interface languages. There is no local biography. Legacy `/about` and `/demo/about` routes replace the browser location after resolving the saved language preference, including automatic selection from an already consented location. They require neither a session nor demo data.
 
 The public home page presents **Try demo** before registration. Account forms also link to `/demo`. The demo uses the full journal interface with a normal-flow banner above content offering sign-in and registration. Signed-in workspaces contain no demo switcher. See [Demo workspace](DEMO.md).
 

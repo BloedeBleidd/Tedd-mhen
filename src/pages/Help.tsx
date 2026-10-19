@@ -4,8 +4,11 @@ import { BookOpen, ExternalLink, LockKeyhole } from 'lucide-react';
 import { WorkspaceLink as Link } from '../components/WorkspaceLink';
 import { scaleDefinitions } from '../../shared/schema';
 import { PageHeading, Panel } from '../components/ui';
+import { authorUrl } from '../lib/author';
+import { useLanguage } from '../lib/language-context';
 export function Help() {
   useTranslation();
+  const { language } = useLanguage();
   return (
     <>
       <PageHeading
@@ -155,7 +158,7 @@ export function Help() {
         <p>
           <Trans
             i18nKey="help:authorizedAdministratorsCanViewAggregateAccountCountsJournalVolume"
-            components={{ slot0: <Link to="/about" /> }}
+            components={{ slot0: <a href={authorUrl(language)} /> }}
           />
         </p>
       </Panel>

@@ -171,10 +171,10 @@ test('mobile visitors can enter before registration, explore every page and leav
       })
       .toBe(true);
   }
-  await page.getByRole('link', { name: 'About the author', exact: true }).click();
-  await expect(page).toHaveURL('http://127.0.0.1:8789/demo/about');
-  await page.reload();
-  await expect(page.getByRole('heading', { name: 'Piotr Żmuda.' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'About the author', exact: true })).toHaveAttribute(
+    'href',
+    'https://piotrzmudadev.com/en/about/',
+  );
   await banner.getByRole('link', { name: 'Create account' }).click();
   await expect(page).toHaveURL('http://127.0.0.1:8789/register');
   await expect(page.getByLabel('Email', { exact: true })).toBeVisible();

@@ -33,12 +33,17 @@ for (const language of languages)
       ['/demo/export', 'export', 'takeTheFullPictureWithYou'],
       ['/demo/help', 'help', 'betterRecordsBetterQuestions'],
       ['/demo/privacy', 'privacy', 'yourJournalClearlyExplained'],
-      ['/demo/about', 'about', ''],
     ];
     for (const [url, namespace, key] of pages) {
       await page.goto(publicOrigin + url);
       await expect(page.locator('html')).toHaveAttribute('lang', language);
       await expect(page.locator('main h1')).toBeVisible();
+      await expect(
+        page.locator('.page-footer a[href^="https://piotrzmudadev.com/"]'),
+      ).toHaveAttribute(
+        'href',
+        `https://piotrzmudadev.com/${language === 'pl' ? 'o-mnie/' : 'en/about/'}`,
+      );
       if (key) await expect(page.locator('main h1')).toHaveText(messages(language, namespace)[key]);
       await expect(page.locator('main')).not.toContainText(
         /(?:activities|enums|validation|fields|measurements):[a-zA-Z_]/,
@@ -54,6 +59,17 @@ for (const language of languages)
     await expect(page.locator('.field-error').first()).toHaveText(
       messages(language, 'common').enter_a_valid_email_address,
     );
+    const destination = `https://piotrzmudadev.com/${language === 'pl' ? 'o-mnie/' : 'en/about/'}`;
+    await expect(
+      page.locator('.public-footer a[href^="https://piotrzmudadev.com/"]'),
+    ).toHaveAttribute('href', destination);
+    await page.route('https://piotrzmudadev.com/**', (route) =>
+      route.fulfill({ contentType: 'text/html', body: '<h1>Portfolio</h1>' }),
+    );
+    for (const path of ['/about', '/demo/about']) {
+      await page.goto(publicOrigin + path);
+      await expect(page).toHaveURL(destination);
+    }
   });
 
 test('language changes preserve drafts and display canonical activities with original custom text', async ({

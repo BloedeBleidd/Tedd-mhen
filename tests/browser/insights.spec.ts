@@ -164,7 +164,7 @@ test('imports a previewed JSON file, skips existing dates and merges supplied fi
   });
 });
 
-test('context labels persist and the public author page is available', async ({
+test('context labels persist and the author link opens the portfolio', async ({
   page,
   request,
 }) => {
@@ -181,7 +181,10 @@ test('context labels persist and the public author page is available', async ({
   await request.delete(`/api/entries/${date}?revision=${saved.revision}`, {
     headers: { 'X-Teddmhen-Request': '1' },
   });
-  await page.goto('http://127.0.0.1:8789/about');
-  await expect(page.getByRole('heading', { name: 'Piotr Żmuda.' })).toBeVisible();
-  await expect(page.getByText(/powerlifting and long-distance running/)).toBeVisible();
+  const destination = 'https://piotrzmudadev.com/en/about/';
+  await page.route(destination, (route) =>
+    route.fulfill({ contentType: 'text/html', body: '<h1>Portfolio</h1>' }),
+  );
+  await page.getByRole('link', { name: 'About the author', exact: true }).click();
+  await expect(page).toHaveURL(destination);
 });

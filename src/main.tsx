@@ -7,6 +7,7 @@ import { ApiProvider } from './lib/api';
 import { App } from './App';
 import { PageError } from './components/PageError';
 import { PublicDemo } from './pages/PublicDemo';
+import { AuthorRedirect } from './components/AuthorRedirect';
 import './styles.css';
 import { AppearanceProvider } from './lib/appearance-context';
 import {
@@ -28,6 +29,8 @@ const router = createBrowserRouter([
       </AppearanceProvider>
     ),
     children: [
+      { path: '/about', element: <AuthorRedirect /> },
+      { path: '/demo/about', element: <AuthorRedirect /> },
       { path: '/demo/*', element: <PublicDemo /> },
       {
         path: '*',

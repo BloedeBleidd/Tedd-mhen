@@ -15,7 +15,7 @@ flowchart LR
   Download --> File[User-owned file]
 ```
 
-The application is a React SPA served with Cloudflare Workers Static Assets. `/api` and `/api/*` always invoke the Worker, including browser navigation requests. Other routes use SPA fallback. Development uses a Vite server proxying `/api` to a local Wrangler instance; a production build can be tested directly with `npm run preview`.
+The application is a React SPA served with Cloudflare Workers Static Assets. `/api` and `/api/*` always invoke the Worker, including browser navigation requests. Other routes use SPA fallback. The browser router handles legacy `/about` and `/demo/about` paths before initializing an API or demo workspace, redirecting to the external portfolio in Polish or English according to saved language preferences. Development uses a Vite server proxying `/api` to a local Wrangler instance; a production build can be tested directly with `npm run preview`.
 
 ## Responsibilities
 

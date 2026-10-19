@@ -21,6 +21,6 @@ Tedd’mhen collects structured training, sleep and wellbeing observations, expl
 | Release packages and documentation publishing             | [Releases](RELEASES.md)               |
 | Algorithm and browser verification                        | [Testing](TESTING.md)                 |
 
-[Security](https://github.com/BloedeBleidd/Tedd-mhen/blob/main/SECURITY.md) · [Contributing](https://github.com/BloedeBleidd/Tedd-mhen/blob/main/CONTRIBUTING.md) · [About Piotr Żmuda](https://teddmhen.piotrzmudadev.com/about)
+[Security](https://github.com/BloedeBleidd/Tedd-mhen/blob/main/SECURITY.md) · [Contributing](https://github.com/BloedeBleidd/Tedd-mhen/blob/main/CONTRIBUTING.md) · [About Piotr Żmuda](https://piotrzmudadev.com/en/about/)
 
 This documentation describes the `main` branch. For a specific release, use the documentation at its Git tag. The documentation site contains no journal or account data. Analyses are exploratory; observational associations are not causal or clinical conclusions.

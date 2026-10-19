@@ -28,7 +28,8 @@ import { WorkspaceNavLink as NavLink, WorkspaceLink } from './components/Workspa
 import { Welcome } from './pages/Welcome';
 import { AuthPage } from './pages/Auth';
 import { Privacy } from './pages/Privacy';
-import { About } from './pages/About';
+import { authorUrl } from './lib/author';
+import { useLanguage } from './lib/language-context';
 const Dashboard = lazy(() => import('./pages/Dashboard').then((m) => ({ default: m.Dashboard })));
 const CheckIn = lazy(() => import('./pages/CheckIn').then((m) => ({ default: m.CheckIn })));
 const Journal = lazy(() => import('./pages/Journal').then((m) => ({ default: m.Journal })));
@@ -43,6 +44,7 @@ const Account = lazy(() => import('./pages/Account').then((m) => ({ default: m.A
 const Admin = lazy(() => import('./pages/Admin').then((m) => ({ default: m.Admin })));
 export function App() {
   useTranslation();
+  const { language } = useLanguage();
   const { demo } = useApi(),
     location = useLocation(),
     [menuOpen, setMenuOpen] = useState(false);
@@ -115,10 +117,8 @@ export function App() {
             <LanguageControl />
           </div>
         </header>
-        <main id="main">
-          {location.pathname === '/about' ? (
-            <About />
-          ) : pathname === '/privacy' ? (
+        <main id="main" tabIndex={-1}>
+          {pathname === '/privacy' ? (
             <Privacy />
           ) : !authRoute && session.loading ? (
             <Loading />
@@ -142,7 +142,7 @@ export function App() {
         <PrivacyNotice />
         <footer className="public-footer">
           <NavLink to="/privacy">{tr('app:privacyData')}</NavLink>
-          <NavLink to="/about">{tr('app:aboutTheAuthor')}</NavLink>
+          <a href={authorUrl(language)}>{tr('app:aboutTheAuthor')}</a>
           <span>{tr('app:aPersonalTrainingRecoveryJournal')}</span>
         </footer>
       </div>
@@ -268,13 +268,11 @@ export function App() {
                     n.also === pathname ||
                     (n.to === '/analysis' && pathname.startsWith('/analysis/')),
                 )?.label ||
-                  (pathname === '/about'
-                    ? tr('app:aboutTheAuthor')
-                    : pathname === '/privacy'
-                      ? tr('app:privacyData')
-                      : pathname === '/account'
-                        ? tr('app:account2')
-                        : tr('app:guideMethodology2'))}
+                  (pathname === '/privacy'
+                    ? tr('app:privacyData')
+                    : pathname === '/account'
+                      ? tr('app:account2')
+                      : tr('app:guideMethodology2'))}
               </strong>
             </div>
             <div className="topbar-tools">
@@ -334,7 +332,6 @@ export function App() {
                 <Route path="/export" element={<DataTransfer mode="export" />} />
                 <Route path="/import" element={<DataTransfer mode="import" />} />
                 <Route path="/admin" element={<Admin />} />
-                <Route path="/about" element={<About />} />
                 <Route path="/help" element={<Help />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/account" element={<Account />} />
@@ -362,7 +359,7 @@ export function App() {
               </span>
               <span>{tr('app:yourObservationsALittleMorePerspective')}</span>
               <NavLink to="/privacy">{tr('app:privacyData')}</NavLink>
-              <NavLink to="/about">{tr('app:aboutTheAuthor')}</NavLink>
+              <a href={authorUrl(language)}>{tr('app:aboutTheAuthor')}</a>
             </footer>
           </main>
           <BackToTop />

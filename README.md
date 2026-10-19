@@ -2,7 +2,7 @@
 
 A personal training, sleep and wellbeing journal with structured measurements, exploratory correlations, Bayesian predictions, and portable data.
 
-**[Open Tedd’mhen](https://teddmhen.piotrzmudadev.com)** · [Try demo](https://teddmhen.piotrzmudadev.com/demo) · [Documentation](https://bloedeBleidd.github.io/Tedd-mhen/) · [Releases](https://github.com/BloedeBleidd/Tedd-mhen/releases) · by [Piotr Żmuda](https://piotrzmudadev.com)
+**[Open Tedd’mhen](https://teddmhen.piotrzmudadev.com)** · [Try demo](https://teddmhen.piotrzmudadev.com/demo) · [Documentation](https://bloedeBleidd.github.io/Tedd-mhen/) · [Releases](https://github.com/BloedeBleidd/Tedd-mhen/releases) · by [Piotr Żmuda](https://piotrzmudadev.com/en/about/)
 
 - Daily numeric scales, sleep, physiology, 150 sports, 40 habit presets, custom activities with counts/times, context labels and optional notes.
 - Account-saved check-in layouts and blank recurring routines, recent choices first, and activity-specific training fields.
