@@ -4,8 +4,7 @@
   "administration": "Administracja",
   "dailyCheckIn": "Dzienny wpis",
   "trendsPredictions": "Trendy i predykcje",
-  "exportData": "Eksport danych",
-  "importData": "Import danych",
+  "exportImport": "Eksport i import",
   "privacyData": "Prywatność i dane",
   "aboutTheAuthor": "O autorze",
   "tryAgain": "Spróbuj ponownie",
@@ -56,5 +55,6 @@
   "documentDescription": "Zapisuj treningi, sen i samopoczucie. Odkrywaj własne wzorce dzięki przejrzystej analizie bayesowskiej.",
   "pageFailed": "Nie udało się wczytać strony.",
   "pageFailedDetail": "Odśwież stronę, aby spróbować ponownie. Zapisane wpisy pozostają na koncie; niezapisane zmiany mogą zostać utracone.",
-  "reload": "Odśwież stronę"
+  "reload": "Odśwież stronę",
+  "backToTop": "Wróć na górę"
 }

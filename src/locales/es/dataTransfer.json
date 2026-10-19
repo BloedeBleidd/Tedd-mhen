@@ -1,0 +1,8 @@
+{
+  "views": "Exportar o importar",
+  "chooseAnOption": "Tus datos: elige una opción",
+  "exportTitle": "Exportar",
+  "exportDescription": "Descarga una copia de seguridad o para tu propio análisis",
+  "importTitle": "Importar",
+  "importDescription": "Revisa un archivo y añade sus días a tu diario"
+}

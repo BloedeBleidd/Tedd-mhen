@@ -18,7 +18,7 @@ CSV formula-like strings are apostrophe-prefixed. Import preserves those apostro
 
 ## Reviewed import
 
-The Import page accepts up to 500 days and 20 MiB per file. Files are parsed locally, validated, and presented as dates and supplied fields before a confirmation checkbox enables saving. Unsupported versions, duplicate dates, invalid fields, excessive values and unsafe nested keys are rejected. Empty/missing data is never converted to a numeric zero.
+The combined **Export & import** destination (`/export` and `/import`) houses both data operations with an option selector at the top. The Import view accepts up to 500 days and 20 MiB per file. Files are parsed locally, validated, and presented as dates and supplied fields before a confirmation checkbox enables saving. Unsupported versions, duplicate dates, invalid fields, excessive values and unsafe nested keys are rejected. Empty/missing data is never converted to a numeric zero.
 
 The destination is the signed-in account. Source owner IDs are rejected; source revisions/timestamps do not replace server provenance. Import uses a current-account guard and ordinary revision-checked writes. Switching accounts during the operation stops further writes.
 

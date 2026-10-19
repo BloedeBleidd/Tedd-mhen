@@ -20,9 +20,17 @@ Registration, sign-in, recovery and legacy-owner setup validate fields in the ap
 
 New passwords require 12–128 characters; a visible count reports progress toward the minimum. Sign-in preserves the existing-password rules. Confirmation and the registration privacy acknowledgement have their own messages. Server errors, including unavailable email identifiers and throttling, are brought into view without clearing entered values. Pending requests display “Please wait…”, lock account fields and navigation, and prompt before closing the tab. Navigation is released when the request finishes so a successful registration or recovery can show its one-time code.
 
-## Analysis navigation
+## Analysis and data transfer navigation
 
 Analysis views appear before the page heading in a distinct bordered panel. Each view has an icon, a descriptive label and a large clickable card. The active card uses a contrasting fill and check mark, with `aria-current="page"`; keyboard focus remains visible. Supporting descriptions are associated with their links for assistive technology. Narrow layouts show all four choices in two columns without horizontal scrolling.
+
+Data transfer combines Export and Import into a single navigation entry (**Export & import**) at `/export` and `/import`. A dual-option selector at the top provides direct switching between downloading an export and importing observations into the journal without navigating away or splitting user attention.
+
+## Page guides and back to top
+
+A collapsible per-page guide (**Quick guide**) appears above main content on workspace pages. It summarizes page workflows and contracts: how check-in fields and routines are preserved in the account overnight, why removed activities must be re-added via search, why blank values remain unrecorded rather than zero or rest, and how export/import policies operate. Users can collapse the guide on any page; dismissal choices are stored per page in browser storage under `teddmhen.guides.v1` without storing journal data or measurements.
+
+A floating **Back to top** button appears at the bottom-right of the viewport across desktop and mobile after scrolling past 480 px. It uses `window.scrollTo` with smooth scrolling, respects `prefers-reduced-motion: reduce` by jumping instantly, returns keyboard focus to the main content container (`#main`), and on pages with sticky bottom save bars positions itself above the action bar.
 
 ## Public entry and mobile layout
 

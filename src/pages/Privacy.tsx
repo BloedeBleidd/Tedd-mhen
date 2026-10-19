@@ -2,6 +2,7 @@ import { useTranslation, Trans } from 'react-i18next';
 import { t as tr } from '../i18n';
 import { WorkspaceLink as Link } from '../components/WorkspaceLink';
 import { PageHeading, Panel } from '../components/ui';
+import { GUIDE_KEY } from '../lib/page-guide';
 export function Privacy() {
   useTranslation();
   return (
@@ -75,6 +76,13 @@ export function Privacy() {
                 </td>
                 <td>{tr('privacy:localStorageRememberingThatThisNoticeWasDismissedDismissal')}</td>
                 <td>{tr('privacy:untilSiteDataIsClearedOrTheNoticeVersion')}</td>
+              </tr>
+              <tr>
+                <td>
+                  <code>{GUIDE_KEY}</code>
+                </td>
+                <td>{tr('privacy:guideStorage')}</td>
+                <td>{tr('privacy:untilChangedForgottenOrBrowserSiteDataIsCleared')}</td>
               </tr>
             </tbody>
           </table>

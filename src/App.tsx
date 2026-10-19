@@ -3,11 +3,10 @@ import { useTranslation, Trans } from 'react-i18next';
 import { t as tr } from './i18n';
 import {
   Activity,
+  ArrowDownUp,
   ArrowUpRight,
   BookOpen,
   ChartNoAxesCombined,
-  Download,
-  Upload,
   FlaskConical,
   LayoutDashboard,
   Menu,
@@ -23,6 +22,8 @@ import { EmptyState, ErrorBox, Loading } from './components/ui';
 import { LanguageControl } from './components/LanguageControl';
 import { AppearanceControl } from './components/AppearanceControl';
 import { PrivacyNotice } from './components/PrivacyNotice';
+import { PageGuide } from './components/PageGuide';
+import { BackToTop } from './components/BackToTop';
 import { WorkspaceNavLink as NavLink, WorkspaceLink } from './components/WorkspaceLink';
 import { Welcome } from './pages/Welcome';
 import { AuthPage } from './pages/Auth';
@@ -34,10 +35,11 @@ const Journal = lazy(() => import('./pages/Journal').then((m) => ({ default: m.J
 const Analysis = lazy(() =>
   import('./pages/AnalysisHub').then((m) => ({ default: m.AnalysisHub })),
 );
-const Export = lazy(() => import('./pages/Export').then((m) => ({ default: m.Export })));
+const DataTransfer = lazy(() =>
+  import('./pages/DataTransfer').then((m) => ({ default: m.DataTransfer })),
+);
 const Help = lazy(() => import('./pages/Help').then((m) => ({ default: m.Help })));
 const Account = lazy(() => import('./pages/Account').then((m) => ({ default: m.Account })));
-const Import = lazy(() => import('./pages/Import').then((m) => ({ default: m.Import })));
 const Admin = lazy(() => import('./pages/Admin').then((m) => ({ default: m.Admin })));
 export function App() {
   useTranslation();
@@ -90,8 +92,7 @@ export function App() {
     { to: '/check-in', icon: Plus, label: tr('app:dailyCheckIn') },
     { to: '/journal', icon: BookOpen, label: tr('app:journal') },
     { to: '/analysis', icon: ChartNoAxesCombined, label: tr('app:trendsPredictions') },
-    { to: '/export', icon: Download, label: tr('app:exportData') },
-    { to: '/import', icon: Upload, label: tr('app:importData') },
+    { to: '/export', icon: ArrowDownUp, label: tr('app:exportImport'), also: '/import' },
     ...(session.data?.admin && !demo
       ? [{ to: '/admin', icon: ShieldCheck, label: tr('app:administration') }]
       : []),
@@ -137,6 +138,7 @@ export function App() {
             <AuthPage key={location.pathname} />
           )}
         </main>
+        <BackToTop />
         <PrivacyNotice />
         <footer className="public-footer">
           <NavLink to="/privacy">{tr('app:privacyData')}</NavLink>
@@ -177,12 +179,25 @@ export function App() {
           </NavLink>
           <p className="nav-caption">{tr('app:workspace')}</p>
           <nav aria-label={tr('app:mainNavigation')}>
-            {nav.map(({ to, icon: Icon, label }) => (
-              <NavLink key={to} to={to} end={to === '/'} onClick={() => setMenuOpen(false)}>
-                <Icon size={18} strokeWidth={1.7} />
-                {label}
-              </NavLink>
-            ))}
+            {nav.map(({ to, icon: Icon, label, also }) =>
+              also === pathname ? (
+                <WorkspaceLink
+                  key={to}
+                  to={also}
+                  className="active"
+                  aria-current="page"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <Icon size={18} strokeWidth={1.7} />
+                  {label}
+                </WorkspaceLink>
+              ) : (
+                <NavLink key={to} to={to} end={to === '/'} onClick={() => setMenuOpen(false)}>
+                  <Icon size={18} strokeWidth={1.7} />
+                  {label}
+                </NavLink>
+              ),
+            )}
           </nav>
           <div className="sidebar-note">
             <span className="leaf-decoration">✳</span>
@@ -250,6 +265,7 @@ export function App() {
                 {nav.find(
                   (n) =>
                     n.to === pathname ||
+                    n.also === pathname ||
                     (n.to === '/analysis' && pathname.startsWith('/analysis/')),
                 )?.label ||
                   (pathname === '/about'
@@ -308,14 +324,15 @@ export function App() {
           )}
           <main id="main" tabIndex={-1}>
             <PreferencesStatus />
+            <PageGuide key={pathname} pathname={pathname} demo={demo} />
             <Suspense key={demo ? 'demo' : 'personal'} fallback={<Loading />}>
               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/check-in" element={<CheckIn />} />
                 <Route path="/journal" element={<Journal />} />
                 <Route path="/analysis/*" element={<Analysis />} />
-                <Route path="/export" element={<Export />} />
-                <Route path="/import" element={<Import />} />
+                <Route path="/export" element={<DataTransfer mode="export" />} />
+                <Route path="/import" element={<DataTransfer mode="import" />} />
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/help" element={<Help />} />
@@ -348,6 +365,7 @@ export function App() {
               <NavLink to="/about">{tr('app:aboutTheAuthor')}</NavLink>
             </footer>
           </main>
+          <BackToTop />
         </div>
       </div>
     </PreferencesProvider>

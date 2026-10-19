@@ -3855,3 +3855,102 @@ select {
     margin-left: 0.25rem;
   }
 }
+.transfer-tabs {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.page-guide {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: start;
+  margin-bottom: 24px;
+  padding: 16px 18px;
+  border: 1px solid var(--accent-strong);
+  border-radius: 12px;
+  background: var(--surface-subtle);
+  color: var(--text-secondary);
+}
+.page-guide-icon {
+  margin-top: 2px;
+  color: var(--green);
+}
+.page-guide .eyebrow {
+  margin-bottom: 4px;
+}
+.page-guide h2 {
+  margin: 0 0 8px;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.4;
+}
+.page-guide ol {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 12px;
+  line-height: 1.7;
+  max-width: 900px;
+}
+.page-guide li + li {
+  margin-top: 4px;
+}
+.page-guide .small {
+  margin-top: 8px;
+}
+.page-guide-toggle {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 14px;
+}
+.back-to-top {
+  position: fixed;
+  right: max(20px, env(safe-area-inset-right));
+  bottom: max(20px, env(safe-area-inset-bottom));
+  z-index: 25;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid var(--green);
+  border-radius: 50%;
+  background: var(--green);
+  color: var(--on-green);
+  box-shadow: 0 4px 14px #173d3333;
+}
+.back-to-top:hover {
+  filter: brightness(1.12);
+}
+.back-to-top:focus-visible {
+  outline-offset: 3px;
+}
+/* Keep the sticky check-in save actions uncovered. */
+body:has(.save-bar) .back-to-top {
+  bottom: calc(max(20px, env(safe-area-inset-bottom)) + 76px);
+}
+@media (max-width: 600px) {
+  .page-guide {
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: 12px 14px;
+    gap: 10px;
+  }
+  .page-guide-icon {
+    display: none;
+  }
+  .back-to-top {
+    right: max(14px, env(safe-area-inset-right));
+    bottom: max(14px, env(safe-area-inset-bottom));
+    width: 44px;
+    height: 44px;
+  }
+  body:has(.save-bar) .back-to-top {
+    bottom: calc(max(14px, env(safe-area-inset-bottom)) + 76px);
+  }
+}
+@media print {
+  .back-to-top,
+  .page-guide,
+  .page-guide-toggle {
+    display: none;
+  }
+}

@@ -39,5 +39,6 @@
   "cloudflareProcessesRequestsToServeTheApplicationAndMay": "Cloudflare obsługuje żądania aplikacji i może przetwarzać adresy IP, zdarzenia bezpieczeństwa i metadane operacyjne według własnych zasad. Limity logowania używają krótkotrwałych skrótów kluczy IP/e-mail. Logi błędów nie zawierają danych logowania, kodów odzyskiwania ani treści dziennika. Bazę utworzono w regionie EEUR; nie oznacza to, że całe przetwarzanie infrastruktury pozostaje w tym regionie.",
   "thePilotHasNoSubscriptionChargeOrApplicationImposed": "Pilotaż nie ma opłaty abonamentowej ani limitu liczby użytkowników narzuconego przez aplikację. Pamięć, ruch i obliczenia podlegają limitom Cloudflare. W sprawach danych kontaktuj się prywatnie z operatorem; nigdy nie umieszczaj danych zdrowotnych, haseł ani eksportów w publicznym repozytorium.",
   "accountControls": "Ustawienia konta",
-  "languageStorage": "Pamięć lokalna dla ręcznego lub automatycznego wyboru języka. Dane dziennika i notatki nie są tłumaczone."
+  "languageStorage": "Pamięć lokalna dla ręcznego lub automatycznego wyboru języka. Dane dziennika i notatki nie są tłumaczone.",
+  "guideStorage": "Pamięć lokalna przeglądarki zapamiętująca zwinięte samouczki stron. Nie zawiera danych dziennika ani pomiarów."
 }

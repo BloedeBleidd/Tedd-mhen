@@ -3,8 +3,7 @@
   "dailyCheckIn": "Daily check-in",
   "journal": "Journal",
   "trendsPredictions": "Trends & predictions",
-  "exportData": "Export data",
-  "importData": "Import data",
+  "exportImport": "Export & import",
   "administration": "Administration",
   "teddMhen": "Tedd’mhen",
   "couldNotOpenYourJournal": "Could not open your journal.",
@@ -56,5 +55,6 @@
   "documentDescription": "Record training, sleep and wellbeing. Explore personal patterns with transparent Bayesian analysis.",
   "pageFailed": "This page could not be loaded.",
   "pageFailedDetail": "Reload to try again. Saved journal entries remain in your account; unsaved edits may be lost.",
-  "reload": "Reload page"
+  "reload": "Reload page",
+  "backToTop": "Back to top"
 }

@@ -56,7 +56,7 @@ test('demo charts, settings, export, mobile navigation and no runtime errors', a
   await page.getByLabel('Prior on the weekly slope').selectOption('strong');
   await expect(page.getByLabel('HRV method')).toHaveValue('rmssd');
   await page.screenshot({ path: 'test-results/analysis-desktop.png', fullPage: true });
-  await page.getByRole('link', { name: 'Export data', exact: true }).click();
+  await page.getByRole('link', { name: 'Export & import', exact: true }).click();
   const downloadPromise = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Download export' }).click();
   const file = await downloadPromise;

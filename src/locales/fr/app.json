@@ -4,8 +4,7 @@
   "administration": "Administration",
   "dailyCheckIn": "Bilan quotidien",
   "trendsPredictions": "Tendances et prévisions",
-  "exportData": "Exporter les données",
-  "importData": "Importer les données",
+  "exportImport": "Export et import",
   "privacyData": "Confidentialité et données",
   "aboutTheAuthor": "À propos de l’auteur",
   "tryAgain": "Réessayer",
@@ -56,5 +55,6 @@
   "documentDescription": "Notez entraînement, sommeil et bien-être. Explorez vos tendances avec une analyse bayésienne transparente.",
   "pageFailed": "Impossible de charger cette page.",
   "pageFailedDetail": "Rechargez pour réessayer. Les entrées enregistrées restent dans votre compte ; les modifications non enregistrées peuvent être perdues.",
-  "reload": "Recharger la page"
+  "reload": "Recharger la page",
+  "backToTop": "Retour en haut"
 }

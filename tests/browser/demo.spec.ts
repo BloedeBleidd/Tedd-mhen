@@ -17,7 +17,8 @@ test('demo editing, multi-row import and marked export stay isolated and reset o
   await page.getByRole('slider', { name: 'Wellbeing', exact: true }).fill('3');
   await page.getByRole('button', { name: 'Save check-in' }).click();
   await expect(page.getByText('Saved in demo memory')).toBeVisible();
-  await page.getByRole('link', { name: 'Import data', exact: true }).click();
+  await page.getByRole('link', { name: 'Export & import', exact: true }).click();
+  await page.getByRole('link', { name: 'Import', exact: true }).click();
   await page.getByLabel('Journal export file').setInputFiles({
     name: 'demo-experiment.json',
     mimeType: 'application/json',
@@ -35,7 +36,7 @@ test('demo editing, multi-row import and marked export stay isolated and reset o
   await page.getByLabel('Search', { exact: true }).fill('Demo batch example');
   await expect(page.getByRole('link', { name: /6 Apr 2003/ })).toBeVisible();
   await expect(page.getByRole('link', { name: /7 Apr 2003/ })).toBeVisible();
-  await page.getByRole('link', { name: 'Export data', exact: true }).click();
+  await page.getByRole('link', { name: 'Export & import', exact: true }).click();
   await expect(
     page.getByRole('heading', { name: 'Take the full picture with you.' }),
   ).toBeVisible();
@@ -152,8 +153,7 @@ test('mobile visitors can enter before registration, explore every page and leav
     ['Daily check-in', '/demo/check-in'],
     ['Journal', '/demo/journal'],
     ['Trends & predictions', '/demo/analysis'],
-    ['Export data', '/demo/export'],
-    ['Import data', '/demo/import'],
+    ['Export & import', '/demo/export'],
     ['Account', '/demo/account'],
     ['Guide & methodology', '/demo/help'],
     ['Privacy & data', '/demo/privacy'],
@@ -248,6 +248,7 @@ test('unsaved demo edits can keep visitors in the demo before leaving for regist
   await accepted;
   await expect(page.getByRole('heading', { name: 'Make room for your rhythm.' })).toBeVisible();
   await page.getByRole('link', { name: 'Try demo — no account needed' }).click();
-  await page.getByRole('link', { name: 'Import data', exact: true }).click();
+  await page.getByRole('link', { name: 'Export & import', exact: true }).click();
+  await page.getByRole('link', { name: 'Import', exact: true }).click();
   await expect(page.getByLabel('Journal export file')).toHaveValue('');
 });

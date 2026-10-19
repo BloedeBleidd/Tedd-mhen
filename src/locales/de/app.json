@@ -4,8 +4,7 @@
   "administration": "Verwaltung",
   "dailyCheckIn": "Tageseintrag",
   "trendsPredictions": "Trends und Vorhersagen",
-  "exportData": "Daten exportieren",
-  "importData": "Daten importieren",
+  "exportImport": "Export und Import",
   "privacyData": "Datenschutz und Daten",
   "aboutTheAuthor": "Über den Autor",
   "tryAgain": "Erneut versuchen",
@@ -56,5 +55,6 @@
   "documentDescription": "Training, Schlaf und Wohlbefinden erfassen. Persönliche Muster mit transparenter bayesscher Analyse erkunden.",
   "pageFailed": "Diese Seite konnte nicht geladen werden.",
   "pageFailedDetail": "Zum erneuten Versuch neu laden. Gespeicherte Einträge bleiben im Konto; ungespeicherte Änderungen können verloren gehen.",
-  "reload": "Seite neu laden"
+  "reload": "Seite neu laden",
+  "backToTop": "Nach oben"
 }

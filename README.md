@@ -7,7 +7,8 @@ A personal training, sleep and wellbeing journal with structured measurements, e
 - Daily numeric scales, sleep, physiology, 150 sports, 40 habit presets, custom activities with counts/times, context labels and optional notes.
 - Account-saved check-in layouts and blank recurring routines, recent choices first, and activity-specific training fields.
 - Historical check-in review with explainable notices and explicit confirmation of unusual observations.
-- Filtered journals, selective JSON/NDJSON/CSV/Markdown exports, and reviewed JSON/NDJSON/CSV imports.
+- Filtered journals, unified Export & import with selective JSON/NDJSON/CSV/Markdown exports and reviewed imports.
+- Collapsible per-page quick guides and a floating back-to-top control across desktop and mobile.
 - Same-day and lagged relationships, trend-adjusted correlations, multiple-input Bayesian models, exploratory forecasts up to 28 days, uncertainty and chronological evaluation with cited methods.
 - Private email/password accounts with recovery codes; aggregate administration; light/dark appearance with opt-in sunrise/sunset switching.
 - Six authored interface languages; optional local country detection, with original notes preserved.

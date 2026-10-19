@@ -177,7 +177,7 @@ test('unavailable page code shows a localized recovery screen without exposing a
 }) => {
   await page.goto(publicOrigin + '/demo');
   await choose(page, 'pl');
-  await page.route('**/assets/Export-*.js', (route) => route.abort());
+  await page.route('**/assets/DataTransfer-*.js', (route) => route.abort());
   await page.locator('a[href="/demo/export"]').first().click();
   await expect(page.getByRole('heading', { name: messages('pl', 'app').pageFailed })).toBeVisible();
   await expect(page.getByRole('button', { name: messages('pl', 'app').reload })).toBeVisible();

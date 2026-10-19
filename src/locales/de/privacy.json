@@ -39,5 +39,6 @@
   "cloudflareProcessesRequestsToServeTheApplicationAndMay": "Cloudflare verarbeitet Anfragen zur Bereitstellung der App und kann IP-Adressen, Sicherheitsereignisse und Betriebsmetadaten gemäß seinen Richtlinien verarbeiten. Anmelderatenlimits nutzen kurzlebige gehashte IP-/E-Mail-Schlüssel. Fehlerprotokolle enthalten keine Zugangsdaten, Wiederherstellungscodes oder Tagebuchinhalte. Die Datenbank wurde in EEUR angelegt; dies garantiert nicht, dass sämtliche Infrastrukturverarbeitung dort bleibt.",
   "thePilotHasNoSubscriptionChargeOrApplicationImposed": "Die Pilotversion hat keine Abogebühr und keine anwendungsseitige Nutzerobergrenze. Speicher, Traffic und Rechenleistung unterliegen Cloudflare-Kontingenten. Bei Datenproblemen kontaktiere den Betreiber privat; stelle niemals Gesundheitsdaten, Passwörter oder Exporte ins öffentliche Repository.",
   "accountControls": "Kontoeinstellungen",
-  "languageStorage": "Lokaler Speicher für deine manuelle oder automatische Sprachwahl. Tagebuchdaten und Notizen werden nicht übersetzt."
+  "languageStorage": "Lokaler Speicher für deine manuelle oder automatische Sprachwahl. Tagebuchdaten und Notizen werden nicht übersetzt.",
+  "guideStorage": "Lokaler Browserspeicher, der merkt, welche Seitenanleitungen du ausgeblendet hast. Enthält keine Tagebuchdaten oder Messwerte."
 }

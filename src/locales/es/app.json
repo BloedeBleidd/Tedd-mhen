@@ -4,8 +4,7 @@
   "administration": "Administración",
   "dailyCheckIn": "Registro diario",
   "trendsPredictions": "Tendencias y predicciones",
-  "exportData": "Exportar datos",
-  "importData": "Importar datos",
+  "exportImport": "Exportar e importar",
   "privacyData": "Privacidad y datos",
   "aboutTheAuthor": "Sobre el autor",
   "tryAgain": "Volver a intentar",
@@ -56,5 +55,6 @@
   "documentDescription": "Registra entrenamiento, sueño y bienestar. Explora patrones personales con análisis bayesiano transparente.",
   "pageFailed": "No se pudo cargar esta página.",
   "pageFailedDetail": "Recarga para reintentar. Las entradas guardadas permanecen en tu cuenta; los cambios sin guardar pueden perderse.",
-  "reload": "Recargar página"
+  "reload": "Recargar página",
+  "backToTop": "Volver arriba"
 }

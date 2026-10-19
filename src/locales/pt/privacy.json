@@ -39,5 +39,6 @@
   "cloudflareProcessesRequestsToServeTheApplicationAndMay": "A Cloudflare processa pedidos e pode tratar IPs, eventos de segurança e metadados operacionais segundo as suas políticas. Os limites de autenticação usam chaves IP/e-mail com hash e curta duração. Os logs excluem credenciais, códigos e conteúdos dos diários. A base foi criada em EEUR; não se garante que todo o processamento da infraestrutura permaneça nessa região.",
   "thePilotHasNoSubscriptionChargeOrApplicationImposed": "O piloto não cobra subscrição nem impõe um limite de utilizadores na aplicação. Armazenamento, tráfego e computação continuam sujeitos às quotas Cloudflare. Para problemas de dados, contacta o operador em privado; nunca publiques dados de saúde, palavras-passe ou exportações no repositório.",
   "accountControls": "Controlos da conta",
-  "languageStorage": "Armazenamento local da escolha de idioma manual ou automática. Os dados e notas do diário não são traduzidos."
+  "languageStorage": "Armazenamento local da escolha de idioma manual ou automática. Os dados e notas do diário não são traduzidos.",
+  "guideStorage": "Armazenamento local que memoriza quais guias de página foram ocultados. Não contém dados do diário nem medições."
 }
