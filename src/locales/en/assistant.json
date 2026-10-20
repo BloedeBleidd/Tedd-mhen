@@ -1,0 +1,19 @@
+{
+  "open": "AI guide",
+  "title": "Tedd’mhen AI guide",
+  "close": "Close AI guide",
+  "subtitle": "Ask how any page, metric, habit, analysis model, or export works in your language.",
+  "greeting": "Hello! I am the Tedd’mhen guide. Ask me how daily check-ins, habits, trends, exploratory models, exports, or account limits work.",
+  "questionLabel": "Ask a question",
+  "placeholder": "Ask how a feature works…",
+  "send": "Ask",
+  "sending": "Thinking…",
+  "clear": "Clear chat",
+  "inputTokensCounter": "Prompt: {{used}} / {{limit}} tokens",
+  "dailyTokensCounter": "Today: {{used}} / {{limit}} tokens",
+  "noCodeNotice": "Text questions about Tedd’mhen only — up to {{input}} input tokens, no code or bulk data.",
+  "promptCheckIn": "How do I log a daily check-in and workouts?",
+  "promptHabits": "How do custom habits and scales work?",
+  "promptAnalysis": "How do Trends & Predictions and lagged correlations work?",
+  "promptQuotas": "What are the daily AI token and 10 MB storage limits?"
+}

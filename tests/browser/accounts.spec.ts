@@ -111,6 +111,21 @@ test('registration UI preserves recovery code until acknowledgement, sign out an
   await expect(page.getByRole('heading', { name: 'Find your rhythm.' })).toBeVisible();
   await page.getByRole('link', { name: 'Account', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Sign out', exact: true })).toBeEnabled();
+  await expect(page.getByText('0 / 30,000 tokens today')).toBeVisible();
+  await expect(page.getByText('0.00 MB / 10.00 MB used overall')).toBeVisible();
+  await page.getByRole('button', { name: 'Open AI guide', exact: true }).click();
+  const chatDialog = page.locator('.ai-chat-dialog');
+  await expect(chatDialog).toBeVisible();
+  await chatDialog.getByLabel('Ask a question').fill('```json\n{"bulk":true}\n```');
+  await chatDialog.getByRole('button', { name: 'Ask', exact: true }).click();
+  await expect(chatDialog.getByRole('alert')).toContainText('Pasting source code');
+  await chatDialog
+    .getByRole('button', { name: 'How do I log a daily check-in and workouts?' })
+    .click();
+  await expect(chatDialog.locator('.ai-chat-bubble.assistant')).toHaveCount(2);
+  await chatDialog.getByRole('button', { name: 'Close AI guide' }).click();
+  await expect(page.getByText('0 / 30,000 tokens today')).toHaveCount(0);
+  await expect(page.getByText(/1 requests today/)).toBeVisible();
   await page.route('**/api/session', (route) =>
     route.fulfill({ status: 503, json: { error: 'Session unavailable after logout.' } }),
   );

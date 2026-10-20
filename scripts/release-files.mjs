@@ -58,6 +58,7 @@ export function releaseConfig(config) {
     'routes',
     'assets',
     'd1_databases',
+    'ai',
     'vars',
   ];
   const permittedVars = ['APP_ORIGIN', 'ACCESS_TEAM_DOMAIN', 'ACCESS_AUD'];

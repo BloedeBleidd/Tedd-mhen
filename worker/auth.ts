@@ -8,6 +8,7 @@ export type Env = {
   LOCAL_DEV?: string;
   AUTH: DurableObjectNamespace;
   APP_ORIGIN: string;
+  AI?: { run: (model: string, input: Record<string, unknown>) => Promise<unknown> };
 };
 export const isLocal = (request: Request, env: Env) =>
   env.LOCAL_DEV === 'true' &&

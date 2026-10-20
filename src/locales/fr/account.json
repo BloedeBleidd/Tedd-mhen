@@ -20,5 +20,18 @@
   "exportAnythingYouWantToKeepFirstThisDeletes": "Exportez d’abord ce que vous souhaitez conserver. Votre compte, vos sessions et tous vos bilans seront supprimés de la base active. Les sauvegardes et exports téléchargés peuvent conserver des copies, comme décrit dans Confidentialité et données.",
   "deleteAccountAndAllEntries": "Supprimer le compte et tous les bilans",
   "permanentlyDeleteYourAccountAndEveryJournalEntryThis": "Supprimer définitivement votre compte et tous les bilans ? Cette action est irréversible dans l’application.",
-  "enterYourCurrentPasswordAboveToEnableDeletion": "Saisissez votre mot de passe actuel ci-dessus pour activer la suppression."
+  "enterYourCurrentPasswordAboveToEnableDeletion": "Saisissez votre mot de passe actuel ci-dessus pour activer la suppression.",
+  "usageAndLimits": "Limites et utilisation des ressources",
+  "usageAndLimitsLead": "Lu à l’ouverture du Compte : consommation quotidienne de jetons IA et stockage total attribué à votre compte.",
+  "dailyAiTokens": "Jetons IA quotidiens",
+  "tokensUsedToday": "{{used}} / {{limit}} jetons aujourd’hui",
+  "tokensRemainingToday": "{{remaining}} jetons restants jusqu’à 00:00 UTC ({{requests}} requêtes aujourd’hui)",
+  "tokenLimitsPerPrompt": "Par requête : jusqu’à {{input}} jetons d’entrée et {{output}} de sortie",
+  "accountStorage": "Stockage de données du compte",
+  "storageUsedOverall": "{{usedMb}} Mo / {{limitMb}} Mo utilisés au total",
+  "storageRemaining": "{{remainingMb}} Mo disponibles pour les bilans, habitudes et préférences",
+  "savedDaysCount": "{{days}} jours enregistrés · {{habits}} habitudes personnalisées",
+  "refreshUsage": "Actualiser l’utilisation",
+  "openAiGuide": "Ouvrir le guide IA",
+  "loadingUsage": "Lecture de l’utilisation actuelle du compte…"
 }

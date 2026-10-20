@@ -20,5 +20,18 @@
   "exportAnythingYouWantToKeepFirstThisDeletes": "Najpierw wyeksportuj wszystko, co chcesz zachować. Usuniemy konto, sesje i wszystkie wpisy z aktywnej bazy. Kopie zapasowe i pobrane eksporty mogą zachować kopie zgodnie z opisem w sekcji Prywatność i dane.",
   "deleteAccountAndAllEntries": "Usuń konto i wszystkie wpisy",
   "permanentlyDeleteYourAccountAndEveryJournalEntryThis": "Trwale usunąć konto i wszystkie wpisy? Nie można tego cofnąć w aplikacji.",
-  "enterYourCurrentPasswordAboveToEnableDeletion": "Wpisz obecne hasło powyżej, aby włączyć usuwanie."
+  "enterYourCurrentPasswordAboveToEnableDeletion": "Wpisz obecne hasło powyżej, aby włączyć usuwanie.",
+  "usageAndLimits": "Limity i zużycie zasobów",
+  "usageAndLimitsLead": "Odczytywane w momencie otwarcia konta: dzienne zużycie tokenów AI oraz całkowita ilość danych przypisana do Twojego konta.",
+  "dailyAiTokens": "Dzienne tokeny AI",
+  "tokensUsedToday": "{{used}} / {{limit}} tokenów dzisiaj",
+  "tokensRemainingToday": "Pozostało {{remaining}} tokenów do 00:00 UTC (zapytań dzisiaj: {{requests}})",
+  "tokenLimitsPerPrompt": "Na jedno zapytanie: maks. {{input}} tokenów wejścia i {{output}} tokenów wyjścia",
+  "accountStorage": "Dane na koncie",
+  "storageUsedOverall": "{{usedMb}} MB / {{limitMb}} MB łącznie",
+  "storageRemaining": "Dostępne {{remainingMb}} MB na wpisy, nawyki i ustawienia",
+  "savedDaysCount": "Zapisane dni: {{days}} · własne nawyki: {{habits}}",
+  "refreshUsage": "Odśwież zużycie",
+  "openAiGuide": "Otwórz przewodnik AI",
+  "loadingUsage": "Odczytywanie bieżącego zużycia konta…"
 }

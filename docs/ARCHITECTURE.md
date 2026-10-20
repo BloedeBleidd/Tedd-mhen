@@ -28,9 +28,11 @@ The application is a React SPA served with Cloudflare Workers Static Assets. `/a
 | `shared/import.ts`                                                      | Bounded JSON/NDJSON/CSV parsing, selective merge and validation                     |
 | `shared/export.ts`                                                      | Field selection, dictionary, CSV escaping, Markdown formatting                      |
 | `shared/preferences.ts`                                                 | Strict preference operations, choice ordering and blank routine construction        |
+| `shared/assistant.ts`                                                   | AI guide prompt/context rules, code/bulk-data filter, token and 10 MB storage caps  |
 | `src/lib/preferences-context.tsx`                                       | Owner-bound settings load, immediate write queue, optimistic state and retry        |
 | `worker/auth.ts`                                                        | Application session verification, legacy Access JWT verification, local mode        |
 | `worker/index.ts`                                                       | Ownership, API, validation, queries, streaming exports                              |
+| `worker/usage.ts`                                                       | Per-account 10 MB storage enforcement, daily 30k AI token ledger, Workers AI chat   |
 | `worker/admin.ts`                                                       | Explicit role checks and aggregate administration queries                           |
 | `src/pages/`                                                            | Journal, analysis, import/export, account, administration, help, privacy and author |
 | `migrations/`                                                           | Versioned D1 schema migrations                                                      |
@@ -48,7 +50,7 @@ The owner/date key provides date-range access. Journal text search uses `instr(l
 
 List and analysis responses use SQL projections that remove narratives and workout details. This keeps long-form content out of dashboard payloads. Detail requests load one day. Exports fetch full records in batches of 50 and apply the chosen fields before serializing.
 
-Each daily JSON request is limited to 256 KiB, each narrative to 50,000 characters, and each day to 20 sessions. This is a bounded large-text journal, not unlimited object storage. D1’s database limits remain authoritative; large attachments and archival R2 storage are not implemented.
+Each daily JSON request is limited to 256 KiB, each narrative to 50,000 characters, each day to 20 sessions, and each account to 10 MB of overall stored journal, custom habit, and preference payloads (`ACCOUNT_DATA_LIMIT_BYTES`). This is a bounded large-text journal, not unlimited object storage. D1’s database limits remain authoritative; large attachments and archival R2 storage are not implemented.
 
 Custom definitions are owner-scoped in `habit_definitions`. Daily JSON contains self-contained habit keys/names. After-insert/update triggers remember new custom keys only when a journal write succeeds. Library operations use the same session, origin and expected-owner checks as journal operations. Old clients omitting `habits` receive 409 when editing a day with existing observations, preventing accidental erasure. See [Habits](HABITS.md).
 
@@ -66,6 +68,8 @@ Custom definitions are owner-scoped in `habit_definitions`. Daily JSON contains 
 | `PUT /api/habit-definitions`           | Strict `{key,name,archived}` upsert, owner derived from session                                      |
 | `GET /api/health`                      | Public liveness only; does not claim database readiness                                              |
 | `GET /api/session`                     | Verified ID, email, local-mode and administrator status                                              |
+| `GET /api/account/usage`               | Live daily AI token usage (out of 30,000/day) and overall account storage bytes (out of 10 MB)       |
+| `POST /api/chat`                       | 6-language AI guide (`@cf/google/gemma-4-26b-a4b-it`); 4,096 input / 1,024 output / 30k daily caps   |
 | `GET /api/preferences`                 | Private field visibility, routine identities and option-use metadata                                 |
 | `PATCH /api/preferences`               | Strict per-setting operation; owner derived from session, counters and timestamps updated atomically |
 | `GET /api/demo`                        | Public read of the fixed synthetic dataset; no owner or filter parameters                            |

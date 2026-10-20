@@ -42,6 +42,7 @@ beforeEach(() => {
   sqlite.exec(readFileSync('migrations/0003_administrators.sql', 'utf8'));
   sqlite.exec(readFileSync('migrations/0005_habit_definitions.sql', 'utf8'));
   sqlite.exec(readFileSync('migrations/0007_preferences.sql', 'utf8'));
+  sqlite.exec(readFileSync('migrations/0008_ai_usage.sql', 'utf8'));
   env = { DB: adapter(sqlite) } as Env;
   actor = 'owner-a';
 });

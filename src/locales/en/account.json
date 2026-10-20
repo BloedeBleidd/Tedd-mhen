@@ -20,5 +20,18 @@
   "exportAnythingYouWantToKeepFirstThisDeletes": "Export anything you want to keep first. This deletes your account, sessions, and all journal entries from the active database. Backups and downloaded exports may retain copies as described in Privacy & data.",
   "deleteAccountAndAllEntries": "Delete account and all entries",
   "permanentlyDeleteYourAccountAndEveryJournalEntryThis": "Permanently delete your account and every journal entry? This cannot be undone in the app.",
-  "enterYourCurrentPasswordAboveToEnableDeletion": "Enter your current password above to enable deletion."
+  "enterYourCurrentPasswordAboveToEnableDeletion": "Enter your current password above to enable deletion.",
+  "usageAndLimits": "Limits & resource usage",
+  "usageAndLimitsLead": "Read when you open Account: daily AI token consumption and total database storage assigned to your account.",
+  "dailyAiTokens": "Daily AI tokens",
+  "tokensUsedToday": "{{used}} / {{limit}} tokens today",
+  "tokensRemainingToday": "{{remaining}} tokens remaining until 00:00 UTC ({{requests}} requests today)",
+  "tokenLimitsPerPrompt": "Per prompt: up to {{input}} input tokens and {{output}} output tokens",
+  "accountStorage": "Account data storage",
+  "storageUsedOverall": "{{usedMb}} MB / {{limitMb}} MB used overall",
+  "storageRemaining": "{{remainingMb}} MB available across entries, habits, and settings",
+  "savedDaysCount": "{{days}} recorded days · {{habits}} custom habits",
+  "refreshUsage": "Refresh usage",
+  "openAiGuide": "Open AI guide",
+  "loadingUsage": "Reading current account usage…"
 }

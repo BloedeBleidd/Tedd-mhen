@@ -4,6 +4,19 @@ import {
   preferencesFromRows,
   type PreferenceRow,
 } from '../../shared/preferences';
+import {
+  ACCOUNT_DATA_LIMIT_BYTES,
+  AI_DAILY_TOKEN_LIMIT,
+  AI_MAX_INPUT_TOKENS,
+  AI_MAX_OUTPUT_TOKENS,
+  buildLocalAssistantReply,
+  estimateTokens,
+  prepareAssistantMessages,
+  truncateToTokenLimit,
+  utf8ByteLength,
+  type AccountUsage,
+  type AssistantChatResponse,
+} from '../../shared/assistant';
 import { habitDefinitionSchema, habitKeySchema, type HabitDefinition } from '../../shared/habits';
 import { z } from 'zod';
 import { DEMO_DATASET } from '../../shared/demo';
@@ -49,6 +62,12 @@ export class DemoWorkspace {
   private preferences = new Map<string, PreferenceRow>();
   private definitions = new Map<string, HabitDefinition>();
   private rows: Map<string, StoredEntry>;
+  private aiUsage = {
+    promptTokensToday: 0,
+    completionTokensToday: 0,
+    usedTokensToday: 0,
+    requestsToday: 0,
+  };
   constructor(
     snapshot: unknown,
     readonly today = localDate(),
@@ -79,6 +98,53 @@ export class DemoWorkspace {
       if (habit.name && !this.definitions.has(habit.key))
         this.definitions.set(habit.key, { key: habit.key, name: habit.name, archived: false });
   }
+  private usageSnapshot(): AccountUsage {
+    let entryBytes = 0;
+    for (const [date, row] of this.rows.entries()) {
+      const { revision: _r, createdAt: _c, updatedAt: _u, ...entry } = row;
+      entryBytes += utf8ByteLength(date) + utf8ByteLength(JSON.stringify(entry));
+    }
+    let habitBytes = 0;
+    for (const def of this.definitions.values()) {
+      habitBytes += utf8ByteLength(def.key) + utf8ByteLength(def.name);
+    }
+    let preferenceBytes = 0;
+    for (const pref of this.preferences.values()) {
+      preferenceBytes += utf8ByteLength(pref.key) + utf8ByteLength(pref.payload);
+    }
+    const usedBytes = entryBytes + habitBytes + preferenceBytes;
+    return {
+      date: this.today,
+      ai: {
+        usedTokensToday: this.aiUsage.usedTokensToday,
+        dailyTokenLimit: AI_DAILY_TOKEN_LIMIT,
+        remainingTokensToday: Math.max(0, AI_DAILY_TOKEN_LIMIT - this.aiUsage.usedTokensToday),
+        promptTokensToday: this.aiUsage.promptTokensToday,
+        completionTokensToday: this.aiUsage.completionTokensToday,
+        requestsToday: this.aiUsage.requestsToday,
+        maxInputTokens: AI_MAX_INPUT_TOKENS,
+        maxOutputTokens: AI_MAX_OUTPUT_TOKENS,
+      },
+      storage: {
+        usedBytes,
+        limitBytes: ACCOUNT_DATA_LIMIT_BYTES,
+        remainingBytes: Math.max(0, ACCOUNT_DATA_LIMIT_BYTES - usedBytes),
+        entryBytes,
+        entryCount: this.rows.size,
+        habitBytes,
+        habitCount: this.definitions.size,
+        preferenceBytes,
+      },
+    };
+  }
+  private checkQuota(deltaBytes: number) {
+    if (deltaBytes <= 0) return;
+    if (this.usageSnapshot().storage.usedBytes + deltaBytes > ACCOUNT_DATA_LIMIT_BYTES)
+      throw new ApiError(
+        'Account storage limit of 10 MB reached. Export and delete older entries before saving more data.',
+        413,
+      );
+  }
   snapshot(): StoredEntry[] {
     return structuredClone([...this.rows.values()]);
   }
@@ -104,15 +170,74 @@ export class DemoWorkspace {
       throw new ApiError('Sign in or create an account to manage your own journal.', 403);
     if (url.pathname === '/api/session' && method === 'GET')
       return { id: this.id, email: 'Demo workspace', local: false, admin: false };
+    if (url.pathname === '/api/account/usage' && method === 'GET') return this.usageSnapshot();
+    if (url.pathname === '/api/chat' && method === 'POST') {
+      let prepared: ReturnType<typeof prepareAssistantMessages>;
+      try {
+        prepared = prepareAssistantMessages(JSON.parse(String(options.body)), AI_MAX_OUTPUT_TOKENS);
+      } catch (cause) {
+        if (cause instanceof Error && !(cause as { issues?: unknown }).issues)
+          throw new ApiError(cause.message, 400);
+        throw cause;
+      }
+      if (this.aiUsage.usedTokensToday + prepared.promptTokens > AI_DAILY_TOKEN_LIMIT)
+        throw new ApiError(
+          'Daily AI token limit of 30,000 tokens reached. Your allowance resets at 00:00 UTC.',
+          429,
+        );
+      const maxCompletion = Math.max(
+        1,
+        Math.min(
+          AI_MAX_OUTPUT_TOKENS,
+          AI_DAILY_TOKEN_LIMIT - this.aiUsage.usedTokensToday - prepared.promptTokens,
+        ),
+      );
+      const rawReply = buildLocalAssistantReply(
+        prepared.userMessage,
+        prepared.language,
+        prepared.pathname,
+      );
+      const truncated = truncateToTokenLimit(rawReply, maxCompletion);
+      const completionTokens = Math.min(
+        maxCompletion,
+        Math.max(truncated.tokens, estimateTokens(truncated.text)),
+      );
+      const totalTokens = prepared.promptTokens + completionTokens;
+      this.aiUsage.promptTokensToday += prepared.promptTokens;
+      this.aiUsage.completionTokensToday += completionTokens;
+      this.aiUsage.usedTokensToday += totalTokens;
+      this.aiUsage.requestsToday += 1;
+      const response: AssistantChatResponse = {
+        reply: truncated.text,
+        model: 'teddmhen-guide-local',
+        usage: {
+          promptTokens: prepared.promptTokens,
+          completionTokens,
+          totalTokens,
+          usedTokensToday: this.aiUsage.usedTokensToday,
+          dailyTokenLimit: AI_DAILY_TOKEN_LIMIT,
+          remainingTokensToday: Math.max(0, AI_DAILY_TOKEN_LIMIT - this.aiUsage.usedTokensToday),
+          requestsToday: this.aiUsage.requestsToday,
+          maxInputTokens: AI_MAX_INPUT_TOKENS,
+          maxOutputTokens: AI_MAX_OUTPUT_TOKENS,
+        },
+      };
+      return response;
+    }
     if (url.pathname === '/api/preferences') {
       if (method === 'GET') return preferencesFromRows([...this.preferences.values()]);
       if (method === 'PATCH') {
         const change = preferenceChangeSchema.parse(JSON.parse(String(options.body)));
         const key = preferenceKey(change),
           previous = this.preferences.get(key);
+        const payload = JSON.stringify(change);
+        const priorBytes = previous
+          ? utf8ByteLength(previous.key) + utf8ByteLength(previous.payload)
+          : 0;
+        this.checkQuota(utf8ByteLength(key) + utf8ByteLength(payload) - priorBytes);
         const row = {
           key,
-          payload: JSON.stringify(change),
+          payload,
           uses: Math.min((previous?.uses || 0) + 1, 2147483647),
           last_used: Math.max(previous?.last_used || 0, Date.now()),
         };
@@ -124,6 +249,13 @@ export class DemoWorkspace {
       if (method === 'GET') return { definitions: structuredClone([...this.definitions.values()]) };
       if (method === 'PUT') {
         const definition = habitDefinitionSchema.parse(JSON.parse(String(options.body)));
+        const previous = this.definitions.get(definition.key);
+        const priorBytes = previous
+          ? utf8ByteLength(previous.key) + utf8ByteLength(previous.name)
+          : 0;
+        this.checkQuota(
+          utf8ByteLength(definition.key) + utf8ByteLength(definition.name) - priorBytes,
+        );
         this.definitions.set(definition.key, definition);
         return structuredClone(definition);
       }
@@ -144,6 +276,12 @@ export class DemoWorkspace {
         if (entry.date !== date) throw new ApiError('Entry date and URL do not match.', 400);
         if ((existing?.revision ?? 0) !== revision)
           throw new ApiError('Entry changed. Reload before saving.', 409);
+        let priorBytes = 0;
+        if (existing) {
+          const { revision: _r, createdAt: _c, updatedAt: _u, ...priorEntry } = existing;
+          priorBytes = utf8ByteLength(date) + utf8ByteLength(JSON.stringify(priorEntry));
+        }
+        this.checkQuota(utf8ByteLength(date) + utf8ByteLength(JSON.stringify(entry)) - priorBytes);
         const now = new Date().toISOString();
         this.rows.set(date, {
           ...entry,

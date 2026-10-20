@@ -1,0 +1,19 @@
+{
+  "open": "Guía IA",
+  "title": "Guía de IA de Tedd’mhen",
+  "close": "Cerrar guía de IA",
+  "subtitle": "Pregunta en tu idioma cómo funciona cualquier página, métrica, hábito, modelo de análisis o exportación.",
+  "greeting": "¡Hola! Soy la guía de Tedd’mhen. Pregúntame cómo funcionan el registro diario, los hábitos, las tendencias, los modelos exploratorios, las exportaciones o los límites de la cuenta.",
+  "questionLabel": "Haz una pregunta",
+  "placeholder": "Pregunta cómo funciona una función…",
+  "send": "Preguntar",
+  "sending": "Pensando…",
+  "clear": "Borrar chat",
+  "inputTokensCounter": "Consulta: {{used}} / {{limit}} tokens",
+  "dailyTokensCounter": "Hoy: {{used}} / {{limit}} tokens",
+  "noCodeNotice": "Solo preguntas de texto sobre Tedd’mhen: hasta {{input}} tokens de entrada, sin código ni datos masivos.",
+  "promptCheckIn": "¿Cómo registro un día y las sesiones de entrenamiento?",
+  "promptHabits": "¿Cómo funcionan los hábitos personalizados y las escalas?",
+  "promptAnalysis": "¿Cómo funcionan Tendencias y predicciones y las correlaciones desfasadas?",
+  "promptQuotas": "¿Cuáles son los límites diarios de tokens de IA y de 10 MB de datos?"
+}

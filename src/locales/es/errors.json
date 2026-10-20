@@ -123,5 +123,10 @@
   "analysis_could_not_run_try_fewer_inputs_a_shorter": "No se pudo ejecutar el análisis. Prueba con menos variables, un intervalo más corto o recarga la página.",
   "analysis_could_not_be_completed": "No se pudo completar el análisis.",
   "completeRows": "Observaciones completas: {{value0}}; se requieren al menos {{value1}} para {{value2}} coeficientes. Es un umbral de visualización, no garantía de fiabilidad.",
-  "forecastHorizonMustBe028Days": "El horizonte debe ser de 0 a 28 días."
+  "forecastHorizonMustBe028Days": "El horizonte debe ser de 0 a 28 días.",
+  "enterAQuestionForTheAiGuide": "Escribe una pregunta para la guía de IA.",
+  "yourMessageExceedsThe4096TokenInputLimitShorten": "Tu mensaje supera el límite de entrada de 4096 tokens. Acorta la pregunta e inténtalo de nuevo.",
+  "theAiGuideAnswersQuestionsAboutUsingTeddMhen": "La guía de IA responde preguntas sobre el uso de Tedd’mhen. No se permite pegar código fuente, exportaciones ni datos masivos.",
+  "dailyAiTokenLimitOf30000TokensReached": "Se alcanzó el límite diario de 30 000 tokens de IA. El cupo se restablece a las 00:00 UTC.",
+  "accountStorageLimitOf10MbReachedExport": "Se alcanzó el límite de almacenamiento de 10 MB de la cuenta. Exporta y elimina registros antiguos antes de guardar más datos."
 }

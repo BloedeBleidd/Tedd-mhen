@@ -123,5 +123,10 @@
   "analysis_could_not_run_try_fewer_inputs_a_shorter": "Die Analyse konnte nicht starten. Weniger Eingaben oder einen kürzeren Zeitraum wählen oder die Seite neu laden.",
   "analysis_could_not_be_completed": "Die Analyse konnte nicht abgeschlossen werden.",
   "completeRows": "Vollständige Beobachtungen: {{value0}}; mindestens {{value1}} für {{value2}} Koeffizienten erforderlich. Anzeigeschwelle, keine Verlässlichkeitsgarantie.",
-  "forecastHorizonMustBe028Days": "Der Vorhersagehorizont muss 0–28 Tage betragen."
+  "forecastHorizonMustBe028Days": "Der Vorhersagehorizont muss 0–28 Tage betragen.",
+  "enterAQuestionForTheAiGuide": "Gib eine Frage für den KI-Leitfaden ein.",
+  "yourMessageExceedsThe4096TokenInputLimitShorten": "Deine Nachricht überschreitet das Eingabelimit von 4.096 Tokens. Kürze deine Frage und versuche es erneut.",
+  "theAiGuideAnswersQuestionsAboutUsingTeddMhen": "Der KI-Leitfaden beantwortet Fragen zur Nutzung von Tedd’mhen. Das Einfügen von Quellcode, Exporten oder großen Datenmengen ist nicht erlaubt.",
+  "dailyAiTokenLimitOf30000TokensReached": "Das tägliche KI-Limit von 30.000 Tokens ist erreicht. Das Kontingent wird um 00:00 UTC zurückgesetzt.",
+  "accountStorageLimitOf10MbReachedExport": "Das Kontospeicherlimit von 10 MB ist erreicht. Exportiere und lösche ältere Einträge, bevor du weitere Daten speicherst."
 }

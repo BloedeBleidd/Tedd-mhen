@@ -1,0 +1,19 @@
+{
+  "open": "KI-Leitfaden",
+  "title": "Tedd’mhen KI-Leitfaden",
+  "close": "KI-Leitfaden schließen",
+  "subtitle": "Frage in deiner Sprache, wie Seiten, Kennzahlen, Gewohnheiten, Analysemodelle oder Exporte funktionieren.",
+  "greeting": "Hallo! Ich bin der Tedd’mhen-Leitfaden. Frage mich, wie tägliche Einträge, Gewohnheiten, Trends, explorative Modelle, Exporte oder Kontolimits funktionieren.",
+  "questionLabel": "Frage stellen",
+  "placeholder": "Frage, wie eine Funktion arbeitet…",
+  "send": "Fragen",
+  "sending": "Antwort wird erstellt…",
+  "clear": "Chat leeren",
+  "inputTokensCounter": "Eingabe: {{used}} / {{limit}} Tokens",
+  "dailyTokensCounter": "Heute: {{used}} / {{limit}} Tokens",
+  "noCodeNotice": "Nur Textfragen zu Tedd’mhen — bis zu {{input}} Eingabe-Tokens, kein Quellcode oder Massendaten.",
+  "promptCheckIn": "Wie erfasse ich einen Tageseintrag und Trainingseinheiten?",
+  "promptHabits": "Wie funktionieren eigene Gewohnheiten und Skalen?",
+  "promptAnalysis": "Wie funktionieren Trends & Vorhersagen sowie zeitversetzte Korrelationen?",
+  "promptQuotas": "Was sind das tägliche KI-Token-Limit und das 10-MB-Speicherlimit?"
+}

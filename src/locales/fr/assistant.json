@@ -1,0 +1,19 @@
+{
+  "open": "Guide IA",
+  "title": "Guide IA Tedd’mhen",
+  "close": "Fermer le guide IA",
+  "subtitle": "Demandez dans votre langue comment fonctionnent les pages, indicateurs, habitudes, modèles d’analyse ou exports.",
+  "greeting": "Bonjour ! Je suis le guide Tedd’mhen. Demandez-moi comment fonctionnent le bilan quotidien, les habitudes, les tendances, les modèles exploratoires, les exports ou les limites du compte.",
+  "questionLabel": "Poser une question",
+  "placeholder": "Demandez comment fonctionne une fonctionnalité…",
+  "send": "Demander",
+  "sending": "Réflexion…",
+  "clear": "Effacer la discussion",
+  "inputTokensCounter": "Question : {{used}} / {{limit}} jetons",
+  "dailyTokensCounter": "Aujourd’hui : {{used}} / {{limit}} jetons",
+  "noCodeNotice": "Questions texte sur Tedd’mhen uniquement — jusqu’à {{input}} jetons d’entrée, sans code ni données massives.",
+  "promptCheckIn": "Comment enregistrer un bilan quotidien et des séances ?",
+  "promptHabits": "Comment fonctionnent les habitudes personnalisées et les échelles ?",
+  "promptAnalysis": "Comment fonctionnent Tendances et prévisions et les corrélations décalées ?",
+  "promptQuotas": "Quelles sont les limites quotidiennes de jetons IA et de 10 Mo de stockage ?"
+}

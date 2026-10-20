@@ -20,5 +20,18 @@
   "exportAnythingYouWantToKeepFirstThisDeletes": "Exporta primeiro o que queres guardar. A conta, as sessões e todos os registos serão eliminados da base ativa. As cópias de segurança e exportações descarregadas podem conservar cópias, conforme descrito em Privacidade e dados.",
   "deleteAccountAndAllEntries": "Eliminar conta e todos os registos",
   "permanentlyDeleteYourAccountAndEveryJournalEntryThis": "Eliminar permanentemente a conta e todos os registos? Não é possível anular esta ação na aplicação.",
-  "enterYourCurrentPasswordAboveToEnableDeletion": "Introduz a palavra-passe atual acima para permitir a eliminação."
+  "enterYourCurrentPasswordAboveToEnableDeletion": "Introduz a palavra-passe atual acima para permitir a eliminação.",
+  "usageAndLimits": "Limites e utilização de recursos",
+  "usageAndLimitsLead": "Lido ao abrir Conta: consumo diário de tokens de IA e armazenamento total atribuído à tua conta.",
+  "dailyAiTokens": "Tokens diários de IA",
+  "tokensUsedToday": "{{used}} / {{limit}} tokens hoje",
+  "tokensRemainingToday": "{{remaining}} tokens disponíveis até às 00:00 UTC ({{requests}} pedidos hoje)",
+  "tokenLimitsPerPrompt": "Por pergunta: até {{input}} tokens de entrada e {{output}} de saída",
+  "accountStorage": "Armazenamento de dados da conta",
+  "storageUsedOverall": "{{usedMb}} MB / {{limitMb}} MB utilizados no total",
+  "storageRemaining": "{{remainingMb}} MB disponíveis para registos, hábitos e definições",
+  "savedDaysCount": "{{days}} dias registados · {{habits}} hábitos personalizados",
+  "refreshUsage": "Atualizar utilização",
+  "openAiGuide": "Abrir guia de IA",
+  "loadingUsage": "A ler a utilização atual da conta…"
 }

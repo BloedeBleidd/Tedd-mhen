@@ -123,5 +123,10 @@
   "analysis_could_not_run_try_fewer_inputs_a_shorter": "Nie udało się uruchomić analizy. Wybierz mniej zmiennych, krótszy zakres dat lub odśwież stronę.",
   "analysis_could_not_be_completed": "Nie udało się ukończyć analizy.",
   "completeRows": "Kompletne obserwacje: {{value0}}; wymagane co najmniej {{value1}} dla {{value2}} współczynników. To próg wyświetlania, nie gwarancja wiarygodności.",
-  "forecastHorizonMustBe028Days": "Horyzont predykcji musi wynosić 0–28 dni."
+  "forecastHorizonMustBe028Days": "Horyzont predykcji musi wynosić 0–28 dni.",
+  "enterAQuestionForTheAiGuide": "Wpisz pytanie do przewodnika AI.",
+  "yourMessageExceedsThe4096TokenInputLimitShorten": "Wiadomość przekracza limit 4 096 tokenów wejściowych. Skróć pytanie i spróbuj ponownie.",
+  "theAiGuideAnswersQuestionsAboutUsingTeddMhen": "Przewodnik AI odpowiada na pytania o korzystanie z Tedd’mhen. Wklejanie kodu źródłowego, eksportów i dużych zbiorów danych jest niedozwolone.",
+  "dailyAiTokenLimitOf30000TokensReached": "Osiągnięto dzienny limit 30 000 tokenów AI. Pula odnawia się o 00:00 UTC.",
+  "accountStorageLimitOf10MbReachedExport": "Osiągnięto limit 10 MB danych na koncie. Wyeksportuj i usuń starsze wpisy przed zapisaniem kolejnych danych."
 }

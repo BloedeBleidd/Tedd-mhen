@@ -33,6 +33,7 @@ Apply the complete migration chain before serving the matching Worker. Deployed 
 | Private custom activity library | `0005_habit_definitions.sql` | Owner-scoped definitions and successful-entry-write import triggers |
 | Synthetic habit observations    | `0006_demo_habits.sql`       | Reproducible demo fixture with baseline guards preserved            |
 | Personal layouts and routines   | `0007_preferences.sql`       | Per-setting owner keys, usage metadata and account-deletion cascade |
+| Daily AI guide usage counters   | `0008_ai_usage.sql`          | Per-owner UTC daily token accounting and account-deletion cascade   |
 
 Migration 0006 replaces and reinstates the demo update guard within its transaction; insert, delete and credential guards remain in place. Migration 0007 creates a separate settings table without rewriting observations, credentials, definitions or the demo baseline. Retain additive tables during a Worker rollback. A Worker that predates habit preservation can discard habit fields on entry updates; prefer a forward fix and verify data compatibility before any rollback.
 
@@ -66,7 +67,7 @@ Use two short-lived synthetic accounts and remove them after verification. Never
 | Custom activities and portability | Private libraries remain isolated; imports restore custom definitions only after successful writes; stale revisions and clients omitting recorded habits cannot erase observations                                                                            |
 | Public demo                       | `/demo` and `/api/demo` work anonymously with only the synthetic baseline; ordinary private APIs return 401; signed-in demo visits redirect to the private journal; edits and settings disappear on exit or reload; registration starts with an empty journal |
 | Administration                    | The granted owner sees Administration; ordinary accounts receive 403 from `/api/admin/overview`; anonymous requests receive 401                                                                                                                               |
-| Analysis and interface            | Relationship and multivariable views handle missing observations; mobile layouts, external author links, input feedback and import previews remain usable                                                                                                 |
+| Analysis and interface            | Relationship and multivariable views handle missing observations; mobile layouts, external author links, input feedback and import previews remain usable                                                                                                     |
 | Language and appearance           | Six source catalogs render; canonical IDs and original notes survive language changes; location permission is explicit; Auto uses English/light without location and follows local geography/sunrise/sunset with coordinates; manual choices take precedence  |
 | Response protections              | Session cookie attributes, `Cache-Control: private, no-store`, CSP and `Permissions-Policy: geolocation=(self)` match configuration                                                                                                                           |
 

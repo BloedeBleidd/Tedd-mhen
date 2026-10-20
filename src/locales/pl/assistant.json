@@ -1,0 +1,19 @@
+{
+  "open": "Przewodnik AI",
+  "title": "Przewodnik AI Tedd’mhen",
+  "close": "Zamknij przewodnik AI",
+  "subtitle": "Zapytaj w swoim języku, jak działa dowolna strona, wskaźnik, nawyk, model analizy lub eksport.",
+  "greeting": "Cześć! Jestem przewodnikiem po Tedd’mhen. Zapytaj mnie, jak działają codzienne wpisy, nawyki, trendy, modele eksploracyjne, eksporty lub limity konta.",
+  "questionLabel": "Zadaj pytanie",
+  "placeholder": "Zapytaj, jak działa wybrana funkcja…",
+  "send": "Zapytaj",
+  "sending": "Odpowiadam…",
+  "clear": "Wyczyść czat",
+  "inputTokensCounter": "Pytanie: {{used}} / {{limit}} tokenów",
+  "dailyTokensCounter": "Dzisiaj: {{used}} / {{limit}} tokenów",
+  "noCodeNotice": "Tylko pytania tekstowe o Tedd’mhen — maks. {{input}} tokenów wejścia, bez kodu i dużych zbiorów danych.",
+  "promptCheckIn": "Jak zapisać codzienny wpis i treningi?",
+  "promptHabits": "Jak działają własne nawyki i skale?",
+  "promptAnalysis": "Jak działają Trendy i predykcje oraz korelacje z opóźnieniem?",
+  "promptQuotas": "Jakie są dzienne limity tokenów AI i limit 10 MB danych?"
+}

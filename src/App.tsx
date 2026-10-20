@@ -24,6 +24,7 @@ import { AppearanceControl } from './components/AppearanceControl';
 import { PrivacyNotice } from './components/PrivacyNotice';
 import { PageGuide } from './components/PageGuide';
 import { BackToTop } from './components/BackToTop';
+import { AiAssistant } from './components/AiAssistant';
 import { WorkspaceNavLink as NavLink, WorkspaceLink } from './components/WorkspaceLink';
 import { Welcome } from './pages/Welcome';
 import { AuthPage } from './pages/Auth';
@@ -362,6 +363,7 @@ export function App() {
               <a href={authorUrl(language)}>{tr('app:aboutTheAuthor')}</a>
             </footer>
           </main>
+          <AiAssistant />
           <BackToTop />
         </div>
       </div>

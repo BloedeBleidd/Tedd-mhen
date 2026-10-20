@@ -123,5 +123,10 @@
   "analysis_could_not_run_try_fewer_inputs_a_shorter": "Analysis could not run. Try fewer inputs, a shorter date range, or reload the page.",
   "analysis_could_not_be_completed": "Analysis could not be completed.",
   "completeRows": "{{value0}} complete observations; at least {{value1}} required for {{value2}} coefficients. This is a display threshold, not a guarantee of reliability.",
-  "forecastHorizonMustBe028Days": "Forecast horizon must be 0–28 days."
+  "forecastHorizonMustBe028Days": "Forecast horizon must be 0–28 days.",
+  "enterAQuestionForTheAiGuide": "Enter a question for the AI guide.",
+  "yourMessageExceedsThe4096TokenInputLimitShorten": "Your message exceeds the 4,096-token input limit. Shorten your question and try again.",
+  "theAiGuideAnswersQuestionsAboutUsingTeddMhen": "The AI guide answers questions about using Tedd’mhen. Pasting source code, exports, or bulk data is not allowed.",
+  "dailyAiTokenLimitOf30000TokensReached": "Daily AI token limit of 30,000 tokens reached. Your allowance resets at 00:00 UTC.",
+  "accountStorageLimitOf10MbReachedExport": "Account storage limit of 10 MB reached. Export and delete older entries before saving more data."
 }

@@ -6,6 +6,17 @@ import {
 } from '../shared/preferences';
 import { habitDefinitionSchema, habitKeySchema } from '../shared/habits';
 import { adminOverview, isAdministrator } from './admin';
+import {
+  enforceStorageQuota,
+  entryStorageBytes,
+  existingEntryBytes,
+  existingHabitBytes,
+  existingPreferenceBytes,
+  getAccountUsage,
+  habitStorageBytes,
+  handleAssistantChat,
+  preferenceStorageBytes,
+} from './usage';
 import { DEMO_DATASET, DEMO_OWNER } from '../shared/demo';
 import { z } from 'zod';
 import { authenticate, authenticateLegacy, isLocal, type Env } from './auth';
@@ -331,6 +342,10 @@ export async function handleApi(request: Request, env: Env): Promise<Response> {
       local: isLocal(request, env),
       admin: await isAdministrator(env.DB, user.id),
     });
+  if (url.pathname === '/api/account/usage' && request.method === 'GET')
+    return json(await getAccountUsage(env.DB, user.id));
+  if (url.pathname === '/api/chat' && request.method === 'POST')
+    return json(await handleAssistantChat(env, user, await readBody(request, 64 * 1024)));
   if (url.pathname === '/api/preferences') {
     if (request.method === 'GET') {
       const rows = await env.DB.prepare(
@@ -343,6 +358,9 @@ export async function handleApi(request: Request, env: Env): Promise<Response> {
     if (request.method === 'PATCH') {
       const change = preferenceChangeSchema.parse(await readBody(request, 4096));
       const key = preferenceKey(change);
+      const payload = JSON.stringify(change);
+      const priorBytes = await existingPreferenceBytes(env.DB, user.id, key);
+      await enforceStorageQuota(env.DB, user.id, preferenceStorageBytes(key, payload) - priorBytes);
       const result = await env.DB.batch([
         env.DB.prepare('INSERT INTO users(id, email) VALUES(?, ?) ON CONFLICT(id) DO NOTHING').bind(
           user.id,
@@ -350,7 +368,7 @@ export async function handleApi(request: Request, env: Env): Promise<Response> {
         ),
         env.DB.prepare(
           `INSERT INTO user_preferences(owner_id, key, payload, uses, last_used) VALUES(?, ?, ?, 1, ?) ON CONFLICT(owner_id, key) DO UPDATE SET payload = excluded.payload, uses = MIN(user_preferences.uses + 1, 2147483647), last_used = MAX(user_preferences.last_used, excluded.last_used) RETURNING key, payload, uses, last_used`,
-        ).bind(user.id, key, JSON.stringify(change), Date.now()),
+        ).bind(user.id, key, payload, Date.now()),
       ]);
       return json(result[1].results[0]);
     }
@@ -369,6 +387,12 @@ export async function handleApi(request: Request, env: Env): Promise<Response> {
     }
     if (request.method === 'PUT') {
       const definition = habitDefinitionSchema.parse(await readBody(request, 4096));
+      const priorBytes = await existingHabitBytes(env.DB, user.id, definition.key);
+      await enforceStorageQuota(
+        env.DB,
+        user.id,
+        habitStorageBytes(definition.key, definition.name) - priorBytes,
+      );
       await env.DB.batch([
         env.DB.prepare('INSERT INTO users(id, email) VALUES(?, ?) ON CONFLICT(id) DO NOTHING').bind(
           user.id,
@@ -460,6 +484,8 @@ export async function handleApi(request: Request, env: Env): Promise<Response> {
         .parse(body);
       if (entry.date !== date) error('Entry date and URL do not match.');
       const data = JSON.stringify(entry);
+      const priorBytes = await existingEntryBytes(env.DB, user.id, date);
+      await enforceStorageQuota(env.DB, user.id, entryStorageBytes(date, data) - priorBytes);
       const operation =
         revision === 0
           ? env.DB.prepare(

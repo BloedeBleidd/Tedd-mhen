@@ -20,5 +20,18 @@
   "exportAnythingYouWantToKeepFirstThisDeletes": "Exporta primero lo que quieras conservar. Se eliminarán tu cuenta, sesiones y todos los registros de la base activa. Las copias de seguridad y las exportaciones descargadas pueden conservar copias, como se explica en Privacidad y datos.",
   "deleteAccountAndAllEntries": "Eliminar cuenta y todos los registros",
   "permanentlyDeleteYourAccountAndEveryJournalEntryThis": "¿Eliminar permanentemente tu cuenta y todos los registros? No se puede deshacer desde la aplicación.",
-  "enterYourCurrentPasswordAboveToEnableDeletion": "Introduce tu contraseña actual arriba para habilitar la eliminación."
+  "enterYourCurrentPasswordAboveToEnableDeletion": "Introduce tu contraseña actual arriba para habilitar la eliminación.",
+  "usageAndLimits": "Límites y uso de recursos",
+  "usageAndLimitsLead": "Leído al abrir Cuenta: consumo diario de tokens de IA y almacenamiento total asignado a tu cuenta.",
+  "dailyAiTokens": "Tokens diarios de IA",
+  "tokensUsedToday": "{{used}} / {{limit}} tokens hoy",
+  "tokensRemainingToday": "{{remaining}} tokens restantes hasta las 00:00 UTC ({{requests}} consultas hoy)",
+  "tokenLimitsPerPrompt": "Por consulta: hasta {{input}} tokens de entrada y {{output}} de salida",
+  "accountStorage": "Almacenamiento de la cuenta",
+  "storageUsedOverall": "{{usedMb}} MB / {{limitMb}} MB en total",
+  "storageRemaining": "{{remainingMb}} MB disponibles para registros, hábitos y ajustes",
+  "savedDaysCount": "{{days}} días registrados · {{habits}} hábitos personalizados",
+  "refreshUsage": "Actualizar uso",
+  "openAiGuide": "Abrir guía de IA",
+  "loadingUsage": "Consultando el uso actual de la cuenta…"
 }

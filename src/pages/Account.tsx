@@ -1,11 +1,12 @@
 import { useTranslation } from 'react-i18next';
-import { t as tr } from '../i18n';
+import { locale, t as tr } from '../i18n';
 import { PendingAccountGuard } from '../components/PendingAccountGuard';
-import { useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useApi, useLoad } from '../lib/api';
 import { ErrorBox, Field, PageHeading, Panel } from '../components/ui';
 import { loginPassword, passwordSchema } from '../../shared/credentials';
+import type { AccountUsage } from '../../shared/assistant';
 import { RecoverySecret } from './Auth';
 
 export function Account() {
@@ -13,6 +14,7 @@ export function Account() {
   const { request, invalidate, demo } = useApi();
   const pending = useRef(false);
   const session = useLoad<{ email: string; local: boolean }>('/api/session');
+  const usage = useLoad<AccountUsage>('/api/account/usage');
   const navigate = useNavigate();
   const [currentPassword, setCurrent] = useState(''),
     [password, setPassword] = useState(''),
@@ -22,6 +24,20 @@ export function Account() {
     [busy, setBusy] = useState(false);
   const errorRef = useRef<HTMLDivElement>(null);
   const unavailable = demo || session.data?.local || !session.data;
+  useEffect(() => {
+    const onUsageUpdated = () => usage.retry();
+    window.addEventListener('teddmhen:usage-updated', onUsageUpdated);
+    return () => window.removeEventListener('teddmhen:usage-updated', onUsageUpdated);
+  });
+  const fmtInt = (value: number) => value.toLocaleString(locale());
+  const fmtMb = (bytes: number, nonZeroFloor = false) => {
+    const rawMb = bytes / (1024 * 1024);
+    const value = nonZeroFloor && bytes > 0 ? Math.max(0.01, rawMb) : rawMb;
+    return value.toLocaleString(locale(), {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  };
   function showError(message: string) {
     setError(message);
     requestAnimationFrame(() => {
@@ -96,6 +112,12 @@ export function Account() {
         }}
       />
     );
+  const aiPercent = usage.data
+    ? Math.min(100, (usage.data.ai.usedTokensToday / usage.data.ai.dailyTokenLimit) * 100)
+    : 0;
+  const storagePercent = usage.data
+    ? Math.min(100, (usage.data.storage.usedBytes / usage.data.storage.limitBytes) * 100)
+    : 0;
   return (
     <>
       <PendingAccountGuard pending={pending} />
@@ -132,6 +154,76 @@ export function Account() {
           >
             {tr('account:signOut')}
           </button>
+        )}
+      </Panel>
+      <Panel title={tr('account:usageAndLimits')} className="prose-panel">
+        <p>{tr('account:usageAndLimitsLead')}</p>
+        {usage.data ? (
+          <>
+            <div className="account-usage-grid">
+              <section className="usage-card" aria-labelledby="usage-ai-heading">
+                <h3 id="usage-ai-heading">{tr('account:dailyAiTokens')}</h3>
+                <strong className="usage-primary">
+                  {tr('account:tokensUsedToday', {
+                    used: fmtInt(usage.data.ai.usedTokensToday),
+                    limit: fmtInt(usage.data.ai.dailyTokenLimit),
+                  })}
+                </strong>
+                <div className="usage-meter" aria-hidden="true">
+                  <span style={{ width: `${aiPercent}%` }} />
+                </div>
+                <p className="small muted">
+                  {tr('account:tokensRemainingToday', {
+                    remaining: fmtInt(usage.data.ai.remainingTokensToday),
+                    requests: fmtInt(usage.data.ai.requestsToday),
+                  })}
+                </p>
+                <p className="small muted">
+                  {tr('account:tokenLimitsPerPrompt', {
+                    input: fmtInt(usage.data.ai.maxInputTokens),
+                    output: fmtInt(usage.data.ai.maxOutputTokens),
+                  })}
+                </p>
+              </section>
+              <section className="usage-card" aria-labelledby="usage-storage-heading">
+                <h3 id="usage-storage-heading">{tr('account:accountStorage')}</h3>
+                <strong className="usage-primary">
+                  {tr('account:storageUsedOverall', {
+                    usedMb: fmtMb(usage.data.storage.usedBytes, true),
+                    limitMb: fmtMb(usage.data.storage.limitBytes),
+                  })}
+                </strong>
+                <div className="usage-meter" aria-hidden="true">
+                  <span style={{ width: `${storagePercent}%` }} />
+                </div>
+                <p className="small muted">
+                  {tr('account:storageRemaining', {
+                    remainingMb: fmtMb(usage.data.storage.remainingBytes),
+                  })}
+                </p>
+                <p className="small muted">
+                  {tr('account:savedDaysCount', {
+                    days: fmtInt(usage.data.storage.entryCount),
+                    habits: fmtInt(usage.data.storage.habitCount),
+                  })}
+                </p>
+              </section>
+            </div>
+            <div className="account-usage-actions">
+              <button type="button" className="button secondary small-button" onClick={usage.retry}>
+                {tr('account:refreshUsage')}
+              </button>
+              <button
+                type="button"
+                className="button secondary small-button"
+                onClick={() => window.dispatchEvent(new CustomEvent('teddmhen:open-assistant'))}
+              >
+                {tr('account:openAiGuide')}
+              </button>
+            </div>
+          </>
+        ) : (
+          <p className="small muted">{tr('account:loadingUsage')}</p>
         )}
       </Panel>
       {!unavailable && (

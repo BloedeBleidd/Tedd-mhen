@@ -20,5 +20,18 @@
   "exportAnythingYouWantToKeepFirstThisDeletes": "Exportiere zuerst alles, was du behalten möchtest. Konto, Sitzungen und sämtliche Einträge werden aus der aktiven Datenbank gelöscht. Sicherungen und heruntergeladene Exporte können Kopien enthalten, wie unter Datenschutz und Daten beschrieben.",
   "deleteAccountAndAllEntries": "Konto und alle Einträge löschen",
   "permanentlyDeleteYourAccountAndEveryJournalEntryThis": "Konto und alle Tagebucheinträge dauerhaft löschen? Das lässt sich in der App nicht rückgängig machen.",
-  "enterYourCurrentPasswordAboveToEnableDeletion": "Gib oben dein aktuelles Passwort ein, um das Löschen zu aktivieren."
+  "enterYourCurrentPasswordAboveToEnableDeletion": "Gib oben dein aktuelles Passwort ein, um das Löschen zu aktivieren.",
+  "usageAndLimits": "Limits und Ressourcennutzung",
+  "usageAndLimitsLead": "Beim Öffnen von Konto abgerufen: täglicher KI-Token-Verbrauch und gesamter Datenbankspeicher deines Kontos.",
+  "dailyAiTokens": "Tägliche KI-Tokens",
+  "tokensUsedToday": "{{used}} / {{limit}} Tokens heute",
+  "tokensRemainingToday": "{{remaining}} Tokens bis 00:00 UTC verbleibend ({{requests}} Anfragen heute)",
+  "tokenLimitsPerPrompt": "Pro Anfrage: bis zu {{input}} Eingabe-Tokens und {{output}} Ausgabe-Tokens",
+  "accountStorage": "Kontodatenspeicher",
+  "storageUsedOverall": "{{usedMb}} MB / {{limitMb}} MB insgesamt belegt",
+  "storageRemaining": "{{remainingMb}} MB frei für Einträge, Gewohnheiten und Einstellungen",
+  "savedDaysCount": "{{days}} erfasste Tage · {{habits}} eigene Gewohnheiten",
+  "refreshUsage": "Nutzung aktualisieren",
+  "openAiGuide": "KI-Leitfaden öffnen",
+  "loadingUsage": "Aktuelle Kontonutzung wird gelesen…"
 }

@@ -123,5 +123,10 @@
   "analysis_could_not_run_try_fewer_inputs_a_shorter": "L’analyse n’a pas pu démarrer. Réduisez les variables ou la période, ou rechargez la page.",
   "analysis_could_not_be_completed": "L’analyse n’a pas pu être terminée.",
   "completeRows": "Observations complètes : {{value0}} ; au moins {{value1}} requises pour {{value2}} coefficients. Seuil d’affichage, pas garantie de fiabilité.",
-  "forecastHorizonMustBe028Days": "L’horizon doit être compris entre 0 et 28 jours."
+  "forecastHorizonMustBe028Days": "L’horizon doit être compris entre 0 et 28 jours.",
+  "enterAQuestionForTheAiGuide": "Saisissez une question pour le guide IA.",
+  "yourMessageExceedsThe4096TokenInputLimitShorten": "Votre message dépasse la limite d’entrée de 4 096 jetons. Raccourcissez votre question et réessayez.",
+  "theAiGuideAnswersQuestionsAboutUsingTeddMhen": "Le guide IA répond aux questions sur l’utilisation de Tedd’mhen. Le collage de code source, d’exports ou de données volumineuses n’est pas autorisé.",
+  "dailyAiTokenLimitOf30000TokensReached": "La limite quotidienne de 30 000 jetons IA est atteinte. Le quota est réinitialisé à 00:00 UTC.",
+  "accountStorageLimitOf10MbReachedExport": "La limite de stockage de 10 Mo du compte est atteinte. Exportez et supprimez d’anciens bilans avant d’enregistrer davantage de données."
 }

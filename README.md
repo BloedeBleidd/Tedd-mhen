@@ -8,13 +8,13 @@ A personal training, sleep and wellbeing journal with structured measurements, e
 - Account-saved check-in layouts and blank recurring routines, recent choices first, and activity-specific training fields.
 - Historical check-in review with explainable notices and explicit confirmation of unusual observations.
 - Filtered journals, unified Export & import with selective JSON/NDJSON/CSV/Markdown exports and reviewed imports.
-- Collapsible per-page quick guides and a floating back-to-top control across desktop and mobile.
+- Collapsible per-page quick guides, a 6-language AI application guide (`@cf/google/gemma-4-26b-a4b-it`), and a floating back-to-top control across desktop and mobile.
 - Same-day and lagged relationships, trend-adjusted correlations, multiple-input Bayesian models, exploratory forecasts up to 28 days, uncertainty and chronological evaluation with cited methods.
-- Private email/password accounts with recovery codes; aggregate administration; light/dark appearance with opt-in sunrise/sunset switching.
+- Private email/password accounts with recovery codes, live per-account quotas (30,000 AI tokens/day with 4,096 input and 1,024 output caps, plus 10 MB overall account storage), aggregate administration, and light/dark appearance with opt-in sunrise/sunset switching.
 - Six authored interface languages; optional local country detection, with original notes preserved.
 - A public `/demo` journal with synthetic observations and temporary edits for exploring the app before registration.
 
-Email identifiers are unverified; save your recovery code. Records are private, while source is public. No AI provider or analytics tracker is connected. Analyses are observational, not causal or clinical conclusions. Registration has no application fee or user-count cap; Cloudflare quotas apply.
+Email identifiers are unverified; save your recovery code. Records are private, while source is public. The built-in AI guide answers application-usage questions only and never receives your journal records; no analytics tracker is connected. Analyses are observational, not causal or clinical conclusions.
 
 ## Run and validate
 
