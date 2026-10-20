@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { flushSync } from 'react-dom';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -21,6 +21,170 @@ type StreamEvent =
   | { type: 'delta'; delta: string }
   | ({ type: 'done' } & AssistantChatResponse)
   | { type: 'error'; error: string };
+
+function renderInlineMarkdown(text: string, isStreamingTail = false): ReactNode[] {
+  let cleaned = text;
+  if (isStreamingTail) {
+    cleaned = cleaned.replace(/\*+$/, '');
+  }
+  const nodes: ReactNode[] = [];
+  const pattern =
+    /\*\*([\s\S]+?)\*\*|__([\s\S]+?)__|`([^`\n]+)`|\*([^*\n]+)\*|_([^_\n]+)_|(?:\*\*([^*]+)$)|(?:`([^`\n]+)$)/g;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  let key = 0;
+
+  while ((match = pattern.exec(cleaned)) !== null) {
+    if (match.index > lastIndex) {
+      nodes.push(cleaned.slice(lastIndex, match.index));
+    }
+    const boldText = match[1] ?? match[2] ?? (isStreamingTail ? match[6] : undefined);
+    const codeText = match[3] ?? (isStreamingTail ? match[7] : undefined);
+    const italicText = match[4] ?? match[5];
+
+    if (boldText !== undefined) {
+      nodes.push(<strong key={`md-b-${key++}`}>{boldText}</strong>);
+    } else if (codeText !== undefined) {
+      nodes.push(<code key={`md-c-${key++}`}>{codeText}</code>);
+    } else if (italicText !== undefined) {
+      nodes.push(<em key={`md-i-${key++}`}>{italicText}</em>);
+    } else {
+      nodes.push(match[0]);
+    }
+    lastIndex = pattern.lastIndex;
+  }
+
+  if (lastIndex < cleaned.length) {
+    nodes.push(cleaned.slice(lastIndex));
+  }
+  return nodes;
+}
+
+function renderChatMarkdown(content: string, cursorNode?: ReactNode): ReactNode {
+  const lines = content.split('\n');
+  type Block =
+    | { type: 'heading'; text: string }
+    | { type: 'ul'; items: string[] }
+    | { type: 'ol'; items: string[] }
+    | { type: 'p'; lines: string[] };
+
+  const blocks: Block[] = [];
+
+  for (const rawLine of lines) {
+    const trimmed = rawLine.trim();
+    if (!trimmed) {
+      if (blocks.length > 0 && blocks[blocks.length - 1].type === 'p') {
+        blocks.push({ type: 'p', lines: [] });
+      }
+      continue;
+    }
+
+    const headingMatch = trimmed.match(/^#{1,4}\s+(.*)$/);
+    if (headingMatch) {
+      blocks.push({ type: 'heading', text: headingMatch[1] });
+      continue;
+    }
+
+    const ulMatch = trimmed.match(/^(?:[-*•])\s+(.*)$/);
+    if (ulMatch) {
+      const prev = blocks[blocks.length - 1];
+      if (prev && prev.type === 'ul') {
+        prev.items.push(ulMatch[1]);
+      } else {
+        blocks.push({ type: 'ul', items: [ulMatch[1]] });
+      }
+      continue;
+    }
+
+    const olMatch = trimmed.match(/^\d+[.)]\s+(.*)$/);
+    if (olMatch) {
+      const prev = blocks[blocks.length - 1];
+      if (prev && prev.type === 'ol') {
+        prev.items.push(olMatch[1]);
+      } else {
+        blocks.push({ type: 'ol', items: [olMatch[1]] });
+      }
+      continue;
+    }
+
+    if (/^(?:---|\*\*\*|___)$/.test(trimmed)) {
+      continue;
+    }
+
+    const prev = blocks[blocks.length - 1];
+    if (prev && prev.type === 'p') {
+      prev.lines.push(trimmed);
+    } else {
+      blocks.push({ type: 'p', lines: [trimmed] });
+    }
+  }
+
+  const nonEmptyBlocks = blocks.filter((b) => (b.type === 'p' ? b.lines.length > 0 : true));
+  if (nonEmptyBlocks.length === 0) {
+    return <p>{cursorNode}</p>;
+  }
+
+  return nonEmptyBlocks.map((block, bIdx) => {
+    const isLastBlock = bIdx === nonEmptyBlocks.length - 1;
+    const isStreaming = Boolean(cursorNode);
+
+    if (block.type === 'heading') {
+      return (
+        <h4 key={bIdx} className="ai-md-heading">
+          {renderInlineMarkdown(block.text, isStreaming && isLastBlock)}
+          {isLastBlock ? cursorNode : null}
+        </h4>
+      );
+    }
+
+    if (block.type === 'ul') {
+      return (
+        <ul key={bIdx} className="ai-md-list">
+          {block.items.map((item, iIdx) => {
+            const isLastItem = isLastBlock && iIdx === block.items.length - 1;
+            return (
+              <li key={iIdx}>
+                {renderInlineMarkdown(item, isStreaming && isLastItem)}
+                {isLastItem ? cursorNode : null}
+              </li>
+            );
+          })}
+        </ul>
+      );
+    }
+
+    if (block.type === 'ol') {
+      return (
+        <ol key={bIdx} className="ai-md-list">
+          {block.items.map((item, iIdx) => {
+            const isLastItem = isLastBlock && iIdx === block.items.length - 1;
+            return (
+              <li key={iIdx}>
+                {renderInlineMarkdown(item, isStreaming && isLastItem)}
+                {isLastItem ? cursorNode : null}
+              </li>
+            );
+          })}
+        </ol>
+      );
+    }
+
+    return (
+      <p key={bIdx}>
+        {block.lines.map((line, lIdx) => {
+          const isLastLine = isLastBlock && lIdx === block.lines.length - 1;
+          return (
+            <span key={lIdx}>
+              {lIdx > 0 ? '\n' : ''}
+              {renderInlineMarkdown(line, isStreaming && isLastLine)}
+            </span>
+          );
+        })}
+        {isLastBlock ? cursorNode : null}
+      </p>
+    );
+  });
+}
 
 export function AiAssistant() {
   useTranslation();
@@ -226,6 +390,12 @@ export function AiAssistant() {
     tr('assistant:promptQuotas'),
   ];
 
+  const cursorElement = (
+    <span className="ai-stream-cursor" aria-hidden="true">
+      ▍
+    </span>
+  );
+
   return (
     <>
       <button
@@ -311,17 +481,23 @@ export function AiAssistant() {
           )}
           {messages.map((message, index) => (
             <article key={index} className={`ai-chat-bubble ${message.role}`}>
-              <p>{message.content}</p>
+              {message.role === 'assistant' ? (
+                renderChatMarkdown(message.content)
+              ) : (
+                <p>{message.content}</p>
+              )}
             </article>
           ))}
           {busy && (
             <article className="ai-chat-bubble assistant-streaming">
-              <p>
-                {streamingReply}
-                <span className="ai-stream-cursor" aria-hidden="true">
-                  ▍
-                </span>
-              </p>
+              {streamingReply ? (
+                renderChatMarkdown(streamingReply, cursorElement)
+              ) : (
+                <p>
+                  <span className="muted ai-thinking-label">{tr('assistant:sending')}</span>
+                  {cursorElement}
+                </p>
+              )}
             </article>
           )}
         </div>
