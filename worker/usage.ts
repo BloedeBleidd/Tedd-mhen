@@ -172,12 +172,31 @@ export async function enforceStorageQuota(
 
 type WorkersAiOutput = {
   response?: string;
+  choices?: {
+    message?: { content?: string };
+    delta?: { content?: string };
+    text?: string;
+  }[];
   usage?: {
     prompt_tokens?: number;
     completion_tokens?: number;
     total_tokens?: number;
   };
 };
+
+function extractAiText(output: WorkersAiOutput | null | undefined): string {
+  if (!output || typeof output !== 'object') return '';
+  if (typeof output.response === 'string') return output.response;
+  const choice = Array.isArray(output.choices) ? output.choices[0] : undefined;
+  if (typeof choice?.delta?.content === 'string') return choice.delta.content;
+  if (typeof choice?.message?.content === 'string') return choice.message.content;
+  if (typeof choice?.text === 'string') return choice.text;
+  return '';
+}
+
+function isReadableStream(value: unknown): value is ReadableStream<Uint8Array> {
+  return Boolean(value && typeof (value as ReadableStream<Uint8Array>).getReader === 'function');
+}
 
 async function runWorkersAi(
   env: Env,
@@ -197,7 +216,7 @@ async function runWorkersAi(
         max_tokens: maxOutputTokens,
         temperature: 0.3,
       })) as WorkersAiOutput | null;
-      const text = typeof output?.response === 'string' ? output.response.trim() : '';
+      const text = extractAiText(output).trim();
       if (text) {
         return {
           text,
@@ -211,6 +230,94 @@ async function runWorkersAi(
     }
   }
   return null;
+}
+
+async function recordAiUsage(
+  db: D1Database,
+  owner: { id: string; email: string },
+  date: string,
+  usedBefore: number,
+  preparedPromptTokens: number,
+  rawReply: string,
+  model: string,
+  aiPromptTokens?: number,
+  aiCompletionTokens?: number,
+): Promise<AssistantChatResponse> {
+  const promptTokens = Math.min(
+    AI_MAX_INPUT_TOKENS,
+    Math.max(preparedPromptTokens, Number(aiPromptTokens || 0)),
+  );
+  if (usedBefore + promptTokens > AI_DAILY_TOKEN_LIMIT) {
+    throw Response.json(
+      {
+        error: 'Daily AI token limit of 30,000 tokens reached. Your allowance resets at 00:00 UTC.',
+      },
+      { status: 429 },
+    );
+  }
+
+  const maxCompletionAllowed = Math.max(
+    1,
+    Math.min(AI_MAX_OUTPUT_TOKENS, AI_DAILY_TOKEN_LIMIT - usedBefore - promptTokens),
+  );
+  const truncated = truncateToTokenLimit(rawReply, maxCompletionAllowed);
+  const completionTokens = Math.min(
+    maxCompletionAllowed,
+    Math.max(
+      truncated.tokens,
+      aiCompletionTokens ? Math.min(aiCompletionTokens, maxCompletionAllowed) : 0,
+      estimateTokens(truncated.text),
+    ),
+  );
+  const totalTokens = promptTokens + completionTokens;
+
+  const [, updateResult] = await db.batch([
+    db
+      .prepare('INSERT INTO users(id, email) VALUES(?, ?) ON CONFLICT(id) DO NOTHING')
+      .bind(owner.id, owner.email),
+    db
+      .prepare(
+        `INSERT INTO ai_daily_usage(owner_id, date, prompt_tokens, completion_tokens, total_tokens, request_count)
+         VALUES(?, ?, ?, ?, ?, 1)
+         ON CONFLICT(owner_id, date) DO UPDATE SET
+           prompt_tokens = ai_daily_usage.prompt_tokens + excluded.prompt_tokens,
+           completion_tokens = ai_daily_usage.completion_tokens + excluded.completion_tokens,
+           total_tokens = ai_daily_usage.total_tokens + excluded.total_tokens,
+           request_count = ai_daily_usage.request_count + 1,
+           updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
+         WHERE ai_daily_usage.total_tokens + excluded.total_tokens <= ?
+         RETURNING prompt_tokens, completion_tokens, total_tokens, request_count`,
+      )
+      .bind(owner.id, date, promptTokens, completionTokens, totalTokens, AI_DAILY_TOKEN_LIMIT),
+  ]);
+
+  const updatedRow = updateResult.results[0] as AiUsageRow | undefined;
+  if (!updatedRow) {
+    throw Response.json(
+      {
+        error: 'Daily AI token limit of 30,000 tokens reached. Your allowance resets at 00:00 UTC.',
+      },
+      { status: 429 },
+    );
+  }
+
+  const usedTokensToday = Number(updatedRow.total_tokens);
+  const requestsToday = Number(updatedRow.request_count);
+  return {
+    reply: truncated.text,
+    model,
+    usage: {
+      promptTokens,
+      completionTokens,
+      totalTokens,
+      usedTokensToday,
+      dailyTokenLimit: AI_DAILY_TOKEN_LIMIT,
+      remainingTokensToday: Math.max(0, AI_DAILY_TOKEN_LIMIT - usedTokensToday),
+      requestsToday,
+      maxInputTokens: AI_MAX_INPUT_TOKENS,
+      maxOutputTokens: AI_MAX_OUTPUT_TOKENS,
+    },
+  };
 }
 
 export async function handleAssistantChat(
@@ -255,80 +362,183 @@ export async function handleAssistantChat(
     buildLocalAssistantReply(prepared.userMessage, prepared.language, prepared.pathname);
   const model = aiResult?.model || 'teddmhen-guide-local';
 
-  const promptTokens = Math.min(
-    AI_MAX_INPUT_TOKENS,
-    Math.max(prepared.promptTokens, Number(aiResult?.promptTokens || 0)),
-  );
-  if (usedBefore + promptTokens > AI_DAILY_TOKEN_LIMIT) {
-    throw Response.json(
-      {
-        error: 'Daily AI token limit of 30,000 tokens reached. Your allowance resets at 00:00 UTC.',
-      },
-      { status: 429 },
-    );
-  }
-
-  const maxCompletionAllowed = Math.max(
-    1,
-    Math.min(AI_MAX_OUTPUT_TOKENS, AI_DAILY_TOKEN_LIMIT - usedBefore - promptTokens),
-  );
-  const truncated = truncateToTokenLimit(rawReply, maxCompletionAllowed);
-  const completionTokens = Math.min(
-    maxCompletionAllowed,
-    Math.max(
-      truncated.tokens,
-      aiResult?.completionTokens ? Math.min(aiResult.completionTokens, maxCompletionAllowed) : 0,
-      estimateTokens(truncated.text),
-    ),
-  );
-  const totalTokens = promptTokens + completionTokens;
-
-  const [, updateResult] = await env.DB.batch([
-    env.DB.prepare('INSERT INTO users(id, email) VALUES(?, ?) ON CONFLICT(id) DO NOTHING').bind(
-      owner.id,
-      owner.email,
-    ),
-    env.DB.prepare(
-      `INSERT INTO ai_daily_usage(owner_id, date, prompt_tokens, completion_tokens, total_tokens, request_count)
-       VALUES(?, ?, ?, ?, ?, 1)
-       ON CONFLICT(owner_id, date) DO UPDATE SET
-         prompt_tokens = ai_daily_usage.prompt_tokens + excluded.prompt_tokens,
-         completion_tokens = ai_daily_usage.completion_tokens + excluded.completion_tokens,
-         total_tokens = ai_daily_usage.total_tokens + excluded.total_tokens,
-         request_count = ai_daily_usage.request_count + 1,
-         updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')
-       WHERE ai_daily_usage.total_tokens + excluded.total_tokens <= ?
-       RETURNING prompt_tokens, completion_tokens, total_tokens, request_count`,
-    ).bind(owner.id, date, promptTokens, completionTokens, totalTokens, AI_DAILY_TOKEN_LIMIT),
-  ]);
-
-  const updatedRow = updateResult.results[0] as AiUsageRow | undefined;
-  if (!updatedRow) {
-    throw Response.json(
-      {
-        error: 'Daily AI token limit of 30,000 tokens reached. Your allowance resets at 00:00 UTC.',
-      },
-      { status: 429 },
-    );
-  }
-
-  const usedTokensToday = Number(updatedRow.total_tokens);
-  const requestsToday = Number(updatedRow.request_count);
-  return {
-    reply: truncated.text,
+  return recordAiUsage(
+    env.DB,
+    owner,
+    date,
+    usedBefore,
+    prepared.promptTokens,
+    rawReply,
     model,
-    usage: {
-      promptTokens,
-      completionTokens,
-      totalTokens,
-      usedTokensToday,
-      dailyTokenLimit: AI_DAILY_TOKEN_LIMIT,
-      remainingTokensToday: Math.max(0, AI_DAILY_TOKEN_LIMIT - usedTokensToday),
-      requestsToday,
-      maxInputTokens: AI_MAX_INPUT_TOKENS,
-      maxOutputTokens: AI_MAX_OUTPUT_TOKENS,
-    },
+    aiResult?.promptTokens,
+    aiResult?.completionTokens,
+  );
+}
+
+export async function handleAssistantChatStream(
+  env: Env,
+  owner: { id: string; email: string },
+  body: unknown,
+  date = utcDateString(),
+): Promise<Response> {
+  const currentUsage = await getAccountUsage(env.DB, owner.id, date);
+  const usedBefore = currentUsage.ai.usedTokensToday;
+
+  let prepared: ReturnType<typeof prepareAssistantMessages>;
+  try {
+    prepared = prepareAssistantMessages(body, AI_MAX_OUTPUT_TOKENS);
+  } catch (cause) {
+    if (cause instanceof Error && !(cause as { issues?: unknown }).issues) {
+      throw Response.json({ error: cause.message }, { status: 400 });
+    }
+    throw cause;
+  }
+
+  if (usedBefore + prepared.promptTokens > AI_DAILY_TOKEN_LIMIT) {
+    throw Response.json(
+      {
+        error: 'Daily AI token limit of 30,000 tokens reached. Your allowance resets at 00:00 UTC.',
+      },
+      { status: 429 },
+    );
+  }
+
+  const remainingForOutput = Math.max(
+    1,
+    Math.min(AI_MAX_OUTPUT_TOKENS, AI_DAILY_TOKEN_LIMIT - usedBefore - prepared.promptTokens),
+  );
+  if (remainingForOutput < AI_MAX_OUTPUT_TOKENS) {
+    prepared = prepareAssistantMessages(body, remainingForOutput);
+  }
+
+  const encoder = new TextEncoder();
+  const sendEvent = (controller: ReadableStreamDefaultController<Uint8Array>, payload: unknown) => {
+    controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`));
   };
+
+  const stream = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      let accumulated = '';
+      let usedModel = 'teddmhen-guide-local';
+      let aiPromptTokens: number | undefined;
+      let aiCompletionTokens: number | undefined;
+
+      const pushDelta = (piece: string) => {
+        if (!piece) return;
+        if (estimateTokens(accumulated + piece) > remainingForOutput) return;
+        accumulated += piece;
+        sendEvent(controller, { type: 'delta', delta: piece });
+      };
+
+      if (env.AI && typeof env.AI.run === 'function') {
+        for (const model of [AI_MODEL, AI_FALLBACK_MODEL]) {
+          try {
+            const output = await env.AI.run(model, {
+              messages: prepared.messages,
+              max_tokens: remainingForOutput,
+              temperature: 0.3,
+              stream: true,
+            });
+            if (isReadableStream(output)) {
+              const reader = output.getReader();
+              const decoder = new TextDecoder();
+              let buffer = '';
+              while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop() ?? '';
+                for (const rawLine of lines) {
+                  const line = rawLine.trim();
+                  if (!line.startsWith('data:')) continue;
+                  const dataStr = line.slice(5).trim();
+                  if (!dataStr || dataStr === '[DONE]') continue;
+                  try {
+                    const parsed = JSON.parse(dataStr) as WorkersAiOutput;
+                    if (parsed.usage?.prompt_tokens) aiPromptTokens = parsed.usage.prompt_tokens;
+                    if (parsed.usage?.completion_tokens)
+                      aiCompletionTokens = parsed.usage.completion_tokens;
+                    const delta = extractAiText(parsed);
+                    if (delta) pushDelta(delta);
+                  } catch {
+                    // Ignore partial or non-JSON SSE comments
+                  }
+                }
+              }
+              if (accumulated.trim()) {
+                usedModel = model;
+                break;
+              }
+            } else {
+              const parsed = output as WorkersAiOutput | null;
+              const text = extractAiText(parsed).trim();
+              if (text) {
+                usedModel = model;
+                aiPromptTokens = parsed?.usage?.prompt_tokens;
+                aiCompletionTokens = parsed?.usage?.completion_tokens;
+                for (const chunk of text.match(/.{1,6}/gs) || [text]) {
+                  pushDelta(chunk);
+                }
+                break;
+              }
+            }
+          } catch {
+            // Fall back to next model or local guide
+          }
+        }
+      }
+
+      if (!accumulated.trim()) {
+        const fallback = buildLocalAssistantReply(
+          prepared.userMessage,
+          prepared.language,
+          prepared.pathname,
+        );
+        usedModel = 'teddmhen-guide-local';
+        for (const chunk of fallback.match(/.{1,6}/gs) || [fallback]) {
+          pushDelta(chunk);
+        }
+      }
+
+      try {
+        const finalized = await recordAiUsage(
+          env.DB,
+          owner,
+          date,
+          usedBefore,
+          prepared.promptTokens,
+          accumulated.trim(),
+          usedModel,
+          aiPromptTokens,
+          aiCompletionTokens,
+        );
+        sendEvent(controller, { type: 'done', ...finalized });
+      } catch (cause) {
+        if (cause instanceof Response) {
+          const errBody = (await cause.json().catch(() => ({}))) as { error?: string };
+          sendEvent(controller, {
+            type: 'error',
+            error: errBody.error || 'Daily AI token limit reached.',
+          });
+        } else {
+          sendEvent(controller, {
+            type: 'error',
+            error: 'The request could not be completed. Please try again.',
+          });
+        }
+      } finally {
+        controller.close();
+      }
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream; charset=utf-8',
+      'X-Accel-Buffering': 'no',
+    },
+  });
 }
 
 export function entryStorageBytes(date: string, dataJson: string): number {

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { flushSync } from 'react-dom';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { MessageSquareText, Send, Sparkles, Trash2, X } from 'lucide-react';
@@ -16,15 +17,21 @@ import {
 } from '../../shared/assistant';
 import { ErrorBox } from './ui';
 
+type StreamEvent =
+  | { type: 'delta'; delta: string }
+  | ({ type: 'done' } & AssistantChatResponse)
+  | { type: 'error'; error: string };
+
 export function AiAssistant() {
   useTranslation();
   const { language } = useLanguage();
-  const { request, demo } = useApi();
+  const { request, response, demo } = useApi();
   const location = useLocation();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const logRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [messages, setMessages] = useState<AssistantMessage[]>([]);
+  const [streamingReply, setStreamingReply] = useState('');
   const [draft, setDraft] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -62,7 +69,7 @@ export function AiAssistant() {
   useEffect(() => {
     const node = logRef.current;
     if (node) node.scrollTop = node.scrollHeight;
-  }, [messages, busy]);
+  }, [messages, streamingReply, busy]);
 
   async function sendQuestion(text: string) {
     const trimmed = text.trim();
@@ -83,22 +90,90 @@ export function AiAssistant() {
     const priorHistory = messages.slice(-6);
     const nextMessages: AssistantMessage[] = [...messages, { role: 'user', content: trimmed }];
     setMessages(nextMessages);
+    setStreamingReply('');
     setDraft('');
     setBusy(true);
     try {
-      const response = await request<AssistantChatResponse>('/api/chat', {
-        method: 'POST',
-        body: JSON.stringify({
-          message: trimmed,
-          language,
-          pathname,
-          history: priorHistory,
-        }),
+      const payload = JSON.stringify({
+        message: trimmed,
+        language,
+        pathname,
+        history: priorHistory,
       });
-      setMessages([...nextMessages, { role: 'assistant', content: response.reply }]);
-      setUsedToday(response.usage.usedTokensToday);
+
+      if (demo) {
+        const chatResponse = await request<AssistantChatResponse>('/api/chat', {
+          method: 'POST',
+          body: payload,
+        });
+        let partial = '';
+        for (const piece of chatResponse.reply.match(/.{1,12}/gs) || [chatResponse.reply]) {
+          partial += piece;
+          flushSync(() => setStreamingReply(partial));
+          await new Promise((resolve) => setTimeout(resolve, 8));
+        }
+        setStreamingReply('');
+        setMessages([...nextMessages, { role: 'assistant', content: chatResponse.reply }]);
+        setUsedToday(chatResponse.usage.usedTokensToday);
+        window.dispatchEvent(new CustomEvent('teddmhen:usage-updated'));
+        return;
+      }
+
+      const streamRes = await response('/api/chat', {
+        method: 'POST',
+        headers: { Accept: 'text/event-stream' },
+        body: payload,
+      });
+
+      if (
+        !streamRes.body ||
+        !streamRes.headers.get('content-type')?.includes('text/event-stream')
+      ) {
+        const jsonRes = (await streamRes.json()) as AssistantChatResponse;
+        setMessages([...nextMessages, { role: 'assistant', content: jsonRes.reply }]);
+        setUsedToday(jsonRes.usage.usedTokensToday);
+        window.dispatchEvent(new CustomEvent('teddmhen:usage-updated'));
+        return;
+      }
+
+      const reader = streamRes.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let accumulated = '';
+      let finalReply = '';
+      let finalUsedToday: number | null = null;
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() ?? '';
+        for (const rawLine of lines) {
+          const line = rawLine.trim();
+          if (!line.startsWith('data:')) continue;
+          const dataStr = line.slice(5).trim();
+          if (!dataStr) continue;
+          const event = JSON.parse(dataStr) as StreamEvent;
+          if (event.type === 'delta' && event.delta) {
+            accumulated += event.delta;
+            flushSync(() => setStreamingReply(accumulated));
+          } else if (event.type === 'done') {
+            finalReply = event.reply;
+            finalUsedToday = event.usage.usedTokensToday;
+          } else if (event.type === 'error') {
+            throw new Error(event.error);
+          }
+        }
+      }
+
+      const completedText = (finalReply || accumulated).trim();
+      setStreamingReply('');
+      setMessages([...nextMessages, { role: 'assistant', content: completedText }]);
+      if (finalUsedToday !== null) setUsedToday(finalUsedToday);
       window.dispatchEvent(new CustomEvent('teddmhen:usage-updated'));
     } catch (cause) {
+      setStreamingReply('');
       setMessages(messages);
       setDraft(trimmed);
       setError(cause instanceof Error ? cause.message : 'Request failed.');
@@ -151,6 +226,7 @@ export function AiAssistant() {
                 disabled={busy}
                 onClick={() => {
                   setMessages([]);
+                  setStreamingReply('');
                   setError('');
                 }}
               >
@@ -186,7 +262,7 @@ export function AiAssistant() {
           <article className="ai-chat-bubble assistant">
             <p>{tr('assistant:greeting')}</p>
           </article>
-          {messages.length === 0 && (
+          {messages.length === 0 && !busy && (
             <div className="ai-chat-starters">
               {starters.map((prompt) => (
                 <button
@@ -206,6 +282,16 @@ export function AiAssistant() {
               <p>{message.content}</p>
             </article>
           ))}
+          {busy && (
+            <article className="ai-chat-bubble assistant-streaming">
+              <p>
+                {streamingReply}
+                <span className="ai-stream-cursor" aria-hidden="true">
+                  ▍
+                </span>
+              </p>
+            </article>
+          )}
         </div>
         <ErrorBox message={error} />
         <form className="ai-chat-form" onSubmit={onSubmit}>

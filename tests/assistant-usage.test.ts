@@ -177,6 +177,44 @@ describe('AI guide safeguards, Gemma 4 26B A4B model, 30k daily limit, 1,024 out
     expect(workerAiBody.reply).toBe('Cloudflare Workers AI Gemma 4 26B A4B guide response.');
     expect(workerAiBody.usage.requestsToday).toBe(2);
 
+    // Verify real-time SSE token streaming (Accept: text/event-stream)
+    let streamFlag = false;
+    env = {
+      DB: adapter(sqlite),
+      AI: {
+        run: async (_model: string, input: { stream?: boolean }) => {
+          streamFlag = Boolean(input.stream);
+          const encoder = new TextEncoder();
+          return new ReadableStream<Uint8Array>({
+            start(controller) {
+              controller.enqueue(encoder.encode('data: {"response":"Live "}\n\n'));
+              controller.enqueue(
+                encoder.encode('data: {"choices":[{"delta":{"content":"streamed "}}]}\n\n'),
+              );
+              controller.enqueue(encoder.encode('data: {"response":"reply."}\n\n'));
+              controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+              controller.close();
+            },
+          });
+        },
+      },
+    } as unknown as Env;
+    const sseRes = await call(
+      '/api/chat',
+      'POST',
+      { language: 'en', message: 'How do exports work?' },
+      { Accept: 'text/event-stream' },
+    );
+    expect(sseRes.status).toBe(200);
+    expect(sseRes.headers.get('content-type')).toContain('text/event-stream');
+    const sseText = await sseRes.text();
+    expect(streamFlag).toBe(true);
+    expect(sseText).toContain('"type":"delta","delta":"Live "');
+    expect(sseText).toContain('"type":"delta","delta":"streamed "');
+    expect(sseText).toContain('"type":"delta","delta":"reply."');
+    expect(sseText).toContain('"type":"done"');
+    expect(sseText).toContain('"reply":"Live streamed reply."');
+
     // Exhaust the daily 30,000 token allowance
     const today = initialUsage.date;
     sqlite

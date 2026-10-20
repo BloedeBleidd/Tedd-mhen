@@ -4022,8 +4022,20 @@ body:has(.save-bar) .back-to-top {
   background: var(--selection);
   border-color: var(--accent-strong);
 }
-.ai-chat-bubble.assistant {
+.ai-chat-bubble.assistant,
+.ai-chat-bubble.assistant-streaming {
   align-self: flex-start;
+}
+.ai-stream-cursor {
+  display: inline-block;
+  margin-left: 2px;
+  color: var(--accent-strong);
+  animation: ai-cursor-blink 0.9s steps(2, start) infinite;
+}
+@keyframes ai-cursor-blink {
+  to {
+    visibility: hidden;
+  }
 }
 .ai-chat-bubble p {
   margin: 0;

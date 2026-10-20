@@ -15,6 +15,7 @@ import {
   getAccountUsage,
   habitStorageBytes,
   handleAssistantChat,
+  handleAssistantChatStream,
   preferenceStorageBytes,
 } from './usage';
 import { DEMO_DATASET, DEMO_OWNER } from '../shared/demo';
@@ -344,8 +345,12 @@ export async function handleApi(request: Request, env: Env): Promise<Response> {
     });
   if (url.pathname === '/api/account/usage' && request.method === 'GET')
     return json(await getAccountUsage(env.DB, user.id));
-  if (url.pathname === '/api/chat' && request.method === 'POST')
-    return json(await handleAssistantChat(env, user, await readBody(request, 64 * 1024)));
+  if (url.pathname === '/api/chat' && request.method === 'POST') {
+    const chatBody = await readBody(request, 64 * 1024);
+    if (request.headers.get('accept')?.includes('text/event-stream'))
+      return handleAssistantChatStream(env, user, chatBody);
+    return json(await handleAssistantChat(env, user, chatBody));
+  }
   if (url.pathname === '/api/preferences') {
     if (request.method === 'GET') {
       const rows = await env.DB.prepare(
