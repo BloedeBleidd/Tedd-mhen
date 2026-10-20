@@ -231,9 +231,7 @@ export function AiAssistant() {
             }}
           />
           <div className="ai-chat-footer">
-            <small className="muted">
-              {tr('assistant:noCodeNotice', { input: fmt(AI_MAX_INPUT_TOKENS) })}
-            </small>
+            <small className="muted">{tr('assistant:noCodeNotice')}</small>
             <button
               type="submit"
               className="button primary small-button"
