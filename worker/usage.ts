@@ -172,6 +172,7 @@ export async function enforceStorageQuota(
 
 type WorkersAiOutput = {
   response?: string;
+  result?: { response?: string };
   choices?: {
     message?: { content?: string };
     delta?: { content?: string };
@@ -187,6 +188,7 @@ type WorkersAiOutput = {
 function extractAiText(output: WorkersAiOutput | null | undefined): string {
   if (!output || typeof output !== 'object') return '';
   if (typeof output.response === 'string') return output.response;
+  if (typeof output.result?.response === 'string') return output.result.response;
   const choice = Array.isArray(output.choices) ? output.choices[0] : undefined;
   if (typeof choice?.delta?.content === 'string') return choice.delta.content;
   if (typeof choice?.message?.content === 'string') return choice.message.content;
@@ -411,24 +413,28 @@ export async function handleAssistantChatStream(
     prepared = prepareAssistantMessages(body, remainingForOutput);
   }
 
+  const { readable, writable } = new TransformStream<Uint8Array, Uint8Array>();
+  const writer = writable.getWriter();
   const encoder = new TextEncoder();
-  const sendEvent = (controller: ReadableStreamDefaultController<Uint8Array>, payload: unknown) => {
-    controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`));
+  const sendEvent = async (payload: unknown) => {
+    await writer.write(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`));
   };
 
-  const stream = new ReadableStream<Uint8Array>({
-    async start(controller) {
-      let accumulated = '';
-      let usedModel = 'teddmhen-guide-local';
-      let aiPromptTokens: number | undefined;
-      let aiCompletionTokens: number | undefined;
+  void (async () => {
+    let accumulated = '';
+    let usedModel = 'teddmhen-guide-local';
+    let aiPromptTokens: number | undefined;
+    let aiCompletionTokens: number | undefined;
 
-      const pushDelta = (piece: string) => {
-        if (!piece) return;
-        if (estimateTokens(accumulated + piece) > remainingForOutput) return;
-        accumulated += piece;
-        sendEvent(controller, { type: 'delta', delta: piece });
-      };
+    const pushDelta = async (piece: string) => {
+      if (!piece) return;
+      if (estimateTokens(accumulated + piece) > remainingForOutput) return;
+      accumulated += piece;
+      await sendEvent({ type: 'delta', delta: piece });
+    };
+
+    try {
+      await writer.write(encoder.encode(': stream-open\n\n'));
 
       if (env.AI && typeof env.AI.run === 'function') {
         for (const model of [AI_MODEL, AI_FALLBACK_MODEL]) {
@@ -460,7 +466,7 @@ export async function handleAssistantChatStream(
                     if (parsed.usage?.completion_tokens)
                       aiCompletionTokens = parsed.usage.completion_tokens;
                     const delta = extractAiText(parsed);
-                    if (delta) pushDelta(delta);
+                    if (delta) await pushDelta(delta);
                   } catch {
                     // Ignore partial or non-JSON SSE comments
                   }
@@ -478,7 +484,7 @@ export async function handleAssistantChatStream(
                 aiPromptTokens = parsed?.usage?.prompt_tokens;
                 aiCompletionTokens = parsed?.usage?.completion_tokens;
                 for (const chunk of text.match(/.{1,6}/gs) || [text]) {
-                  pushDelta(chunk);
+                  await pushDelta(chunk);
                 }
                 break;
               }
@@ -497,45 +503,49 @@ export async function handleAssistantChatStream(
         );
         usedModel = 'teddmhen-guide-local';
         for (const chunk of fallback.match(/.{1,6}/gs) || [fallback]) {
-          pushDelta(chunk);
+          await pushDelta(chunk);
         }
       }
 
+      const finalized = await recordAiUsage(
+        env.DB,
+        owner,
+        date,
+        usedBefore,
+        prepared.promptTokens,
+        accumulated.trim(),
+        usedModel,
+        aiPromptTokens,
+        aiCompletionTokens,
+      );
+      await sendEvent({ type: 'done', ...finalized });
+    } catch (cause) {
       try {
-        const finalized = await recordAiUsage(
-          env.DB,
-          owner,
-          date,
-          usedBefore,
-          prepared.promptTokens,
-          accumulated.trim(),
-          usedModel,
-          aiPromptTokens,
-          aiCompletionTokens,
-        );
-        sendEvent(controller, { type: 'done', ...finalized });
-      } catch (cause) {
         if (cause instanceof Response) {
           const errBody = (await cause.json().catch(() => ({}))) as { error?: string };
-          sendEvent(controller, {
+          await sendEvent({
             type: 'error',
             error: errBody.error || 'Daily AI token limit reached.',
           });
         } else {
-          sendEvent(controller, {
+          await sendEvent({
             type: 'error',
             error: 'The request could not be completed. Please try again.',
           });
         }
-      } finally {
-        controller.close();
+      } catch {
+        // Ignore write errors if client closed stream
       }
-    },
-  });
+    } finally {
+      await writer.close().catch(() => {});
+    }
+  })();
 
-  return new Response(stream, {
+  return new Response(readable, {
     headers: {
       'Content-Type': 'text/event-stream; charset=utf-8',
+      'Cache-Control': 'private, no-store, no-transform',
+      'Content-Encoding': 'identity',
       'X-Accel-Buffering': 'no',
     },
   });

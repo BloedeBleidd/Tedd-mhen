@@ -554,7 +554,7 @@ export default {
       }
     }
     const headers = new Headers(response.headers);
-    headers.set('Cache-Control', 'private, no-store');
+    if (!headers.has('Cache-Control')) headers.set('Cache-Control', 'private, no-store');
     headers.set('X-Content-Type-Options', 'nosniff');
     headers.set('Referrer-Policy', 'no-referrer');
     headers.set('Vary', 'Cookie');

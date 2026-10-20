@@ -106,14 +106,18 @@ export function AiAssistant() {
           method: 'POST',
           body: payload,
         });
-        let partial = '';
-        for (const piece of chatResponse.reply.match(/.{1,12}/gs) || [chatResponse.reply]) {
-          partial += piece;
-          flushSync(() => setStreamingReply(partial));
-          await new Promise((resolve) => setTimeout(resolve, 8));
+        let cursor = 0;
+        const full = chatResponse.reply;
+        while (cursor < full.length) {
+          cursor = Math.min(
+            full.length,
+            cursor + Math.max(3, Math.ceil((full.length - cursor) / 14)),
+          );
+          flushSync(() => setStreamingReply(full.slice(0, cursor)));
+          await new Promise((resolve) => setTimeout(resolve, 14));
         }
         setStreamingReply('');
-        setMessages([...nextMessages, { role: 'assistant', content: chatResponse.reply }]);
+        setMessages([...nextMessages, { role: 'assistant', content: full }]);
         setUsedToday(chatResponse.usage.usedTokensToday);
         window.dispatchEvent(new CustomEvent('teddmhen:usage-updated'));
         return;
@@ -138,36 +142,64 @@ export function AiAssistant() {
 
       const reader = streamRes.body.getReader();
       const decoder = new TextDecoder();
-      let buffer = '';
-      let accumulated = '';
+      let sseBuffer = '';
+      let streamBuffer = '';
       let finalReply = '';
       let finalUsedToday: number | null = null;
+      let networkDone = false;
+      let streamError: Error | null = null;
 
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() ?? '';
-        for (const rawLine of lines) {
-          const line = rawLine.trim();
-          if (!line.startsWith('data:')) continue;
-          const dataStr = line.slice(5).trim();
-          if (!dataStr) continue;
-          const event = JSON.parse(dataStr) as StreamEvent;
-          if (event.type === 'delta' && event.delta) {
-            accumulated += event.delta;
-            flushSync(() => setStreamingReply(accumulated));
-          } else if (event.type === 'done') {
-            finalReply = event.reply;
-            finalUsedToday = event.usage.usedTokensToday;
-          } else if (event.type === 'error') {
-            throw new Error(event.error);
+      // Read network SSE chunks and append immediately to streamBuffer
+      const readerPromise = (async () => {
+        try {
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            sseBuffer += decoder.decode(value, { stream: true });
+            const lines = sseBuffer.split('\n');
+            sseBuffer = lines.pop() ?? '';
+            for (const rawLine of lines) {
+              const line = rawLine.trim();
+              if (!line.startsWith('data:')) continue;
+              const dataStr = line.slice(5).trim();
+              if (!dataStr) continue;
+              const event = JSON.parse(dataStr) as StreamEvent;
+              if (event.type === 'delta' && event.delta) {
+                streamBuffer += event.delta;
+              } else if (event.type === 'done') {
+                finalReply = event.reply;
+                if (!streamBuffer) streamBuffer = event.reply;
+                finalUsedToday = event.usage.usedTokensToday;
+              } else if (event.type === 'error') {
+                streamError = new Error(event.error);
+              }
+            }
           }
+        } catch (err) {
+          streamError = err instanceof Error ? err : new Error('Request failed.');
+        } finally {
+          networkDone = true;
         }
+      })();
+
+      // Concurrently paint received characters onto the screen frame-by-frame
+      let displayedCursor = 0;
+      while (!networkDone || displayedCursor < streamBuffer.length) {
+        if (streamError) throw streamError;
+        if (displayedCursor < streamBuffer.length) {
+          const backlog = streamBuffer.length - displayedCursor;
+          const step = Math.max(2, Math.ceil(backlog / 10));
+          displayedCursor = Math.min(streamBuffer.length, displayedCursor + step);
+          const visibleSlice = streamBuffer.slice(0, displayedCursor);
+          flushSync(() => setStreamingReply(visibleSlice));
+        }
+        await new Promise((resolve) => setTimeout(resolve, 14));
       }
 
-      const completedText = (finalReply || accumulated).trim();
+      await readerPromise;
+      if (streamError) throw streamError;
+
+      const completedText = (finalReply || streamBuffer).trim();
       setStreamingReply('');
       setMessages([...nextMessages, { role: 'assistant', content: completedText }]);
       if (finalUsedToday !== null) setUsedToday(finalUsedToday);
